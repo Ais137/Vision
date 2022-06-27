@@ -1,0 +1,23 @@
+{
+  "name": "vision",
+  "version": "1.0.0",
+  "description": "Build for Spark and Imagination",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "vision",
+    "javascript"
+  ],
+  "author": "Ais",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^28.1.1"
+  }
+}

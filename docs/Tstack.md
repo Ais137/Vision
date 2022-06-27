@@ -11,3 +11,5 @@
 新平台的绘制API，而不需要对计算逻辑有太大的结构性适配。
 
 ## 技术栈: JavaScript  Nodejs  线性代数  前端  
+
+* javascript 单元测试框架 Jest
