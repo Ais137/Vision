@@ -24,7 +24,7 @@ test("vector weight get/set", () => {
     expect(v1.v).toEqual([111, 222, 333, 4]);
 });
 
-//维度接口测试
+//维度
 test("vector method(dim)", () => {
     let v1 = new Vector(1, 1, 2, 7);
     expect(v1.dim()).toBe(4);
@@ -32,7 +32,7 @@ test("vector method(dim)", () => {
     expect(v1.dim(5).v).toEqual([1, 1, 2, 0, 0])
 });
 
-//复制接口测试
+//复制
 test("vector method(clone/copy)", () => {
     let v1 = new Vector(1, 2, 3);
     let v2 = v1.clone();
@@ -41,8 +41,8 @@ test("vector method(clone/copy)", () => {
     expect(v1.v).not.toEqual(v2.v);
 });
 
-//运算接口测试
-test("vector base op(add, mult, sub)", () => {
+//基本运算
+test("vector op(add, mult, sub)", () => {
     let v1 = new Vector(1, 2, 3);
     //add
     expect(v1.clone().add(new Vector(4, 5, 6)).v).toEqual([5, 7, 9]);
@@ -57,3 +57,28 @@ test("vector base op(add, mult, sub)", () => {
     expect(v1.clone().sub(v2).v).toEqual([0, 1, 2]);
     expect(v1.clone().add(v2.clone().mult(-1)).v).toEqual([0, 1, 2]);
 });
+
+//模长
+test("vector method(norm)", () => {
+    //get
+    expect(new Vector(1, 1).norm()).toBeCloseTo(Math.sqrt(2));
+    expect(new Vector(3, 4).norm()).toBeCloseTo(5);
+    //set
+    expect(new Vector(1, 1).norm(5).x).toBeCloseTo(Math.sqrt(5*5/2));
+    //norm(0)
+    expect(new Vector(3, 4).norm(0).v).toEqual([0, 0]);
+});
+
+//单位化
+test("vector method(normalize)", () => {
+    expect(new Vector(3, 4).normalize().norm()).toBeCloseTo(1);
+});
+
+//限制器
+test("vector method(limit)", () => {
+    let v1 = new Vector(2, 2);
+    expect(v1.clone().add(new Vector(2, 2)).limit(3).norm()).toBeCloseTo(3);
+    expect(v1.clone().norm(2).limit(3, 5).norm()).toBeCloseTo(3);
+});
+
+
