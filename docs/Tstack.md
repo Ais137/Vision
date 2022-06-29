@@ -12,4 +12,9 @@
 
 ## 技术栈: JavaScript  Nodejs  线性代数  前端  
 
-* javascript 单元测试框架 Jest
+* LinearAlgebra: 线性代数
+* JavaScript: 逻辑接口实现
+* Canvas: 绘图接口实现
+* webpack: 静态模块打包器
+* Jest: 单元测试框架 
+

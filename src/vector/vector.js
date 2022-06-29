@@ -5,10 +5,7 @@
  * Project: Vision
  * Desc: Vision框架核心组件
  * Version: 0.1
- * DevPlan 
-    * 链式计算优化 v.add(v1).mult(k1).add(v2).sub(v3) ...   
 ****************************************/
-
 
 class Vector {
 
@@ -19,9 +16,45 @@ class Vector {
     @exp: 
         v = new Vector(1, 2, 3) -> v(1, 2, 3)
     ----------------------------------------*/
-    constructor() {
+    constructor(...v) {
         //向量分量
-        this._v = arguments.length > 0 ? [...arguments] : [0, 0];
+        this._v = v.length > 0 ? [...v] : [0, 0];
+    }
+
+    //static builder
+    static V(...v) {
+        return new Vector(...v);
+    }
+
+    //builder -> v(1, 1, 1, ...)
+    static ones(dim=2) {
+        return new Vector(...Array(dim).fill(1))
+    }
+
+    //builder -> v(0, 0, 0, ...)
+    static zeros(dim=2) {
+        return new Vector(...Array(dim).fill(0))
+    }
+
+    /*----------------------------------------
+    @func: builder -> 生成随机向量
+    @desc: 生成指定范围内的随机向量
+    @params: 
+        * range(list): 向量分量范围, 其长度决定了向量的维度
+        * isint(false): 分量值类型 true(int) | false(float)
+    @return(Vector): Vector(obj)
+    @exp: 
+        Vector.random([[1, 3], [1, 3]]) -> v(1.13, 2.54)
+        Vector.random([[1, 3], [1, 3]], true) -> v(1, 2)
+        Vector.random([[1, 3], [1, 3], [4, 7]]) -> v(2.13, 0.54, 5.56)
+    ----------------------------------------*/
+    static random(range=[], isint=false) {
+        let v = [], r = 0;
+        for(let i=0, end=range.length; i<end; i++){
+            r = Math.random() * (range[i][1] - range[i][0]) + range[i][0];
+            isint ? v.push(parseInt(r)) : v.push(r);
+        }
+        return new Vector(...v);
     }
 
     //分量接口
@@ -51,10 +84,18 @@ class Vector {
     ----------------------------------------*/
     add(vector){
         let v = vector.v;
-        for(let i=0; i<this._v.length; i++) {
+        for(let i=0, end=this._v.length; i<end; i++) {
             this._v[i] += (v[i] || 0);
         }
         return this;
+    }
+    static add(...vector) {
+        let v = Vector.zeros(vector[0].dim());
+        for(let i=0, end=vector.length; i<end; i++) {
+            v.dim()<vector[i].dim() && v.dim(vector[i].dim())
+            v.add(vector[i]);
+        }
+        return v;
     }
 
     /*----------------------------------------
@@ -68,7 +109,7 @@ class Vector {
         v1.mult(2) -> v(2, 4, 6) -> v1
     ----------------------------------------*/
     mult(k) {
-        for(let i=0; i<this._v.length; i++) {
+        for(let i=0, end=this._v.length; i<end; i++) {
             this._v[i] *= k;
         }
         return this;
@@ -80,10 +121,50 @@ class Vector {
         // return this.add(vector.clone().mult(-1));
         //计算优化实现
         let v = vector.v;
-        for(let i=0; i<this._v.length; i++) {
+        for(let i=0, end=this._v.length; i<end; i++) {
             this._v[i] -= (v[i] || 0);
         }
         return this;
+    }
+    static sub(...vector) {
+        let v = vector[0].clone();
+        for(let i=1, end=vector.length; i<end; i++) {
+            v.sub(vector[i]);
+        }
+        return v;
+    }
+
+    /*----------------------------------------
+    @func: 标量积(点积)
+    @desc: v1·v2 -> sum(v1[i]*v2[i]) -> |v1|*|v2|*cos(rad)
+    @params: 
+        * vector(Vector): 操作数
+    @return(float): 
+    ----------------------------------------*/
+    dot(vector) {
+        let t = 0, v = vector.v;
+        for(let i=0, end=this._v.length; i<end; i++) {
+            t += this._v[i] * (v[i] || 0);
+        }
+        return t;
+    }
+    inner(vector) {
+        return this.dot(vector);
+    }
+
+    /*----------------------------------------
+    @func: 线性插值
+    @desc: v(t) = (1-t)*v1 + t*v2 -> v1 + t*(v2-v1)
+    @params: 
+        * vector(Vector): 目标向量
+        * t(float): 0<=t<=1 
+    @return(Vector): new Vector
+    ----------------------------------------*/
+    lerp(vector, t) {
+        return (t>0 && t<1) ? vector.clone().sub(this).mult(t).add(this) : (t<=0 ? this.clone() : vector.clone());
+    }
+    static lerp(v_from, v_to, t) {
+        return v_from.lerp(v_to, t);
     }
 
     /*----------------------------------------
@@ -125,7 +206,7 @@ class Vector {
     norm(n=null) {
         //计算模长
         let t = 0;
-        for(let i=0; i<this._v.length; i++) {
+        for(let i=0, end=this._v.length; i<end; i++) {
             t += this._v[i] * this._v[i];
         }
         let v_norm = Math.sqrt(t);
@@ -135,7 +216,7 @@ class Vector {
     }
 
     //单位化
-    normalize() {
+    normalization() {
         let _norm = this.norm();
         (_norm != 0) && this.mult(1/_norm);
         return this;
@@ -185,11 +266,14 @@ class Vector {
             return this.norm();
         } else {
             let t = 0, v = vector.v;
-            for(let i=0; i<this._v.length; i++) {
+            for(let i=0, end=this._v.length; i<end; i++) {
                 t += (this._v[i] - v[i]) * (this._v[i] - v[i]);
             }
             return Math.sqrt(t);
         }
+    }
+    static dist(v1, v2) {
+        return v1.dist(v2);
     }
 
     /*----------------------------------------
@@ -204,9 +288,17 @@ class Vector {
     ----------------------------------------*/
     rad(vector=null) {
         let x = this._v[0], y = this._v[1];
-        let rad, act = Math.atan(y/x);
-        rad = (x>=0) ? (y >= 0 ? act : Math.PI*2 + act) : (Math.PI + act);
+        let rad = Math.atan(y/x);
+        rad = (x>=0) ? (y >= 0 ? rad : Math.PI*2 + rad) : (Math.PI + rad);
         return  vector ? rad - vector.rad() : rad;
+    }
+    static rad(v1, v2) {
+        return v1.rad(v2);
+    }
+
+    //整数化: 将分量转换成整数
+    toint() {
+        for(let i=0, end=this._v.length; i<end; i++) { this._v[i] = parseInt(this._v[i]);}
     }
 
 }
