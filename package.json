@@ -1,23 +1,25 @@
 {
-  "name": "vision",
-  "version": "1.0.0",
-  "description": "Build for Spark and Imagination",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "lib": "lib",
-    "test": "test"
-  },
-  "scripts": {
-    "test": "jest"
-  },
-  "keywords": [
-    "vision",
-    "javascript"
-  ],
-  "author": "Ais",
-  "license": "ISC",
-  "devDependencies": {
-    "jest": "^28.1.1"
-  }
+    "name": "vision",
+    "version": "1.0.0",
+    "description": "Build for Spark and Imagination",
+    "main": "index.js",
+    "directories": {
+        "doc": "docs",
+        "lib": "lib",
+        "test": "test"
+    },
+    "scripts": {
+        "test": "jest",
+        "build": "node ./build/build.js"
+    },
+    "keywords": [
+        "vision",
+        "javascript"
+    ],
+    "author": "Ais",
+    "license": "ISC",
+    "devDependencies": {
+        "jest": "^28.1.1",
+        "webpack": "^5.73.0"
+    }
 }

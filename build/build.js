@@ -1,0 +1,57 @@
+/****************************************
+ * Name: 构建器
+ * Date: 2022-07-05
+ * Author: Ais
+ * Project: Vision
+ * Desc: 项目构建与打包
+ * Version: 0.1
+****************************************/
+
+const fs = require("fs");
+const path = require("path");
+const builder_conf = require("./builder.config");
+const webpack = require("webpack");
+const webpack_conf = require("./webpack.config");
+webpack_conf.entry = builder_conf.index_fpath
+
+//模块索引构建器
+const module_index_builder = function(module_dir, module_index=Array()) {
+    let module_files = fs.readdirSync(path.resolve(module_dir));
+    for(let i=0, end=module_files.length; i<end; i++) {
+        let module_path = path.resolve(module_dir, module_files[i]);
+        if(fs.statSync(module_path).isFile()) {
+            module_index.push([path.parse(module_path).name, module_path])
+        } else {
+            module_index_builder(module_path, module_index);
+        }
+    }
+    return module_index;
+}
+
+//构建项目
+fs.open(builder_conf.index_fpath, "w", function(err, fd) {
+    if(err) {
+        console.error(`[builder]: open index.js failed`)
+        throw err;
+    }
+    //构建模块索引
+    let module_index = module_index_builder(builder_conf.src_dir);
+    let module_index_str = '';
+    for(let i=0, end=module_index.length; i<end; i++) {
+        module_index_str += `module.exports["${module_index[i][0]}"] = require("${module_index[i][1]}");`
+    }
+    fs.write(fd, module_index_str, function(err, bytesWritten, buffer) {
+        if(err) {
+            console.error("[builder]: index.js build failed");
+            throw err;
+        } 
+        console.log("[builder]: index.js build success");
+        //webpack构建
+        webpack(webpack_conf, function(err, stats){
+            if(err) {
+                throw err;
+            } 
+            console.log("[builder]: webpack build success");
+        });
+    });
+});
