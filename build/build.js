@@ -12,13 +12,13 @@ const path = require("path");
 const builder_conf = require("./builder.config");
 const webpack = require("webpack");
 const webpack_conf = require("./webpack.config");
-webpack_conf.entry = builder_conf.index_fpath
+webpack_conf.entry = builder_conf.module_index_path
 
 //模块索引构建器
 const module_index_builder = function(module_dir, module_index=Array()) {
-    let module_files = fs.readdirSync(path.resolve(module_dir));
+    let module_files = fs.readdirSync(module_dir);
     for(let i=0, end=module_files.length; i<end; i++) {
-        let module_path = path.resolve(module_dir, module_files[i]);
+        let module_path = `${module_dir}/${module_files[i]}`;
         if(fs.statSync(module_path).isFile()) {
             module_index.push([path.parse(module_path).name, module_path])
         } else {
@@ -29,18 +29,22 @@ const module_index_builder = function(module_dir, module_index=Array()) {
 }
 
 //构建项目
-fs.open(builder_conf.index_fpath, "w", function(err, fd) {
+fs.open(builder_conf.module_index_path, "w", function(err, fd) {
     if(err) {
         console.error(`[builder]: open index.js failed`)
         throw err;
     }
-    //构建模块索引
-    let module_index = module_index_builder(builder_conf.src_dir);
-    let module_index_str = '';
+    //解析模块源码路径
+    let module_src_path = path.join(__dirname, builder_conf.module_src_path).replace(/\\/g, "/");
+    //解析模块索引
+    let module_index = module_index_builder(module_src_path);
+    //构建模块索引导出代码
+    let module_index_code = '';
     for(let i=0, end=module_index.length; i<end; i++) {
-        module_index_str += `module.exports["${module_index[i][0]}"] = require("${module_index[i][1]}");`
+        module_index_code += `module.exports["${module_index[i][0]}"] = require("${module_index[i][1]}");\n`
     }
-    fs.write(fd, module_index_str, function(err, bytesWritten, buffer) {
+    //生成索引文件
+    fs.write(fd, module_index_code, function(err, bytesWritten, buffer) {
         if(err) {
             console.error("[builder]: index.js build failed");
             throw err;

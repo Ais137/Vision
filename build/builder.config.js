@@ -1,7 +1,7 @@
 //构建器配置
 module.exports = {
-    //源码目录
-    "src_dir": "./src",
-    //索引文件构建路径
-    "index_fpath": "./build/index.js",
+    //模块源码目录
+    "module_src_path": "../src",
+    //模块索引文件构建路径
+    "module_index_path": "./build/index.js",
 }
