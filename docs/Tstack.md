@@ -16,5 +16,7 @@
 * JavaScript: 逻辑接口实现
 * Canvas: 绘图接口实现
 * webpack: 静态模块打包器
-* Jest: 单元测试框架 
+* Jest: 单元测试框架
+* ejs: 嵌入式JavaScript模板引擎 
+* webpack热更新模块加载
 
