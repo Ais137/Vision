@@ -51,6 +51,11 @@ class Canvas {
     get cx() { return this._cx; }
     get cy() { return this._cy; }
 
+    //设置颜色(strokeStyle && fillStyle)
+    set colorStyle(color) {
+        this.ctx.strokeStyle = this.ctx.fillStyle = color;
+    }
+
     //重置画布尺寸
     resize(width, height) {
         this.width = parseInt(width) || window.screen.width;
@@ -70,17 +75,12 @@ class Canvas {
         * x: x坐标参数
         * y: y坐标参数
     @exp:
-        * point(x, y)
-        * point([x, y])
-        * point(vector) 
-        * point({"x":x, "y":y}) 
+        * point(100, 100)
+        * point(Vector(100, 100)) 
+        * point({"x":100, "y":100}) 
     ----------------------------------------*/
     point(x, y) {
-        if(typeof arguments[0] === "number") {
-            x = arguments[0]; y = arguments[1];
-        } else if (arguments[0].length) {
-            x = arguments[0][0]; y = arguments[0][1];
-        } else {
+        if(typeof arguments[0] != "number") {
             x = arguments[0].x; y = arguments[0].y;
         }
         this.ctx.strokeStyle = this.ctx.fillStyle = this.POINT.C;
@@ -90,19 +90,78 @@ class Canvas {
         this.POINT.R > 1 && this.ctx.fill();
     }
 
-    //线
-    line() {
-
+    /*----------------------------------------
+    @func: 绘制线段(line)
+    @desc: 绘制一条从起始点(xs, ys)到终止点(xe, ye)的线段
+    @params: 
+        * (xs, ys): 起始点坐标
+        * (xe, ye): 终止点坐标
+    @exp:
+        * line(100, 100, 300, 300)
+        * line(Vector(100, 100), Vector(300, 300)) 
+    ----------------------------------------*/
+    line(xs, ys, xe, ye) {
+        if(typeof arguments[0] != "number") {
+            xs = arguments[0].x; ys = arguments[0].y;
+            xe = arguments[1].x; ye = arguments[1].y;
+        }
+        this.ctx.beginPath();
+        this.ctx.moveTo(xs, ys);
+        this.ctx.lineTo(xe, ye);   
+        this.ctx.stroke(); 
     }
 
-    //圆
-    circle() {
-
+    /*----------------------------------------
+    @func: 绘制线集
+    @desc: 根据顶点集绘制线集
+    @params: 
+        * ps: 顶点集 -> [[x1, y1], [x2, y2], ..., [xn, yn]] || [v1, v2, v3, ..., vn]
+        * close: 是否闭合
+    @exp:
+        * lines([[100, 100], [300, 300]])
+        * lines([Vector(100, 100), Vector(300, 300)]) 
+    ----------------------------------------*/
+    lines(ps, close=false) {
+        this.ctx.beginPath();
+        let isVector = (ps[0].x != undefined);
+        isVector ? this.ctx.moveTo(ps[0].x, ps[0].y) : this.ctx.moveTo(ps[0][0], ps[0][1]);
+        for(let i=1, end=ps.length; i<end; i++) {
+            isVector ? this.ctx.lineTo(ps[i].x, ps[i].y) : this.ctx.lineTo(ps[i][0], ps[i][1]);
+        }
+        close && this.ctx.closePath();
+        this.ctx.stroke(); 
     }
 
-    //矩形
-    rect() {
-        
+    /*----------------------------------------
+    @func: 绘制圆
+    @desc: 绘制圆心坐标为(x, y), 半径为r的圆
+    @params: 
+        * (x, y): 圆心坐标
+        * r: 半径
+    @exp:
+        * circle(100, 100, 5) 
+    ----------------------------------------*/
+    circle(x, y, r=1) {
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, r, 0, 2*Math.PI);
+        this.ctx.stroke(); 
+    }
+
+    /*----------------------------------------
+    @func: 绘制矩形
+    @desc: 绘制中心坐标为(x, y), x轴半径为rx, y轴半径为ry的矩形
+    @params: 
+        * (x, y): 中心坐标
+        * rx: x轴半径为rx
+        * ry: y轴半径为rx
+    @exp:
+        * rect(100, 100, 50, 100) 
+        * rect(100, 100, 50, 50) 
+    ----------------------------------------*/
+    rect(x, y, rx, ry) {
+        this.ctx.beginPath();
+        this.ctx.rect(x-rx, y-ry, rx*2, ry*2);
+        this.ctx.stroke();
     }
 }
 

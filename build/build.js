@@ -31,7 +31,7 @@ const module_index_builder = function(module_dir, module_index=Array()) {
 }
 
 //构建模式
-let BUILD_MODE = process.argv[2] || "build";
+let BUILD_MODE = process.argv[2] || "update";
 //构建索引文件
 if(BUILD_MODE == "build") {
     fs.open(builder_conf.module_index_path, "w", function(err, fd) {
