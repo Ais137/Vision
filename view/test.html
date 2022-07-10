@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision</title>
+    <!-- 导入模块 -->
+    <script src="../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* * {
+            cursor: none;
+        } */
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        let canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+
+        let points = [
+            // Vector.V(canvas.cx-500, canvas.cy-200),
+            // Vector.V(canvas.cx-100, canvas.cy-250),
+            // Vector.V(canvas.cx+100, canvas.cy-20),
+            // Vector.V(canvas.cx+50, canvas.cy+130),
+            // Vector.V(canvas.cx, canvas.cy+400),
+            // Vector.V(canvas.cx-130, canvas.cy+150),
+        ]
+
+        // canvas.ctx.lineWidth = 2;
+        // canvas.ctx.strokeStyle = 'rgb(255, 255, 255)';
+        // canvas.lines(points, close=true);
+
+        //计算点到点集的距离和
+        const dist_sum = function(p, points) {
+            let d = 0;
+            for(let i=0, end=points.length; i<end; i++) {
+                d += p.dist(points[i]);
+            }
+            return d;
+        }
+
+        //采样点
+        let samp_d = 5;
+        const samp = [
+            new Vector(-5, -5),
+            new Vector(0, -5),
+            new Vector(5, -5),
+            new Vector(-5, 0),
+            new Vector(0, 0),
+            new Vector(5, 0),
+            new Vector(-5, 5),
+            new Vector(0, 5),
+            new Vector(5, 5),
+        ]
+
+        document.getElementById("vision_canvas").addEventListener("mousedown", function(event) {
+            let x = event.clientX, y = event.clientY;
+            points.push(new Vector(x, y));
+            canvas.POINT.C = 'rgb(0, 255, 0)';
+            canvas.point(x, y);
+        });
+
+        document.getElementById("vision_canvas").addEventListener("mousemove", function(event) {
+            // canvas.reflush();
+            // //绘制多边形
+            // canvas.ctx.strokeStyle = 'rgb(255, 255, 255)';
+            // canvas.lines(points, close=true);
+            // //绘制顶点连线
+            let x = event.clientX, y = event.clientY;
+            // canvas.ctx.strokeStyle = 'rgb(70, 70, 70)';
+            // for(let i=0, end=points.length; i<end; i++) {
+            //     canvas.line(x, y, points[i].x, points[i].y);
+            // }
+            //计算鼠标到各顶点的长度和
+            let mv = new Vector(x, y);
+            let max_v = mv, max = 0;
+            let min_v = mv, min = 99999999;
+            for(let i=0, end=samp.length; i<end; i++) {
+                let v = Vector.add(mv, samp[i]);
+                let d = dist_sum(v, points);
+                if(d > max) {
+                    max = d; max_v = samp[i];
+                }
+                if(d < min) {
+                    min = d; min_v = samp[i];
+                }
+            }
+            // max_v.norm(20), min_v.norm(20);
+            // canvas.POINT.C = "rgb(255, 0, 0)";
+            // canvas.point(mv.x+max_v.x, mv.y+max_v.y);
+            // canvas.POINT.C = "rgb(0, 255, 0)";
+            // canvas.point(mv.x+min_v.x, mv.y+min_v.y);
+            console.log(`max(${max}), min(${min})`);
+        });
+
+        const test = function() {
+            canvas.reflush();
+            //绘制多边形
+            canvas.ctx.strokeStyle = 'rgb(255, 255, 255)';
+            canvas.lines(points, close=true);
+
+            let xs = 0, xe = canvas.width;
+            let ys = 0, ye = canvas.height;
+            let dx = dy = 10;
+            for(let x=xs; x<=xe; x+=dx) {
+                for(let y=ys; y<=ye; y+=dy) {
+                    let mv = new Vector(x, y);
+                    console.log(x, y);
+                    let max_v = mv, max = 0;
+                    let min_v = mv, min = Infinity;
+                    for(let i=0, end=samp.length; i<end; i++) {
+                        let v = Vector.add(mv, samp[i]);
+                        let d = dist_sum(v, points);
+                        if(d > max) {
+                            max = d; max_v = v;
+                        }
+                        if(d < min) {
+                            min = d; min_v = v;
+                        }
+                    }
+                    canvas.ctx.strokeStyle = "rgb(0, 200, 0)";
+                    canvas.line(mv.x, mv.y, min_v.x, min_v.y);
+                    // canvas.line(mv.x, mv.y, max_v.x, max_v.y);
+                }
+            }
+        }
+        // test();
+
+
+    </script>
+
+
+</body>
+</html>
