@@ -38,6 +38,15 @@ class Particle {
     action() {
         return this.p.add(this.v).clone();
     }
+
+    /*----------------------------------------
+    @func: 停机状态
+    @desc: 描述粒子的停机状态
+    @return(bool):  
+    ----------------------------------------*/
+    end() {
+        return false;
+    }
 }
 
 
@@ -176,11 +185,67 @@ class CircularMotorParticle extends Particle {
 
 //随机游走器
 class RandomWalker extends Particle {
+    
+    /*----------------------------------------
+    @func: 随机游走
+    @desc: 给定一组速度向量集，每次随机选择一个速度进行移动
+    @params: 
+        * ps(Vector): 初始位置
+        * rvs(list): 随机速度向量集 -> [Vector(速度向量), wt(权重)]
+    ----------------------------------------*/
+    constructor(ps, rvs) {
+        super();
+        //初始位置
+        this.p = ps;
+        //随机速度向量集
+        this._rvs = this._probability(rvs);
+    }
 
+    //计算概率(基于权重): p[i] = wt[i] / sum(wt)
+    _probability(rvs) {
+        //计算总权重
+        let swt = 0;
+        for(let i=0, end=rvs.length; i<end; i++) {
+            swt += rvs[i][1];
+        }
+        //计算每个速度矢量的概率
+        let _rvs = [], _ps = 0;
+        for(let i=0, end=rvs.length; i<end; i++) {
+            let p = (rvs[i][1] || 0) / swt;
+            _rvs.push({
+                //速度
+                "v": rvs[i][0] || new Vector(0, 0),
+                //概率
+                "p": p,
+                //概率范围
+                "ps": _ps, "pe": _ps + p
+            });
+            _ps += p;
+        }
+        return _rvs;
+    }
+
+    //随机选择速度
+    rv_select() {
+        let r = Math.random();
+        for(let i=0, end=this._rvs.length; i<end; i++) {
+            if(r > this._rvs[i].ps && r <= this._rvs[i].pe) {
+                return this._rvs[i].v;
+            }
+        }
+    }
+
+    //运动模式
+    action() {
+        //选择随机速度
+        this.v = this.rv_select();
+        return this.p.add(this.v).clone();
+    }
 }
 
 
 
 module.exports.Particle = Particle;
 module.exports.LinearMotorParticle = LinearMotorParticle;
-module.exports.CircularMotorParticle = CircularMotorParticle
+module.exports.CircularMotorParticle = CircularMotorParticle;
+module.exports.RandomWalker = RandomWalker;

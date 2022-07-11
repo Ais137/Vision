@@ -301,6 +301,28 @@ class Vector {
         for(let i=0, end=this._v.length; i<end; i++) { this._v[i] = parseInt(this._v[i]);}
     }
 
+    /*----------------------------------------
+    @func: 向量分量范围判断
+    @desc: 判断向量的分量是否在指定范围
+    @params: 
+        * range(list): 分量范围
+    @return(bool): 判定结果 
+    @exp: 
+        new Vector(1, 2).in([[1, 5], [1, 5]]) -> true
+        new Vector(1, 2).in([[1, 5], [0, 1]]) -> false
+    ----------------------------------------*/
+    in(range=[]) {
+        for(let i=0, end=range.length; i<end; i++) {
+            if(!(this._v[i] >= range[i][0] && this._v[i] <= range[i][1])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    static in(vector, range) {
+        return vector.in(range);
+    }
+
 }
 
 

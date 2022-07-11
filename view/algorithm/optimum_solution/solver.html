@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision</title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        // const canvas = new vision.canvas.Canvas("vision_canvas", 3840, 2160);
+        const Vector = vision.vector.Vector;
+
+        //目标函数构建器
+        const tfunc_builder = function(points) {
+            //给定一个顶点集，求解一个点p, 使p到顶点集中各顶点的距离和最小。
+            return function dist_sum(p) {
+                let d = 0;
+                for(let i=0, end=points.length; i<end; i++) {
+                    d += p.dist(points[i]);
+                }
+                return d;
+            }
+        }
+
+        //顶点集
+        let vpoints = [];
+
+        //计算最优解
+        const solve = function(vps) {
+
+            //构建最优解求解器集群
+            let oss = new vision.optimum_solution_solver.OptimumSolutionSolvers();
+            //求解器数量
+            oss.n = 50;
+            //目标函数
+            oss.tfunc = tfunc_builder(vps);
+            //求解域
+            oss.dod = [[10, canvas.width-10], [10, canvas.height-10]];
+            //求解器速度集步长
+            oss.vsd = 1;
+            //最优值类型
+            oss.val_type = "min";
+
+            //绘制函数
+            let disp = function() {
+                canvas.reflush();
+                //绘制顶点
+                canvas.ctx.strokeStyle = 'rgb(255, 255, 255)';
+                canvas.lines(vps, close=true);
+                //绘制求解器坐标
+                for(let i=0, end=oss.solvers.length; i<end; i++) {
+                    canvas.colorStyle = 'rgb(0, 255, 0)';
+                    canvas.circle(oss.solvers[i].p.x, oss.solvers[i].p.y, 1);
+                    canvas.ctx.fill();
+                }
+            }
+
+            //初始化
+            oss.init();
+            //迭代
+            let clock = setInterval(function() {
+                if(!oss.end()) {
+                    oss.next(); disp();
+                } else {
+                    clearInterval(clock);
+                    console.log(`os_val:(${oss.os_val}), os_p:(${oss.os_p.v})`);
+                }
+            }, 17);
+        }
+        
+        //设置顶点
+        document.getElementById("vision_canvas").addEventListener("mousedown", function(event) {
+            if(event.button == 0) {
+                let x = event.clientX, y = event.clientY;
+                vpoints.push(new Vector(x, y));
+                canvas.POINT.C = 'rgb(0, 255, 0)';
+                canvas.point(x, y);
+            } else if(event.button == 2) {
+                solve(vpoints);
+            }
+        });
+        
+
+    </script>
+
+
+</body>
+</html>

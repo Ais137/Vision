@@ -133,3 +133,9 @@ test("vector method(rad)", () => {
     expect(new Vector(1, 1).rad(new Vector(0, 1))).toBeCloseTo(-Math.PI/4);
 });
 
+//向量分量范围判断
+test("vector method(in)", () => {
+    expect(new Vector(1, 1).in([[1, 2], [1, 2]])).toBe(true);
+    expect(new Vector(1, 1).in([[-1, 1], [-1, -2]])).toBe(false);
+    expect(new Vector(1, 1).in([[1, 2]])).toBe(true);
+});
