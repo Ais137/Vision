@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vision</title>
+    <title>optimum_solution_solver</title>
     <!-- 导入模块 -->
-    <script src="../../../dist/vision.js"></script>
+    <script src="../../dist/vision.js"></script>
     <style>
         /* 去掉边缘滚动条 */
         body {
@@ -28,6 +28,14 @@
 
     <!-- 绘制代码 -->
     <script>
+        /***************************************************  
+         * Name: optimum_solution_solver | 最优解求解器
+         * Desc: 给定一个目标函数，求解该目标函数在限定定义域内的全局最优解(最值)
+         * Option:
+            1. 通过鼠标左键选取目标函数的顶点集
+            2. 点击鼠标右键触发计算 
+        ****************************************************/
+
         const canvas = new vision.canvas.Canvas("vision_canvas");
         // const canvas = new vision.canvas.Canvas("vision_canvas", 3840, 2160);
         const Vector = vision.vector.Vector;
@@ -35,23 +43,44 @@
         //目标函数构建器
         const tfunc_builder = function(points) {
             //给定一个顶点集，求解一个点p, 使p到顶点集中各顶点的距离和最小。
-            return function dist_sum(p) {
+            let dist_sum = function(p) {
                 let d = 0;
                 for(let i=0, end=points.length; i<end; i++) {
                     d += p.dist(points[i]);
                 }
                 return d;
             }
+            //给定一个顶点集，求解一个点p, 使p到顶点集中各顶点的距离差最小
+            let dist_avg = function(p) {
+                let vds = [], d_sum = 0;
+                //计算平均距离
+                for(let i=0, end=points.length; i<end; i++) {
+                    let d = p.dist(points[i]);
+                    vds[i] = d; d_sum += d;
+                }
+                let d_avg = d_sum/points.length;
+                let df_sum = 0;
+                //计算方差
+                for(let i=0, end=points.length; i<end; i++) {
+                    df_sum += (vds[i]-d_avg)*(vds[i]-d_avg); 
+                }
+                return Math.sqrt(df_sum/points.length);
+            }
+
+            return dist_sum;
+            // return dist_avg;
         }
 
         //顶点集
         let vpoints = [];
+        //求解器集群
+        let oss = null;
 
         //计算最优解
         const solve = function(vps) {
 
             //构建最优解求解器集群
-            let oss = new vision.optimum_solution_solver.OptimumSolutionSolvers();
+            oss = new vision.optimum_solution_solver.OptimumSolutionSolvers();
             //求解器数量
             oss.n = 50;
             //目标函数
@@ -76,7 +105,6 @@
                     canvas.ctx.fill();
                 }
             }
-
             //初始化
             oss.init();
             //迭代
@@ -85,7 +113,10 @@
                     oss.next(); disp();
                 } else {
                     clearInterval(clock);
-                    console.log(`os_val:(${oss.os_val}), os_p:(${oss.os_p.v})`);
+                    canvas.colorStyle = 'rgb(0, 255, 0)';
+                    canvas.circle(oss.os_p.x, oss.os_p.y, 3);
+                    canvas.ctx.fill();
+                    alert(`os_val: (${oss.os_val})\nos_p: (${oss.os_p.v})`);
                 }
             }, 17);
         }

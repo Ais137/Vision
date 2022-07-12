@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision</title>
+    <!-- 导入模块 -->
+    <script src="../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas", 3820, 2160);
+        const Vector = vision.vector.Vector;
+
+        //构建坐标捕获器
+        let p_capturer = new vision.point_capturer.PointCapturer(canvas);
+        p_capturer.is_line = p_capturer.is_close = true;
+        p_capturer.capture("vision_canvas");
+
+        document.getElementById("vision_canvas").addEventListener("mousemove", function(event) {
+            p_capturer.disp();
+            let p = p_capturer.p, points = p_capturer.points;
+            for(let i=0, end=points.length; i<end; i++) {
+                canvas.ctx.strokeStyle = 'rgb(0, 200, 0)';
+                canvas.line(p.x, p.y, points[i].x, points[i].y);
+            }
+        });
+
+    </script>
+
+
+</body>
+</html>
