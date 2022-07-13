@@ -44,7 +44,7 @@ class PointCapturer {
         //坐标点类型
         this.is_vector = true;
         //是否绘制坐标点
-        this.is_disp = true;
+        this.is_disp = false;
         //是否连线
         this.is_line = false;
         //连线是否闭合
@@ -95,15 +95,15 @@ class PointCapturer {
     }
 
     //导出
-    export() {
+    export(to_str=false) {
+        let _points = this.points;
         if(this.is_vector) {
-            let _points = [];
+            _points = [];
             for(let i=0, end=this.points.length; i<end; i++) {
                 _points.push([this.points[i].x, this.points[i].y]);
             }
-            return _points;
         } 
-        return this.points;
+        return to_str==false ? _points : JSON.stringify(_points);
     }
 }
 

@@ -8,7 +8,7 @@
 ****************************************/
 
 //导入目标模块
-const Vector = require("../../src/vector/vector").Vector;
+const Vector = require("../src/vector/vector").Vector;
 
 //构建器
 test("vector builder", () => {

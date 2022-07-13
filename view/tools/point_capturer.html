@@ -33,18 +33,20 @@
 
         //构建坐标捕获器
         let p_capturer = new vision.point_capturer.PointCapturer(canvas);
-        p_capturer.is_line = p_capturer.is_close = true;
+        p_capturer.is_disp = true;
+        p_capturer.is_line = true;
+        // p_capturer.is_close = true;
         p_capturer.capture("vision_canvas");
 
-        document.getElementById("vision_canvas").addEventListener("mousemove", function(event) {
-            p_capturer.disp();
-            let p = p_capturer.p, points = p_capturer.points;
-            for(let i=0, end=points.length; i<end; i++) {
-                canvas.ctx.strokeStyle = 'rgb(0, 200, 0)';
-                canvas.line(p.x, p.y, points[i].x, points[i].y);
-            }
-        });
-
+        // document.getElementById("vision_canvas").addEventListener("mousemove", function(event) {
+        //     p_capturer.disp();
+        //     let p = p_capturer.p, points = p_capturer.points;
+        //     for(let i=0, end=points.length; i<end; i++) {
+        //         canvas.ctx.strokeStyle = 'rgb(0, 200, 0)';
+        //         canvas.line(p.x, p.y, points[i].x, points[i].y);
+        //     }
+        // });
+        
     </script>
 
 

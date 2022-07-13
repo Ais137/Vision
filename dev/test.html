@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vision</title>
     <!-- 导入模块 -->
-    <script src="./vision.js"></script>
+    <script src="../dist/vision.js"></script>
     <style>
         /* 去掉边缘滚动条 */
         body {
@@ -16,6 +16,7 @@
         * {
             margin: 0;
             padding: 0;
+            cursor: none;
         }
     </style>
 </head>
@@ -28,11 +29,50 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.canvas.Canvas("vision_canvas", 3820, 2160);
+        const canvas = new vision.canvas.Canvas("vision_canvas");
         const Vector = vision.vector.Vector;
 
-        //判断给定点是否在封闭多边形内部        
+        //构建引力场
+        let gravity = new vision.field.Gravity(new Vector(canvas.cx, canvas.cy), mass=1);
+        gravity.G = 0.1;
 
+        //构建粒子
+        // let p = new vision.particle.ForceParticle(new Vector(500, 500), Vector.random([[-3, 3], [-3, 3]]));
+        let n = 10;
+        let ps = [];
+        for(let i=0; i<n; i++) {
+            ps.push(new vision.particle.ForceParticle(
+                Vector.random([[0, canvas.width], [0, canvas.height]]), 
+                Vector.random([[-3, 3], [-3, 3]]), 
+            ))
+        }
+
+        //边界限制器
+        // const border = new vision.border.RectLoopBorder([[0, canvas.width], [0, canvas.height]]);
+        document.getElementById("vision_canvas").addEventListener("mousemove", function(event) {
+            gravity.gp = new Vector(event.clientX, event.clientY);
+        });
+
+        /*  
+        引力捕获器
+        有一个粒子群受引力场吸引，让引力场移动，使粒子群到引力场的距离和最小
+        */
+        setInterval(function() {
+            canvas.reflush();
+            for(let i=0, n=ps.length; i<n; i++) {
+                gravity.force(ps[i]);
+                ps[i].action();
+            }
+            canvas.colorStyle = 'rgb(0, 200, 0)';
+            for(let i=0, n=ps.length; i<n; i++) {
+                canvas.circle(ps[i].p.x, ps[i].p.y, 3);
+                canvas.ctx.fill();
+            }
+            canvas.colorStyle = 'rgb(255, 255, 255)';
+            canvas.circle(gravity.gp.x, gravity.gp.y, 3);
+            canvas.ctx.fill();
+        }, 17);
+        
     </script>
 
 

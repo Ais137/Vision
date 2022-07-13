@@ -323,6 +323,23 @@ class Vector {
         return vector.in(range);
     }
 
+    /*----------------------------------------
+    @func: 从坐标数组中构建向量
+    @desc: [[x1, y1], [x2, y2], ..., [xn, yn]] -> [v1, v2, ..., vn]
+    @params: 
+        * ps(list:list): 坐标点的数组形式
+    @return(list:Vector): 坐标点的向量形式 
+    @exp: 
+        Vector.vpoints([[100, 100], [200, 200]]) -> [Vector(100, 100), Vector(200, 200)]
+    ----------------------------------------*/
+    static vpoints(ps) {
+        let vps = [];
+        for(let i=0, n=ps.length; i<n; i++) {
+            vps.push(new Vector(...ps[i]));
+        }
+        return vps;
+    }
+
 }
 
 

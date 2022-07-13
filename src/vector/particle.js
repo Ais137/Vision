@@ -16,7 +16,7 @@ class Particle {
     /*----------------------------------------
     @func: Particle构建器
     @desc: 通过向量描述粒子的运动
-    @params: 
+    @property: 
         * position(Vector): 位置矢量
         * velocity(Vector): 速度矢量
     @return(Particle): obj
@@ -50,13 +50,53 @@ class Particle {
 }
 
 
+//力粒子
+class ForceParticle extends Particle {
+
+    /*----------------------------------------
+    @func: 可受力粒子
+    @property: 
+        * ps(Vector): 起始位置
+        * pe(Vector): 终止位置
+        * v_rate(number): 速率(this.v.norm())
+    ----------------------------------------*/
+    constructor(position, velocity, acceleration, mass) {
+        super();
+        //位置矢量
+        this.p = position || new Vector(0, 0);
+        //速度矢量
+        this.v = velocity || new Vector(0, 0);
+        //加速度
+        this.acc = acceleration || new Vector(0, 0);
+        //质量
+        this.mass = mass || 1;
+    }
+
+    /*----------------------------------------
+    @func: 受力(积累效应)
+    @desc: 通过受力来改变粒子的加速度
+    @params: 
+        * f(Vector): 作用力
+    ----------------------------------------*/
+    force(f) {
+        this.acc.add(f.clone().mult(1/this.mass));
+    }
+
+    action() {
+        this.p.add(this.v.add(this.acc));
+        this.acc = new Vector(0, 0);
+        return this.p.clone();
+    }
+}
+
+
 //线性运动粒子
 class LinearMotorParticle extends Particle {
 
     /*----------------------------------------
     @func: 线性运动
     @desc: 描述直线运动模式的粒子
-    @params: 
+    @property: 
         * ps(Vector): 起始位置
         * pe(Vector): 终止位置
         * v_rate(number): 速率(this.v.norm())
@@ -147,7 +187,7 @@ class CircularMotorParticle extends Particle {
     /*----------------------------------------
     @func: 环形运动
     @desc: 描述圆形运动模式的粒子
-    @params: 
+    @property: 
         * o(Vector): 圆心位置
         * r(number): 旋转半径
         * v_rad(number): 旋转速率(弧度)
@@ -184,12 +224,12 @@ class CircularMotorParticle extends Particle {
 
 
 //随机游走器
-class RandomWalker extends Particle {
+class RandomWalkerParticle extends Particle {
     
     /*----------------------------------------
     @func: 随机游走
     @desc: 给定一组速度向量集，每次随机选择一个速度进行移动
-    @params: 
+    @property: 
         * ps(Vector): 初始位置
         * rvs(list): 随机速度向量集 -> [Vector(速度向量), wt(权重)]
     ----------------------------------------*/
@@ -246,6 +286,7 @@ class RandomWalker extends Particle {
 
 
 module.exports.Particle = Particle;
+module.exports.ForceParticle = ForceParticle;
 module.exports.LinearMotorParticle = LinearMotorParticle;
 module.exports.CircularMotorParticle = CircularMotorParticle;
-module.exports.RandomWalker = RandomWalker;
+module.exports.RandomWalkerParticle = RandomWalkerParticle;

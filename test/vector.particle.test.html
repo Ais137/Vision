@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vision</title>
     <!-- 导入模块 -->
-    <script src="../../dist/vision.js"></script>
+    <script src="../dist/vision.js"></script>
     <style>
         /* 去掉边缘滚动条 */
         body {
@@ -84,7 +84,7 @@
         /* --------------- 随机游走 --------------- */
         //随机游走器
         let vd = 3;
-        rw1 = new vision.particle.RandomWalker(new Vector(canvas.cx, canvas.cy), [
+        rw1 = new vision.particle.RandomWalkerParticle(new Vector(canvas.cx, canvas.cy), [
             [new Vector(-1, -1).mult(vd), 1/8],
             [new Vector(0, -1).mult(vd), 1/8],
             [new Vector(1, -1).mult(vd), 1/8],
