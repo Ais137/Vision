@@ -42,11 +42,11 @@ class ColorVector extends Vector {
     set b(val){ this._v[2] = val; }
     set a(val){ this._v[3] = val; }
 
-    color() {
-        if(this._v.length==3) {
-            return `rgb(${this._v[0]}, ${this._v[1]}, ${this._v[2]})`;
+    color(tolist=false) {
+        if(this._v.length<=3) {
+            return tolist ? [this._v[0], this._v[1], this._v[2]] : `rgb(${this._v[0]}, ${this._v[1]}, ${this._v[2]})`;
         } else {
-            return `rgb(${this._v[0]}, ${this._v[1]}, ${this._v[2]}, ${this._v[3]})`;
+            return tolist ? [this._v[0], this._v[1], this._v[2], this._v[3]] : `rgb(${this._v[0]}, ${this._v[1]}, ${this._v[2]})`;
         }
     }
 
@@ -89,8 +89,8 @@ class ColorGradient {
         this._dcv = Vector.sub(this.ecv, this.scv).norm(Vector.dist(this.ecv, this.scv)/n);
     }
 
-    color() {
-        let color_val = this.cv.color();
+    color(tolist=false) {
+        let color_val = this.cv.color(tolist);
         if(this._count > 0) { this.cv.add(this._dcv); }
         this._count--;
         return color_val;
