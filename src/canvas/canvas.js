@@ -2,7 +2,7 @@
  * Name: HTML5 Canvas 对象
  * Date: 2022-07-05
  * Author: Ais
- * Project: 
+ * Project: Vision
  * Desc: 对canvas接口进行二次封装
  * Version: 0.1
 ****************************************/
@@ -116,20 +116,28 @@ class Canvas {
     @desc: 根据顶点集绘制线集
     @params: 
         * ps: 顶点集 -> [[x1, y1], [x2, y2], ..., [xn, yn]] || [v1, v2, v3, ..., vn]
+        * color(str || Color(颜色对象)): 线段颜色样式 
         * close: 是否闭合
     @exp:
         * lines([[100, 100], [300, 300]])
         * lines([Vector(100, 100), Vector(300, 300)]) 
     ----------------------------------------*/
-    lines(ps, close=false) {
-        this.ctx.beginPath();
+    lines(ps, color='rgb(255, 255, 255)', close=false) {
+        //判断点集元素类型
         let isVector = (ps[0].x != undefined);
-        isVector ? this.ctx.moveTo(ps[0].x, ps[0].y) : this.ctx.moveTo(ps[0][0], ps[0][1]);
-        for(let i=1, end=ps.length; i<end; i++) {
-            isVector ? this.ctx.lineTo(ps[i].x, ps[i].y) : this.ctx.lineTo(ps[i][0], ps[i][1]);
+        //判断是否是颜色对象
+        let isColor = (color.color != undefined);
+        //绘制线段
+        for(let i=0, n=ps.length, end=(close ? n : n-1); i<end; i++) {
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = (isColor ? color.color() : color);
+            if(isVector) {
+                this.ctx.moveTo(ps[i].x, ps[i].y); this.ctx.lineTo(ps[(i+1)%n].x, ps[(i+1)%n].y);
+            } else {
+                this.ctx.moveTo(ps[i][0], ps[i][1]); this.ctx.lineTo(ps[(i+1)%n][0], ps[(i+1)%n][1]);
+            }
+            this.ctx.stroke();
         }
-        close && this.ctx.closePath();
-        this.ctx.stroke(); 
     }
 
     /*----------------------------------------

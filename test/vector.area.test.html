@@ -35,17 +35,19 @@
 
         //构建顶点集区域
         let vps_area = new vision.area.Area(Vector.vpoints(JSON.parse('[[711,500],[821,325],[1095,317],[1254,550],[1102,745],[819,830],[664,686]]')));
-        
+        // vps_area.reverse = true;
+
         //矩形区域
         let r_area = new vision.area.RectArea([[200, 500], [-Infinity, Infinity]]);
+        // r_area.reverse = true;
 
         //圆形区域
         let c_area = new vision.area.CircleArea(new Vector(1574, 254), 200);
+        // c_area.reverse = true;
 
         //绘制
         const disp = function() {
-            canvas.ctx.strokeStyle = 'rgb(255, 255, 255)';
-            canvas.lines(vps_area.vps, close=true);
+            canvas.lines(vps_area.vps, color='rgb(255, 255, 255)', close=true);
             canvas.rect((r_area.borders[0][1]-r_area.borders[0][0])/2+r_area.borders[0][0], 0, (r_area.borders[0][1]-r_area.borders[0][0])/2, canvas.height);
             canvas.circle(c_area.po.x, c_area.po.y, c_area.r);
         }

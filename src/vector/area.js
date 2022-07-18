@@ -5,6 +5,8 @@
  * Project: Vision
  * Desc: 描述一个封闭区域，并给定一个点是否在区域内的判定算法(in)
  * Version: 0.1
+ * Update:
+ *     [2022-07-14]: 增加区域反转功能, 将method(in)的判定反转 
 ****************************************/
 
 const Vector = require("./vector.js").Vector;
@@ -34,13 +36,16 @@ class Area extends BaseArea {
     @property: 
         * vps(list:Vector): 构成区域的顶点集
         * offset(number): 判定算法(in)的计算误差
+        * reverse(bool): 区域反转标记, 将method(in)的判定反转
     ----------------------------------------*/
-    constructor(vpoints) {
+    constructor(vpoints, reverse=false) {
         super();
         //顶点集
         this.vps = vpoints;
         //计算误差
         this.offset = (Math.PI/180)*5;
+        //区域反转标记
+        this.reverse = reverse;
     }
 
     /*----------------------------------------
@@ -60,7 +65,7 @@ class Area extends BaseArea {
             let _rad = Math.abs(Vector.rad(Vector.sub(this.vps[i%n], p), Vector.sub(this.vps[(i+1)%n], p)))
             rads += (_rad>Math.PI ? 2*Math.PI-_rad : _rad);
         }
-        return (rads > Math.PI*2-this.offset) && (rads < Math.PI*2+this.offset) 
+        return this.reverse ^ (rads > Math.PI*2-this.offset) && (rads < Math.PI*2+this.offset) 
     }
 }
 
@@ -76,20 +81,22 @@ class RectArea extends BaseArea {
     @exp:
         new ReactArea([[100, 300], [100, 300]]) -> 中心点为(200, 200), 边长为100的矩形区域
     ----------------------------------------*/
-    constructor(borders) {
+    constructor(borders, reverse=false) {
         super();
         //矩形边界范围
         this.borders = borders;
+        //区域反转标记
+        this.reverse = reverse;
     }
 
     in(p) {
         p = p.v ? p : new Vector(...p);
         for(let i=0, n=this.borders.length; i<n; i++) {
             if((p.v[i] < this.borders[i][0]) || (p.v[i] > this.borders[i][1])) {
-                return false;
+                return this.reverse ^ false;
             }
         }
-        return true;
+        return this.reverse ^ true;
     }
 }
 
@@ -104,21 +111,24 @@ class CircleArea extends BaseArea {
         * po(Vector): 中心坐标
         * r(number): 半径 
     ----------------------------------------*/
-    constructor(po, r) {
+    constructor(po, r, reverse=false) {
         super();
         //中心坐标
         this.po = po;
         //半径
         this.r = r;
+        //区域反转标记
+        this.reverse = reverse;
     }
 
     in(p) {
         p = p.v ? p : new Vector(...p);
-        return p.dist(this.po) < this.r;
+        return this.reverse ^ (p.dist(this.po) < this.r);
     }
 }
 
 
+module.exports.BaseArea = BaseArea;
 module.exports.Area = Area;
 module.exports.RectArea = RectArea;
 module.exports.CircleArea = CircleArea;

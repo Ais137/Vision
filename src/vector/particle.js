@@ -36,7 +36,7 @@ class Particle {
     @return(Vector): this.p -> 粒子的当前位置 
     ----------------------------------------*/
     action() {
-        return this.p.add(this.v).clone();
+        return this.p.add(this.v);
     }
 
     /*----------------------------------------
@@ -85,7 +85,7 @@ class ForceParticle extends Particle {
     action() {
         this.p.add(this.v.add(this.acc));
         this.acc = new Vector(0, 0);
-        return this.p.clone();
+        return this.p;
     }
 }
 
@@ -176,7 +176,7 @@ class LinearMotorParticle extends Particle {
                 }
             }
         }
-        return this.p.clone();
+        return this.p;
     }
 }
 
@@ -217,7 +217,7 @@ class CircularMotorParticle extends Particle {
         this.po.x = this.r * Math.sin(this.rad);
         this.po.y = this.r * Math.cos(this.rad);
         this.p = Vector.add(this.po, this.o);
-        return this.p.clone();
+        return this.p;
     }
 
 }
@@ -279,7 +279,7 @@ class RandomWalkerParticle extends Particle {
     action() {
         //选择随机速度
         this.v = this.rv_select();
-        return this.p.add(this.v).clone();
+        return this.p.add(this.v);
     }
 }
 

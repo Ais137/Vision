@@ -96,8 +96,7 @@
             let disp = function() {
                 canvas.reflush();
                 //绘制顶点
-                canvas.ctx.strokeStyle = 'rgb(255, 255, 255)';
-                canvas.lines(vps, close=true);
+                canvas.lines(vps, color='rgb(255, 255, 255)', close=true);
                 //绘制求解器坐标
                 for(let i=0, end=oss.solvers.length; i<end; i++) {
                     canvas.colorStyle = 'rgb(0, 255, 0)';
