@@ -1,5 +1,5 @@
 /****************************************
- * Name: Field | 场
+ * Name: Field | 矢量场
  * Date: 2022-07-13
  * Author: Ais
  * Project: Vision
@@ -11,18 +11,18 @@ const Vector = require("./vector.js").Vector;
 const area = require('./area.js');
 
 
-//基类
+//矢量场(基类)
 class Field {
 
     /*----------------------------------------
-    @func: 力场
+    @func: 矢量力场
     @desc: 影响场范围内的粒子行为(对粒子进行力的作用)
     @property: 
         * area(BaseArea): 场作用范围
     ----------------------------------------*/
-    constructor() {
+    constructor(area) {
         //场作用范围
-        this.area = new area.BaseArea();
+        this.area = area || new area.BaseArea();
     }
 
     /*----------------------------------------
@@ -70,7 +70,7 @@ class Gravity extends Field {
     }
 
     //计算两个粒子间的引力
-    static force(fp1, fp2) {
+    static gravity(fp1, fp2) {
         let r = Vector.dist(fp1.p, fp2.p);
         let g = Gravity.G * (fp1.mass * fp2.mass) / r*r;
         fp1.force(Vector.sub(fp2.p, fp1.p).norm(g));

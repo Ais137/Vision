@@ -9,17 +9,18 @@
 
 const Vector = require("./vector.js").Vector;
 
-
 //粒子(基类)
 class Particle {
 
     /*----------------------------------------
-    @func: Particle构建器
+    @class: Particle(粒子)
     @desc: 通过向量描述粒子的运动
     @property: 
         * position(Vector): 位置矢量
         * velocity(Vector): 速度矢量
-    @return(Particle): obj
+    @method:
+        * action(): 描述粒子运动模式 -> 粒子位置矢量(Vector)
+        * end(): 粒子停机状态 -> bool
     @exp: 
         let p = new Particle(new Vector(100, 100), new Vector(2, 3));
     ----------------------------------------*/
@@ -46,6 +47,101 @@ class Particle {
     ----------------------------------------*/
     end() {
         return false;
+    }
+}
+
+
+//粒子系统(基类)
+class ParticleSystem {
+
+    /*----------------------------------------
+    @class: ParticleSystem(粒子系统)
+    @desc: 描述粒子集群
+    @property: 
+        * ps(list:Particle): 粒子容器
+        * max_pn(number[N+]): 最大粒子数(>=0)
+        * gen_pn(number[N+]): 迭代过程粒子生成数
+        * GENR(bool): 粒子生成开关, 用于在迭代过程(action)中生成新的粒子
+        * DSTR(bool): 粒子销毁开关, 当容器中的粒子进入停机状态时，从容器中移除该粒子
+        * _END(bool): 粒子系统停机状态
+    @method:
+        * init(): 对粒子系统进行初始化
+        * build(): 生成新的粒子
+        * action(): 描述粒子集群的行为模式
+        * end(): 返回粒子系统的停机状态
+    @exp: 
+        let ptcs = new ParticleSystem().init();
+    ----------------------------------------*/
+    constructor() {
+        //粒子容器
+        this.ps = [];
+        //最大粒子数
+        this.max_pn = Infinity;
+        //迭代过程粒子生成数
+        this.gen_pn = 1;
+        //粒子生成开关
+        this.GENR = false;
+        //粒子销毁开关
+        this.DSTR = true;
+        //粒子系统停机标记
+        this._END = false;
+    }
+
+    /*----------------------------------------
+    @func: 初始化
+    @desc: 对粒子系统进行初始化
+    @return(this) 
+    ----------------------------------------*/
+    init() {
+        this.ps = [];
+        return this;
+    }
+
+    /*----------------------------------------
+    @func: 构建器
+    @desc: 生成新的粒子，并添加到容器中
+    @warning: 在重新该方法时，需要注意尽量不添加形参，这是由于当
+    this.GENR = true 时，会在action调用 this.build() 来构建新粒子
+    ----------------------------------------*/
+    build() {
+        if(this.ps.length < this.max_pn) {
+            //this.ps.push(new Particle());
+        }
+    }
+
+    /*----------------------------------------
+    @func: 行为模式(迭代过程)
+    @desc: 描述粒子集群的行为模式
+    ----------------------------------------*/
+    action() {
+        let _ps = [], _END = true;
+        for(let i=0, n=this.ps.length; i<n; i++) {
+            //判断粒子的停机状态
+            let isEND = this.ps[i].end(); _END = isEND && _END;
+            if(!isEND) {
+                //调用粒子的行为模式方法
+                this.ps[i].action(); _ps.push(this.ps[i]);
+            } else {
+                //根据"粒子销毁开关"判断是否销毁停机粒子
+                (this.DSTR == false) && _ps.push(this.ps[i]);
+            }
+        }
+        //更新粒子容器和停机状态标记
+        this.ps = _ps; this._END = _END;
+        //生成新的粒子
+        if(this.GENR) {
+            for(let i=0, n=this.gen_pn; i<n; i++) {
+                this.build();
+            }
+        }
+    }
+
+    /*----------------------------------------
+    @func: 停机状态
+    @desc: 返回粒子系统的停机状态
+    ----------------------------------------*/
+    end() {
+        return this._END;
     }
 }
 
@@ -110,7 +206,7 @@ class LinearMotorParticle extends Particle {
         //当前位置
         this.p = this._ps.clone();
         //速度
-        this.v = Vector.sub(this._pe, this._ps).norm(v_rate);
+        this.v = Vector.sub(this._pe, this._ps).norm(Math.abs(v_rate));
         /*  
         运动模式:
             * [line]: 移动到pe后停机
@@ -286,6 +382,7 @@ class RandomWalkerParticle extends Particle {
 
 
 module.exports.Particle = Particle;
+module.exports.ParticleSystem = ParticleSystem;
 module.exports.ForceParticle = ForceParticle;
 module.exports.LinearMotorParticle = LinearMotorParticle;
 module.exports.CircularMotorParticle = CircularMotorParticle;

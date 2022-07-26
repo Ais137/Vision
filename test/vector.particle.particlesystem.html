@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision</title>
+    <!-- 导入模块 -->
+    <script src="../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+    
+        //线性移动粒子系统
+        class LinearMotorParticleSystem extends vision.particle.ParticleSystem {
+            
+            //初始化
+            init(n) {
+                for(let i=0; i<n; i++) { this.build(); }
+                return this;
+            }
+
+            //构建器
+            build() {
+                if(this.ps.length >= this.max_pn) {
+                    return;
+                }
+                //粒子生成位置参数(半径, 角度)
+                let p_r = 100, p_rad = Vector.random([[0, Math.PI*2]]).x;
+                //构建线性运动粒子
+                let p = new vision.particle.LinearMotorParticle(
+                    //粒子初始位置
+                    new Vector(Math.cos(p_rad)*p_r+canvas.cx, Math.sin(p_rad)*p_r+canvas.cy),
+                    // Vector.random([[0, canvas.width], [0, canvas.height]]),
+                    //粒子终止位置
+                    Vector.random([[0, canvas.width], [0, canvas.height]]),
+                )
+                //迭代次数
+                let n = Vector.random([[50, 300]]).x;
+                //粒子速度
+                p.v_count = n;
+                //粒子颜色
+                p.C = new vision.color.ColorGradient(Vector.random([[100, 100], [100, 255], [100, 255]]).v, [50, 50, 50], n);
+                //粒子半径(线性迭代器)
+                p.R = vision.iterator.Range.N(Vector.random([[50, 100]]).x, 1, n);
+
+                //添加粒子
+                this.ps.push(p);
+            }
+        }
+
+        let lmps = new LinearMotorParticleSystem().init(50);
+        lmps.max_pn = 300; lmps.gen_pn = 20; lmps.GENR = true;
+
+        //迭代
+        setInterval(function(){
+            lmps.action();
+            //绘制
+            canvas.reflush();
+            for(let i=0, n=lmps.ps.length; i<n; i++) {
+                canvas.colorStyle = lmps.ps[i].C.val();
+                canvas.circle(lmps.ps[i].p.x, lmps.ps[i].p.y, lmps.ps[i].R.val());
+                canvas.ctx.fill();
+            }
+
+        }, 17);
+
+    </script>
+
+
+</body>
+</html>

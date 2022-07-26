@@ -49,6 +49,7 @@ class ColorVector extends Vector {
             return tolist ? [this._v[0], this._v[1], this._v[2], this._v[3]] : `rgb(${this._v[0]}, ${this._v[1]}, ${this._v[2]})`;
         }
     }
+    val(tolist=false) { return this.color(tolist); }
 
     clone() {
         return new ColorVector(...this._v);
@@ -95,6 +96,11 @@ class ColorGradient {
         this._count--;
         return color_val;
     } 
+    val(tolist=false) { return this.color(tolist); }
+
+    end() {
+        return !(this._count > 0);
+    }
 
 }
 
