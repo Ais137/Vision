@@ -8,7 +8,7 @@
 ****************************************/
 
 const Vector = require("./vector.js").Vector;
-const area = require('./area.js');
+const Area = require('./area.js');
 
 
 //矢量场(基类)
@@ -22,7 +22,7 @@ class Field {
     ----------------------------------------*/
     constructor(area) {
         //场作用范围
-        this.area = area || new area.BaseArea();
+        this.area = area || new Area.BaseArea();
     }
 
     /*----------------------------------------

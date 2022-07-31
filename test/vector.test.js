@@ -82,6 +82,23 @@ test("vector method(dot)", () => {
     expect(new Vector(1, 1).dot(new Vector(-1, 1))).toBeCloseTo(0);
 });
 
+//线性组合
+test("vector method(LC)", () => {
+    expect(
+        Vector.LC([
+            new Vector(1, 1),
+            new Vector(2, 2),
+            new Vector(3, 3),
+        ], [6, 3, 2]).v
+    ).toEqual(new Vector(18, 18).v);
+});
+
+//旋转
+test("vector method(rotate)", ()=> {
+    expect(new Vector(1, 0).rotate(Math.PI/4).rad()).toBeCloseTo(Math.PI/4);
+    expect(new Vector(1, 1).rotate(Math.PI/4).v).toEqual(new Vector(1, 1).rotate(45, true).v);
+});
+
 //线性插值
 test("vector method(lerp)", () => {
     expect(new Vector(1, 1).lerp(new Vector(-1, 1), 0.5).rad()).toBeCloseTo(Math.PI/2);

@@ -153,9 +153,10 @@ class FuncIterator extends Iterator {
         //定义域(Range)
         this.dod = dod.val ? dod : Range.S(...dod);
     }
-
-    val() {
-        return this.fx(this.dod.val());
+    
+    val(toPoint=false) {
+        let x = this.dod.val();
+        return toPoint ? [x, this.fx(x)] : this.fx(x);
     }
 
     end() {

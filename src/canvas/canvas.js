@@ -74,18 +74,20 @@ class Canvas {
     @params: 
         * x: x坐标参数
         * y: y坐标参数
+        * color: 颜色
+        * r: 半径
     @exp:
         * point(100, 100)
         * point(Vector(100, 100)) 
         * point({"x":100, "y":100}) 
     ----------------------------------------*/
-    point(x, y) {
+    point(x, y, color=null, r=null) {
         if(typeof arguments[0] != "number") {
             x = arguments[0].x; y = arguments[0].y;
         }
-        this.ctx.strokeStyle = this.ctx.fillStyle = this.POINT.C;
+        this.ctx.strokeStyle = this.ctx.fillStyle = (color || this.POINT.C);
         this.ctx.beginPath();
-        this.ctx.arc(x, y, this.POINT.R, 0, 2*Math.PI);
+        this.ctx.arc(x, y, r || this.POINT.R, 0, 2*Math.PI);
         this.ctx.stroke(); 
         this.POINT.R > 1 && this.ctx.fill();
     }

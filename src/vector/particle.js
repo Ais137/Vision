@@ -59,6 +59,7 @@ class ParticleSystem {
     @desc: 描述粒子集群
     @property: 
         * ps(list:Particle): 粒子容器
+        * tp_builder(function): 粒子生成器函数
         * max_pn(number[N+]): 最大粒子数(>=0)
         * gen_pn(number[N+]): 迭代过程粒子生成数
         * GENR(bool): 粒子生成开关, 用于在迭代过程(action)中生成新的粒子
@@ -75,6 +76,8 @@ class ParticleSystem {
     constructor() {
         //粒子容器
         this.ps = [];
+        //粒子生成器
+        this.tp_builder = null;
         //最大粒子数
         this.max_pn = Infinity;
         //迭代过程粒子生成数
@@ -88,12 +91,30 @@ class ParticleSystem {
     }
 
     /*----------------------------------------
+    @func: 构建器
+    @desc: 通过 tp_builder 构建粒子群
+    @params: 
+        * tp_builder(function): 粒子生成器函数
+    @return(ParticleSystem)
+    @exp: 
+        ParticleSystem.Builder(()=>{
+            return new Particle();
+        })
+    ----------------------------------------*/
+    static Builder(tp_builder) {
+        let ps = new ParticleSystem();
+        ps.tp_builder = tp_builder;
+        return ps;
+    }
+
+    /*----------------------------------------
     @func: 初始化
     @desc: 对粒子系统进行初始化
     @return(this) 
     ----------------------------------------*/
-    init() {
+    init(n=0) {
         this.ps = [];
+        for(let i=0; i<n; i++) { this.build(); }
         return this;
     }
 
@@ -105,7 +126,7 @@ class ParticleSystem {
     ----------------------------------------*/
     build() {
         if(this.ps.length < this.max_pn) {
-            //this.ps.push(new Particle());
+            this.tp_builder && this.ps.push(this.tp_builder());
         }
     }
 

@@ -25,6 +25,9 @@ class Vector {
     static V(...v) {
         return new Vector(...v);
     }
+    static v(...v) {
+        return new Vector(...v);
+    }
 
     //builder -> v(1, 1, 1, ...)
     static ones(dim=2) {
@@ -114,8 +117,17 @@ class Vector {
         }
         return this;
     }
+    static mult(vector, k) {
+        return vector.clone().mult(k);
+    }
 
-    //减法(加法的一种特殊情况)
+    /*----------------------------------------
+    @func: 减法
+    @desc: 加法的一种特殊情况
+    @params: 
+        * vector(Vector): 操作数
+    @return(Vector): this 
+    ----------------------------------------*/
     sub(vector){
         //向量方法实现
         // return this.add(vector.clone().mult(-1));
@@ -135,11 +147,11 @@ class Vector {
     }
 
     /*----------------------------------------
-    @func: 标量积(点积)
+    @func: dot product | 标量积(点积)
     @desc: v1·v2 -> sum(v1[i]*v2[i]) -> |v1|*|v2|*cos(rad)
     @params: 
         * vector(Vector): 操作数
-    @return(float): 
+    @return(float)
     ----------------------------------------*/
     dot(vector) {
         let t = 0, v = vector.v;
@@ -153,18 +165,99 @@ class Vector {
     }
 
     /*----------------------------------------
+    @func: Linear Combination | 线性组合
+    @desc: lc = v1*w[1] + v2*w[2] + ... + vn*w[n]
+    @params: 
+        * vectors(list:Vector): 向量组
+        * w(list:number): 权
+    @condition: vectors[i].dim() == w.length
+    @return(Vector)
+    @ exp:
+        LC([
+            new Vector(1, 1),
+            new Vector(2, 2),
+            new Vector(3, 3),
+        ], [6, 3, 2]) -> Vector(18, 18)
+    ----------------------------------------*/
+    static LC(vectors, w) {
+        let v = Vector.zeros(vectors[0].dim());
+        for(let i=0, n=vectors.length; i<n; i++) {
+            v.add(vectors[i].clone().mult(w[i]));
+        }
+        return v;
+    }
+
+    /*----------------------------------------
+    @func: Linear Mapping | 线性映射
+    @desc: 对向量进行线性变换，有以下两种实现方式
+        * 行向量: 设 vi 为 m[i] 构成的行向量,
+        则 LM(m) -> o.add(v.dot(vi)), 即 v 与 vi 的点积之和
+        * 列向量: 设 vk 为 m[i][k=(1, 2, 3...)] 的列向量
+        则 LM(m) -> LC(vk, v), 即以 v 的分量为权，对m的列向量的线性组合
+    @params: 
+        * m(list:list): 矩阵(数组形式)
+    @return(Vector)
+    ----------------------------------------*/
+    LM(m) {
+        let _v = [];
+        for(let i=0, endi=m.length; i<endi; i++) {
+            //[Vector]: _v.push(this.dot(new Vector(...m[i])));
+            let _vi = 0;
+            for(let k=0, endk=m[i].length; k<endk; k++) {
+                _vi += m[i][k] * (this._v[i] || 0);
+            }
+            _v.push(_vi);
+        }
+        this._v = _v;
+        return this;
+    }
+    static LM(vector, m) {
+        return vector.clone().map(m);
+    }
+
+    /*----------------------------------------
     @func: 线性插值
     @desc: v(t) = (1-t)*v1 + t*v2 -> v1 + t*(v2-v1)
     @params: 
         * vector(Vector): 目标向量
         * t(float): 0<=t<=1 
-    @return(Vector): new Vector
+    @return(Vector)
     ----------------------------------------*/
     lerp(vector, t) {
         return (t>0 && t<1) ? vector.clone().sub(this).mult(t).add(this) : (t<=0 ? this.clone() : vector.clone());
     }
     static lerp(v_from, v_to, t) {
         return v_from.lerp(v_to, t);
+    }
+
+    /*----------------------------------------
+    @func: 二维向量的旋转变换
+    @desc: 对向量(dim=2)进行旋转(线性变换)
+    @params: 
+        * rad(number): 旋转角度
+        * angle(bool): rad参数格式 -> true(弧度) | false(角度)
+    @return(Vector)
+    @exp:
+        * v.rotate(Math.PI/4)
+        * v.rotate(45, true)
+    ----------------------------------------*/
+    rotate(rad, angle=false) {
+        /* 
+        [Vector]:
+        this._v = this.LM([
+            [Math.cos(rad), -Math.sin(rad)],
+            [Math.sin(rad), Math.cos(rad)],
+        ])
+        */
+        rad = angle ? (Math.PI/180*rad) : rad;
+        let cos_rad = Math.cos(rad), sin_rad = Math.sin(rad);
+        let x = this._v[0] * cos_rad - this._v[1] * sin_rad;
+        let y = this._v[0] * sin_rad + this._v[1] * cos_rad;
+        this._v[0] = x, this._v[1] = y;
+        return this;
+    }
+    static rotate(vector, rad) {
+        return vector.clone().rotate(rad);
     }
 
     /*----------------------------------------
@@ -240,12 +333,16 @@ class Vector {
         return this;
     }
 
-    //复制
+    /*----------------------------------------
+    @func: 克隆/复制
+    @desc: 复制向量
+    @return(Vector)
+    ----------------------------------------*/
     clone() {
         return new Vector(...this._v);
     }
     copy() {
-        return new Vector(...this._v);
+        return this.clone();
     }
 
     /*----------------------------------------
@@ -296,7 +393,10 @@ class Vector {
         return v1.rad(v2);
     }
 
-    //整数化: 将分量转换成整数
+    /*----------------------------------------
+    @func: 整数化
+    @desc: 将分量转换成整数
+    ----------------------------------------*/
     toint() {
         for(let i=0, end=this._v.length; i<end; i++) { this._v[i] = parseInt(this._v[i]);}
     }

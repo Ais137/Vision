@@ -34,25 +34,41 @@
 
         //构建边界器
         // const border = new vision.border.RectLoopBorder([[0, canvas.width], [0, canvas.height]]);
-        const border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+        // const border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+        const border = new vision.border.RingReflectBorder(new Vector(canvas.cx, canvas.cy), 500);
+        // const border = new vision.border.RingLoopBorder(new Vector(canvas.cx, canvas.cy), 500);
+        
         border.size = {
             "x": canvas.cx,
             "y": canvas.cy,
             "d": 300
         }
+
         document.getElementById("vision_canvas").addEventListener("mousemove", function(event) { 
             border.size.x = event.clientX, border.size.y = event.clientY;
-            border.borders = [
-                [border.size.x-border.size.d, border.size.x+border.size.d], 
-                [border.size.y-border.size.d, border.size.y+border.size.d]
-            ];
+            if(border.borders) {
+                border.borders = [
+                    [border.size.x-border.size.d, border.size.x+border.size.d], 
+                    [border.size.y-border.size.d, border.size.y+border.size.d]
+                ];
+            }
+            if(border.po) {
+                border.po = new Vector(border.size.x, border.size.y);
+                border.r = border.size.d;
+            }
         });
         document.getElementById("vision_canvas").addEventListener("mousewheel", function(event) { 
             border.size.d = event.wheelDelta>0 ? border.size.d+10 : border.size.d-10
-            border.borders = [
-                [border.size.x-border.size.d, border.size.x+border.size.d], 
-                [border.size.y-border.size.d, border.size.y+border.size.d]
-            ];
+            if(border.borders) {
+                border.borders = [
+                    [border.size.x-border.size.d, border.size.x+border.size.d], 
+                    [border.size.y-border.size.d, border.size.y+border.size.d]
+                ];
+            }
+            if(border.po) {
+                border.po = new Vector(border.size.x, border.size.y);
+                border.r = border.size.d;
+            }
         });
 
         //生成随机粒子
@@ -74,11 +90,17 @@
         //时钟
         setInterval(function(){
             canvas.reflush();
-            canvas.rect(border.size.x, border.size.y, border.size.d, border.size.d);
+            if(border.borders) {
+                canvas.rect(border.size.x, border.size.y, border.size.d, border.size.d);
+            }
+            if(border.po) {
+                canvas.circle(border.size.x, border.size.y, border.size.d);
+            }
+            let r = 10;
             for(let i=0, end=ps.length; i<end; i++) {
                 ps[i].action();
-                border.limit(ps[i]);
-                disp(ps[i].p);
+                border.limit(ps[i], r);
+                disp(ps[i].p, r);
             }
         }, 17);
 
