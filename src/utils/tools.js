@@ -32,6 +32,9 @@ class Tools {
         }
         return ps;
     }
+    static RP(n, r, po, rad=0) {
+        return Tools.regular_polygon(n, r, po, rad);
+    }
 
     /*----------------------------------------
     @func: 角度<>弧度 转换器
@@ -59,6 +62,20 @@ class Tools {
     static random(start, end) {
         return (end-start)*Math.random()+start;
     }
+
+    /*----------------------------------------
+    @func: (list)随机选择器
+    @desc: 从数组中随机选择一个元素
+    @params: 
+        * ops(list): 选项集
+    @return(any)
+    @exp: 
+        Tools.rslist(["a", "b", "c"])
+    ----------------------------------------*/
+    static rslist(ops) {
+        return ops[parseInt((ops.length)*Math.random())];
+    }
+
 
 }
 

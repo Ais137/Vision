@@ -204,7 +204,7 @@ class Vector {
             //[Vector]: _v.push(this.dot(new Vector(...m[i])));
             let _vi = 0;
             for(let k=0, endk=m[i].length; k<endk; k++) {
-                _vi += m[i][k] * (this._v[i] || 0);
+                _vi += m[i][k] * (this._v[k] || 0);
             }
             _v.push(_vi);
         }

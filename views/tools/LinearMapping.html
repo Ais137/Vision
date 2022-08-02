@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinearMapping(线性变换)</title>
+    <!-- 导入模块 -->
+    <script src="../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+        const Tools = vision.tools.Tools;
+        const Views = vision.views.Views; Views.canvas = canvas;
+
+        //参考点
+        let d = 5;
+        let vps = Vector.vpoints([
+            [0, 0],
+            [d, 0],
+            [d, d],
+            [0, d]
+        ]);
+
+        //变换矩阵
+        let A = [
+            [1, 3],
+            [0, 1]
+        ]
+
+        //构建网格坐标系
+        const grid = new vision.coor.Grid(new Vector(canvas.cx, canvas.cy), 50, 50, true);
+
+        //渲染函数
+        const render = function() {
+            //绘制网格
+            Views.grid({co: grid.co, dx: grid.dx, dy: grid.dy});
+            //绘制中心点
+            canvas.circle(grid.co.x, grid.co.y, grid.dx*0.1, "rgb(255, 255, 255)");
+            //绘制参考点
+            canvas.lines(vps.map((v)=>{return grid.from(v);}), "rgb(0, 255, 0, 0.5)", true);
+            //变换参考点
+            let Tvps = vps.map((v)=>{return v.clone().LM(A)});
+            canvas.lines(Tvps.map((v)=>{return grid.from(v);}), "rgb(0, 255, 0, 1)", true);
+        }
+        render();
+
+        //网格坐标系缩放
+        document.getElementById("vision_canvas").addEventListener("mousewheel", function(event) { 
+            canvas.reflush();
+            let dv = 10;
+            grid.dx = grid.dy = event.wheelDelta>0 ? grid.dx+dv : (grid.dx>dv ? grid.dx-dv : grid.dx)
+            render();
+        });
+   
+
+
+
+
+    </script>
+</body>
+</html>

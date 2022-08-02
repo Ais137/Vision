@@ -148,13 +148,16 @@ class Canvas {
     @params: 
         * (x, y): 圆心坐标
         * r: 半径
+        * color: 颜色
     @exp:
         * circle(100, 100, 5) 
     ----------------------------------------*/
-    circle(x, y, r=1) {
+    circle(x, y, r, color=null) {
+        if(color){ this.ctx.strokeStyle = this.ctx.fillStyle = color};
         this.ctx.beginPath();
         this.ctx.arc(x, y, r, 0, 2*Math.PI);
         this.ctx.stroke(); 
+        color && this.ctx.fill();
     }
 
     /*----------------------------------------
