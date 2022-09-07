@@ -328,12 +328,14 @@ class CircularMotorParticle extends Particle {
 
     //运动模式
     action() {
+        this._p = this.p.clone();
         this.rad += this.v_rad;
         if(this.rad >= 2 * Math.PI) { this.rad -= 2 * Math.PI; } 
         if(this.rad <= -2 * Math.PI) { this.rad += 2 * Math.PI; } 
         this.po.x = this.r * Math.sin(this.rad);
         this.po.y = this.r * Math.cos(this.rad);
         this.p = Vector.add(this.po, this.o);
+        this.v = this.p.clone().sub(this._p);
         return this.p;
     }
 

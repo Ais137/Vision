@@ -1,0 +1,11 @@
+/* 去掉边缘滚动条 */
+body {
+    overflow: hidden;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    /* 隐藏鼠标 */
+    /* cursor: none; */
+}

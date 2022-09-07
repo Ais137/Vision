@@ -76,6 +76,18 @@ class Tools {
         return ops[parseInt((ops.length)*Math.random())];
     }
 
+    /*----------------------------------------
+    @func: RGB(list) -> RGB(str)
+    @desc: 将RGB数组装换成RGB字符串
+    @params: 
+        * color(list): 颜色数组
+    @exp: 
+        Tools.RGB([255, 255, 255]) -> "rgb(255, 255, 255, 1)";
+    ----------------------------------------*/
+    static RGB(color) {
+        return `rgb(${color[0]||0}, ${color[1]||0}, ${color[2]||0}, ${color[3]||1})`;
+    }
+
 
 }
 

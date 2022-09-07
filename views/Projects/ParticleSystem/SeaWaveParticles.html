@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> SeaWaveParticles </title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+        const Views = vision.views.Views; Views.canvas = canvas;
+        const Tools = vision.tools.Tools;
+
+        //配置参数
+        const confs = {
+            //粒子数
+            "N": 500,
+            //是否生成新粒子
+            "GENR": true,
+            //粒子生成速度
+            "gn": 2,
+            //粒子速度偏移角度
+            "vR": [Tools.ATR(-30), Tools.ATR(30)],
+            //粒子属性 Q 生成范围
+            "qR": [-10, 10],
+            //减速场 减速系数
+            "decf_D": 0.015,
+            //偏转场 偏转系数
+            "qdfc_W": 0.5,
+            /*----- 绘制参数 -----*/
+            "draw": {
+                //粒子显示半径
+                "pR": 2,
+                //粒子颜色
+                "pColor": [0, 175, 255],
+                //粒子连线半径
+                "nR": 200,
+                //粒子连线颜色
+                "nColor": [0, 175, 175],
+            }
+        }
+
+        //构建发射粒子
+        let lp = new vision.particle.ForceParticle(
+            Vector.random([[0, canvas.width], [0, canvas.height]]),
+            Vector.random([[5, 10], [5, 10]])
+        );
+        // let lp = new vision.particle.CircularMotorParticle(new Vector(canvas.cx, canvas.cy), 300, Tools.ATR(2))
+
+        //构建粒子群
+        const pcs = vision.particle.ParticleSystem.Builder(() => {
+            //以lp粒子的当前位置为初始位置，初始速度为以lp速度为中心偏移弧度vR的速度
+            let p = new vision.particle.ForceParticle(lp.p.clone(), lp.v.clone().rotate(Tools.random(...confs.vR)));
+            //粒子停机条件
+            p.end = function() {
+                return p.v.norm() < 1;
+            }
+            //生成偏移场作用参数
+            p.Q = Tools.random(...confs.qR);
+            return p;
+        });
+        pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
+
+        //边界限制器
+        const border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+
+        //构建减速场
+        const dec_field = new vision.field.DecelerateField(confs.decf_D);
+        
+        //构建偏转场
+        class QDeflectField extends vision.field.Field {
+
+            constructor(W) {
+                super();
+                //偏转系数
+                this.W = W || 0.5;
+            }
+
+            force(fp) {
+                fp.force(Vector.sub(fp.v.clone().rotate(fp.Q*this.W, true), fp.v))
+            }
+        }
+        const qdfc_field = new QDeflectField(confs.qdfc_W);
+
+        //渲染函数
+        const renderer = function () {
+            lp.action();
+            border.limit(lp);
+
+            pcs.action();
+            for (let i = 0, n = pcs.ps.length; i < n; i++) {
+                dec_field.force(pcs.ps[i]);
+                qdfc_field.force(pcs.ps[i]);
+                border.limit(pcs.ps[i]);
+            }
+
+            //绘制
+            canvas.reflush();
+            Views.nodelink(pcs.ps, confs.draw.nR, confs.draw.nColor);
+            // canvas.colorStyle = Tools.RGB(confs.draw.pColor);
+            // for (let i = 0, n = pcs.ps.length; i < n; i++) {
+            //     canvas.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, confs.draw.pR);
+            //     canvas.ctx.fill();
+            // }
+        };
+
+        setInterval(renderer, 17);
+
+
+
+    </script>
+</body>
+
+</html>

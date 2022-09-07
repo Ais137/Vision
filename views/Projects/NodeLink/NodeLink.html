@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> NodeLink </title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+        const Tools = vision.tools.Tools;
+        const Views = vision.views.Views; Views.canvas = canvas;
+
+        /***************************************************  
+         * Name: NodeLink
+         * Desc: 给定一个粒子群，当粒子间的距离小于给定范围时，绘制粒子间的连线
+        ****************************************************/
+
+        //配置
+        const confs = {
+            //粒子数
+            "N": 100,
+            //粒子速度范围
+            "vR": [-5, 5],
+            //可绘制的点距范围
+            "dR": [0, 300],
+            //连线颜色
+            "LC": [[0, 175, 175]],
+            "LC": [[0, 200, 100], [0, 100, 200]],
+        }
+
+        //场景A: 匀速运动粒子
+        const SceneA = function() {
+            
+            //构建粒子群
+            let pcs = vision.particle.ParticleSystem.Builder(()=>{
+                return new vision.particle.Particle(
+                    Vector.random([[0, canvas.width], [0, canvas.height]]),
+                    Vector.random([confs.vR, confs.vR])
+                );
+            }).init(confs.N);
+            
+            //边界限制器
+            let border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+
+            //渲染器
+            return function render() {
+                //运动
+                pcs.action();
+                for(let i=0, n=pcs.ps.length; i<n; i++) { border.limit(pcs.ps[i], 1); }
+                //绘制
+                canvas.reflush();
+                Views.nodelink(pcs.ps, confs.dR, new vision.color.ColorGradient(confs.LC[0], confs.LC[1]||confs.LC[0], confs.N));
+            } 
+        }
+
+
+        //场景B: 环形边界
+        const SceneB = function() {
+            //边界限制器半径
+            confs.BR = 500;
+            
+            //构建粒子群
+            let pcs = vision.particle.ParticleSystem.Builder(()=>{
+                return new vision.particle.Particle(
+                    Vector.random([[0, canvas.width], [0, canvas.height]]),
+                    Vector.random([confs.vR, confs.vR])
+                );
+            }).init(confs.N);
+
+            //边界限制器
+            let border = new vision.border.RingReflectBorder(new Vector(canvas.cx, canvas.cy), confs.BR);
+            
+            return function render() {
+                //运动
+                pcs.action();
+                for(let i=0, n=pcs.ps.length; i<n; i++) { border.limit(pcs.ps[i], 1); }
+                //绘制
+                canvas.reflush();
+                Views.nodelink(pcs.ps, confs.dR, new vision.color.ColorGradient(confs.LC[0], confs.LC[1]||confs.LC[0], confs.N));
+                canvas.ctx.strokeStyle = "rgb(0, 175, 175)";
+                canvas.circle(border.po.x, border.po.y, border.r);
+            } 
+        }
+
+        
+        //场景C: 圆周运动粒子群
+        const SceneC = function() {
+            //环绕半径范围
+            confs.rR = [50, 500];
+            //旋转速率范围
+            confs.vR = [-1, 1];
+            //起始弧度范围
+            confs.srR = [0, Math.PI*2];
+            //可绘制的点距范围
+            confs.dR = 150;
+            
+            //构建粒子群
+            let pcs = vision.particle.ParticleSystem.Builder(()=>{
+                return new vision.particle.CircularMotorParticle(
+                    //圆心坐标
+                    Vector.v(canvas.cx, canvas.cy),
+                    //环绕半径
+                    Tools.random(...confs.rR),
+                    //旋转速率
+                    Tools.ATR(Tools.random(...confs.vR)),
+                    //起始弧度
+                    Tools.random(...confs.srR)
+                );
+            }).init(confs.N);
+
+            return function render() {
+                //运动
+                pcs.action();
+                //绘制
+                canvas.reflush();
+                Views.nodelink(pcs.ps, confs.dR, new vision.color.ColorGradient(confs.LC[0], confs.LC[1]||confs.LC[0], confs.N));
+            } 
+        }
+
+
+        //绘制
+        setInterval(SceneA(), 17);
+        // setInterval(SceneB(), 17);
+        // setInterval(SceneC(), 17);
+
+    </script>
+
+
+</body>
+</html>

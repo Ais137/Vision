@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> GlassBall </title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        /***************************************************  
+         * Name: ClassBall | 玻璃球
+         * Intro: ...
+        ****************************************************/
+
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+        const Tools = vision.tools.Tools;
+        const Views = vision.views.Views; Views.canvas = canvas;
+        canvas.BGC = 'rgb(0, 0, 0)';
+
+        //配置参数
+        const confs = {
+            //粒子数
+            "N": 20,
+            //粒子速度范围
+            "vR": [-5, 5],
+            //粒子半径范围
+            "rR": [50, 150],
+            //环色
+            "RC": [0, 255, 255]
+        }
+
+        //构建玻璃球
+        const gbs = vision.particle.ParticleSystem.Builder(()=>{
+            let p = new vision.particle.Particle(
+                Vector.random([[0, canvas.width], [0, canvas.height]]),
+                Vector.random([confs.vR, confs.vR])
+            );
+            p.R = Tools.random(...confs.rR);
+            return p;
+        }).init(confs.N);
+
+        //边界限制器
+        const border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+
+        //碰撞反射器
+        const collide_reflector = function(p1, p2) {
+            //计算法向量
+            let vb1 = Vector.sub(p2.p, p1.p).norm(1);
+            let vb2 = Vector.rotate(vb1, Math.PI/180*90);
+            //碰撞反射
+            p1.v = Vector.sub(p1.v, vb2.clone().mult(vb2.dot(p1.v)*2)).mult(-1)
+            p2.v = Vector.sub(p2.v, vb2.clone().mult(vb2.dot(p2.v)*2)).mult(-1)
+            //消除粘滞效果
+            p1.p.add(vb1.clone().mult(-3))
+            p2.p.add(vb1.clone().mult(3))
+        }
+
+        //渲染函数G
+        const render = function() {
+            gbs.action();
+            //碰撞检查
+            for(let i=0, n=gbs.ps.length; i<n; i++) {
+                //碰撞反射
+                for(let k=i+1; k<n; k++) {
+                    if(gbs.ps[i].p.dist(gbs.ps[k].p) <= (gbs.ps[i].R+gbs.ps[k].R)) {
+                        collide_reflector(gbs.ps[i], gbs.ps[k]);
+                    }
+                }
+                //边界反射
+                border.limit(gbs.ps[i], gbs.ps[i].R);
+            }
+
+            //绘制
+            canvas.reflush();
+            for(let i=0, end=gbs.ps.length; i<end; i++) {
+                Views.lightRing(gbs.ps[i].p.x, gbs.ps[i].p.y, gbs.ps[i].R, {cs: confs.RC});
+            }
+        }
+
+        setInterval(render, 17);
+
+
+    </script>
+
+
+</body>
+
+</html>

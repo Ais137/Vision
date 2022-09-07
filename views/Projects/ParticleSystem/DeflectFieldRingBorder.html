@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> DeflectFieldRingBorder </title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+        const Views = vision.views.Views; Views.canvas = canvas;
+        const Tools = vision.tools.Tools;
+
+        //配置参数
+        const confs = {
+            //粒子数
+            "N": 50,
+            //粒子速度范围
+            "vR": [5, 20],
+            //是否生成新粒子
+            "GENR": true,
+            //粒子生成速度
+            "gn": 10,
+            //粒子轨迹长度
+            "tn": 50,
+            //环形边界半径
+            "bR": 400
+        }
+
+        //环形边界限制器
+        const border = new vision.border.RingReflectBorder(new Vector(canvas.cx, canvas.cy), confs.bR);
+
+        //构建粒子群
+        const pcs = vision.particle.ParticleSystem.Builder(() => {
+            //在边界位置附近生成粒子(产生反射效果)
+            let rad = Tools.random(0, Math.PI*2);
+            let p = new vision.particle.ForceParticle(
+                new Vector((confs.bR-10)*Math.cos(rad), (confs.bR-10)*Math.sin(rad)),
+                Vector.random([confs.vR, confs.vR])
+            );
+            p.tracker = new vision.tracker.TrailTracker(p, confs.tn);
+            p.end = function() {
+                let v_val = p.v.norm();
+                return v_val > 30000 || v_val < 5;
+            }
+            return p;
+        }).init(confs.N);
+        pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
+
+        //偏转场
+        const field = new vision.field.DeflectField(Tools.ATR(5));
+
+        //渲染函数
+        const renderer = function () {
+            pcs.action();
+            for (let i = 0, n = pcs.ps.length; i < n; i++) {
+                field.force(pcs.ps[i]);
+                border.limit(pcs.ps[i]);
+            }
+            //绘制
+            canvas.reflush();
+            canvas.colorStyle = "rgb(255, 255, 255)";
+            for (let i = 0, n = pcs.ps.length; i < n; i++) {
+                //绘制粒子轨迹
+                canvas.lines(
+                    pcs.ps[i].tracker.trail,
+                    new vision.color.ColorGradient([50, 50, 50], [0, 255, 200], confs.tn)
+                );
+                //绘制粒子坐标
+                // canvas.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, 3);
+                // canvas.ctx.fill();
+            }
+        };
+
+        setInterval(renderer, 17);
+
+
+
+    </script>
+</body>
+
+</html>

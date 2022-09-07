@@ -71,7 +71,7 @@ class Views {
         //居中偏移量
         let cdx = (center ? 0 : dx/2), cdy = (center ? 0 : dy/2); 
         //设置颜色
-        Views.canvas.ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]||0.5})`
+        Views.canvas.ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]||0.25})`
         //绘制x轴平行线
         for(let x=xR[0], n=xR[1]; x<=n; x++) {
             let _x = x*dx+co.x+cdx;
@@ -82,6 +82,62 @@ class Views {
             let _y = y*dy+co.y+cdy;
             Views.canvas.line(xs, _y, xe, _y);
         }
+    }
+
+    /*----------------------------------------
+    @func: 光线
+    @params:
+        * ps(list:Vector): 线的点集
+        * Lfx(function): 亮度衰减函数(Lfx应满足在[1, n]区间单调递减)
+        * n(int:>0): 光线的层数
+        * d(number:>0): 每次光线的宽度
+        * cs(list): 起始颜色
+        * ce(list): 终止颜色
+    ----------------------------------------*/
+    static lightLine(ps, {Lfx, n=10, d=3, cs=[255, 255, 255], ce=[0, 0, 0]} = {}) {
+        //亮度衰减函数
+        Lfx = Lfx || ((x) => {return 1/(x+0.0001);});
+        //Lfx函数在[1, n]区间的最值, 用于进行后续归一化处理
+        let max = Lfx(1), min = Lfx(n);
+        //绘制光线
+        Views.canvas.ctx.lineCap = "round";
+        for(let i=n; i>0; i--) {
+            //计算亮度
+            let lr = (Lfx(i) - min) / (max - min);
+            let lc = [(cs[0]-ce[0])*lr+ce[0], (cs[1]-ce[1])*lr+ce[1], (cs[2]-ce[2])*lr+ce[2]];
+            //绘制光线层
+            Views.canvas.ctx.lineWidth = i * d;
+            Views.canvas.lines(ps, new color.ColorGradient(lc, ce, ps.length));
+        }  
+    }
+
+    /*----------------------------------------
+    @func: 光环
+    @params: 
+        * x, y, r(number): 圆心坐标与半径
+        * Lfx(function): 亮度衰减函数(Lfx应满足在[1, n]区间单调递减)
+        * n(int:>0): 光线的层数
+        * cs(list): 起始颜色
+        * ce(list): 终止颜色
+        * point(bool): true->绘制成光点样式
+    ----------------------------------------*/
+    static lightRing(x, y, r, {Lfx, n=50, cs=[255, 255, 255], ce=[0, 0, 0], point=false}={}) {
+        //亮度衰减函数
+        Lfx = Lfx || ((x) => {return 1/(x+0.0001);});
+        //Lfx函数在[1, n]区间的最值, 用于进行后续归一化处理
+        let max = Lfx(1), min = Lfx(n);
+        //计算环宽
+        let dR = r / n;
+        //绘制
+        for(let i=n; i>0; i--) {
+            //计算亮度
+            let lr = (Lfx(point ? i : n-i) - min) / (max - min);
+            let lc = [(cs[0]-ce[0])*lr+ce[0], (cs[1]-ce[1])*lr+ce[1], (cs[2]-ce[2])*lr+ce[2]];
+            //绘制光环
+            Views.canvas.colorStyle = `rgb(${lc[0]}, ${lc[1]}, ${lc[2]})`;
+            Views.canvas.circle(x, y, dR*i);
+            Views.canvas.ctx.fill();
+        }  
     }
 }
 

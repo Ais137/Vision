@@ -2,25 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vision</title>
+    <title> #title# </title>
     <!-- 导入模块 -->
-    <script src="../dist/vision.js"></script>
-    <style>
-        /* 去掉边缘滚动条 */
-        body {
-            overflow: hidden;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            /* 隐藏鼠标 */
-            /* cursor: none; */
-        }
-
-    </style>
+    <script src="#vmp#"></script>
+    #css#
 </head>
 <!-- 禁用右键菜单 -->
 <body oncontextmenu="return false;">
@@ -33,11 +19,13 @@
     <script>
         const canvas = new vision.canvas.Canvas("vision_canvas");
         const Vector = vision.vector.Vector;
-        const Tools = vision.tools.Tools;
         const Views = vision.views.Views; Views.canvas = canvas;
+        const Tools = vision.tools.Tools;
+   
+        //#code#
 
+        //#renderer#
+        
     </script>
-
-
 </body>
 </html>

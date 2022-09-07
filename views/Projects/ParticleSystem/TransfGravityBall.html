@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> TransfGravityBall </title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+        const Views = vision.views.Views; Views.canvas = canvas;
+        const Tools = vision.tools.Tools;
+        const Gravity = vision.field.Gravity;
+
+        //系统参数
+        const confs = {
+            /*----- 粒子系统参数 -----*/
+            //粒子数
+            "N": 100,
+            //粒子速度范围
+            "vR": [-5, 5],
+            //粒子最大速率
+            "v_max": 15,
+            /*----- 变换引力场参数 -----*/
+            "TG": {
+                //粒子临近范围
+                "R": 200,
+                //临近粒子数量临界值
+                "N": 30,
+                //吸引力常数
+                "Ga": 0.01,
+                //排斥力常数
+                "Gr": -0.05,
+            },
+            /*----- 绘制参数 -----*/
+            "draw": {
+                //粒子显示半径
+                "pR": 2,
+                //粒子颜色
+                "pColor": [0, 255, 255],
+                //粒子连线半径
+                "nR": 300,
+                //粒子连线颜色
+                "nColor": [0, 255, 200]
+            }
+        }
+
+        //构建粒子群
+        const pcs = vision.particle.ParticleSystem.Builder(() => {
+            return new vision.particle.ForceParticle(
+                Vector.random([[0, canvas.width], [0, canvas.height]]),
+                Vector.random([confs.vR, confs.vR])
+            );
+        }).init(confs.N);
+
+        //边界限制器
+        const border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+
+        //变换引力场
+        class TransfGravity extends vision.field.Field {
+
+            constructor() {
+                super();
+                //粒子临近范围
+                this.R = confs.TG.R;
+                //临近粒子数量临界值
+                this.N = confs.TG.N;
+                //吸引力常数
+                this.Ga = confs.TG.Ga;
+                //排斥力常数
+                this.Gr = confs.TG.Gr;
+            }
+
+            force(ps) {
+                for(let i=0, n=ps.length; i<n; i++) {
+                    //计算给定粒子临近范围(this.R)内的粒子数
+                    let pn = 0;
+                    for(let k=0; k<n; k++) {
+                        (ps[i].p.dist(ps[k].p) < this.R) && pn++;
+                    }
+                    //计算作用力
+                    Gravity.G = (pn <= this.N ? this.Ga : this.Gr);
+                    for(let k=0, n=ps.length; k<n; k++) {
+                        Gravity.gravity(ps[i], ps[k]);
+                    }
+                }
+            }
+        }
+        const field = new TransfGravity();
+
+        //渲染函数
+        const renderer = function () {
+            field.force(pcs.ps);
+            pcs.action();
+            for (let i = 0, n = pcs.ps.length; i < n; i++) {
+                pcs.ps[i].v.limit(confs.v_max);
+                border.limit(pcs.ps[i]);
+            }
+            //绘制
+            canvas.reflush();
+            //绘制粒子连接
+            Views.nodelink(pcs.ps, confs.draw.nR, new vision.color.ColorGradient(confs.draw.nColor, [50, 50, 50], confs.N))
+            canvas.colorStyle = `rgb(${confs.draw.pColor[0]}, ${confs.draw.pColor[1]}, ${confs.draw.pColor[2]})`;
+            for (let i = 0, n = pcs.ps.length; i < n; i++) {
+                //绘制粒子坐标
+                canvas.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, confs.draw.pR);
+                canvas.ctx.fill();
+            }
+        };
+
+        setInterval(renderer, 17);
+
+
+
+    </script>
+</body>
+
+</html>

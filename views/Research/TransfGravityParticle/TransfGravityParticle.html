@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> TransfGravityParticle </title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>/* 去掉边缘滚动条 */
+body {
+    overflow: hidden;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    /* 隐藏鼠标 */
+    /* cursor: none; */
+}
+</style>
+</head>
+<!-- 禁用右键菜单 -->
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+        const Views = vision.views.Views; Views.canvas = canvas;
+        const Tools = vision.tools.Tools;
+        const Gravity = vision.field.Gravity;
+
+        /********************************************
+         * 当粒子临近范围(TG.N=200)时，粒子群呈现出一种随机游走的趋势
+         * 但是当粒子临近范围(TG.N=300, 400, ...)时，粒子群会在中心产生一种群聚的趋势。
+        *********************************************/
+        
+        //系统参数
+        const confs = {
+            /*----- 粒子系统参数 -----*/
+            //粒子数
+            "N": 300,
+            //粒子速度范围
+            "vR": [-5, 5],
+            //是否生成新粒子
+            "GENR": false,
+            //粒子生成速度
+            "gn": 5,
+            //粒子轨迹长度
+            "tn": 50,
+            //粒子最大速率
+            "v_max": 15,
+            /*----- 变换引力场参数 -----*/
+            "TG": {
+                //粒子临近范围
+                "R": 200,
+                //临近粒子数量临界值
+                "N": 10,
+                //吸引力常数
+                "Ga": 0.1,
+                //排斥力常数
+                "Gr": -0.5,
+            },
+            /*----- 绘制参数 -----*/
+            "draw": {
+                //粒子显示半径
+                "pR": 3,
+                //粒子颜色
+                "pColor": [0, 255, 200],
+                //轨迹颜色
+                "tColor": [0, 200, 200],
+            }
+        }
+
+        //构建粒子群
+        const pcs = vision.particle.ParticleSystem.Builder(() => {
+            let p = new vision.particle.ForceParticle(
+                Vector.random([[0, canvas.width], [0, canvas.height]]),
+                Vector.random([confs.vR, confs.vR])
+            );
+            p.tracker = new vision.tracker.TrailTracker(p, confs.tn);
+            return p;
+        }).init(confs.N);
+        pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
+
+        //边界限制器
+        const border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+        // const border = new vision.border.RingReflectBorder(new Vector(canvas.cx, canvas.cy), 500);
+
+        //变换引力场
+        class TransfGravity extends vision.field.Field {
+
+            /*----------------------------------------
+            @class: 变换引力场
+            @desc: 
+                计算给定粒子临近范围(视野)以(R)为半径的空间内的粒子(nps), 
+                当粒子数小于阈值(N)时，该粒子受到这些临近粒子(nps)的吸引力，反之受到排斥力。
+            @property: 
+                * R(number:>0): 粒子临近范围(视野)
+                * N(number:>0): 临近粒子数量临界值
+                * Ga(number:>0): 吸引力常数
+                * Gr(number:<0): 排斥力常数
+            ----------------------------------------*/
+            constructor() {
+                super();
+                //粒子临近范围
+                this.R = confs.TG.R;
+                //临近粒子数量临界值
+                this.N = confs.TG.N;
+                //吸引力常数
+                this.Ga = confs.TG.Ga;
+                //排斥力常数
+                this.Gr = confs.TG.Gr;
+            }
+
+            force(ps) {
+                for(let i=0, n=ps.length; i<n; i++) {
+                    //计算给定粒子临近范围(this.R)内的粒子
+                    let nps = [];
+                    for(let k=0, n=ps.length; k<n; k++) {
+                        if(ps[i].p.dist(ps[k].p) <= this.R) {
+                            k!=i && nps.push(k);
+                        }
+                    }
+                    //计算作用力
+                    Gravity.G = (nps.length <= this.N ? this.Ga : this.Gr);
+                    for(let k=0, n=nps.length; k<n; k++) {
+                        Gravity.gravity(ps[i], ps[nps[k]]);
+                    }
+                }
+            }
+        }
+        const field = new TransfGravity();
+
+        //渲染函数
+        const renderer = function () {
+            field.force(pcs.ps);
+            pcs.action();
+            for (let i = 0, n = pcs.ps.length; i < n; i++) {
+                border.limit(pcs.ps[i]);
+                pcs.ps[i].v.limit(confs.v_max);
+            }
+            //绘制
+            canvas.reflush();
+            for (let i = 0, n = pcs.ps.length; i < n; i++) {
+                //绘制粒子轨迹
+                canvas.lines(pcs.ps[i].tracker.trail, new vision.color.ColorGradient([50, 50, 50], confs.draw.tColor, confs.tn));
+                //绘制粒子坐标
+                canvas.colorStyle = `rgb(${confs.draw.pColor[0]}, ${confs.draw.pColor[1]}, ${confs.draw.pColor[2]})`;
+                canvas.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, confs.draw.pR);
+                canvas.ctx.fill();
+            }
+        };
+
+        setInterval(renderer, 17);
+        
+    </script>
+</body>
+</html>

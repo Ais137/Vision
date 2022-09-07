@@ -10,7 +10,8 @@
     },
     "scripts": {
         "test": "jest",
-        "build": "node ./build/build.js"
+        "build": "node ./build/build.js",
+        "vtp": "node ./templates/tpBuilder.js"
     },
     "keywords": [
         "vision",
