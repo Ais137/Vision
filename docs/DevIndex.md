@@ -1,0 +1,41 @@
+# 项目文件索引
+
+* */build*: 项目构建目录
+    * build.js: 项目构建与打包
+    * builder.config.js: 构建器配置文件
+    * index.js: 构建器生成的索引文件
+    * webpack.config.js: webpack配置文件
+* */docs*: 项目文件目录
+* */src*: 源码目录
+    * */algorithms*: 一些算法实现
+    * */canvas*: canvasAPI相关
+        * canvas.js: 对canvas接口进行二次封装
+        * color.js: 颜色容器
+    * */utils*: 工具包
+        * iterator.js: 实现迭代器对象
+        * random.js: 随机选择器
+        * tools.js: 常用工具代码封装
+    * */vector*: 核心模块
+        * area.js: 区域类
+        * border.js: 边界类
+        * coor.js: 坐标系
+        * field.js: 矢量场
+        * particle.js: 粒子系统
+        * tracker.js: 轨迹追踪器
+        * vector.js: 向量系统(核心模块)
+    * */views*: 视觉效果模块
+        * capturer.js: 截图器
+        * randerer.js: 渲染器
+        * views.js: 常用绘制方法封装
+* */templates*: Views模板系统
+    * */css*: 模板css代码
+    * */js*: 模块js代码
+    * base.html: 基础模板容器
+    * tpBuilder.confs.js: 模板构建器配置文件
+    * tpBuilder.js: 模板构建器
+* */test*: 测试代码目录
+* */tools*: 辅助开发/设计工具
+* */views*: 项目应用目录
+    * */Algorithm*: 算法研究
+    * */Projects*: 项目应用
+    * */Research*: 想法验证
