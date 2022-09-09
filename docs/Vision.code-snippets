@@ -1,0 +1,99 @@
+{
+    //[javascript]: Meta信息
+    "JavaScript_Meta": {
+        //触发的文件类型
+        "scope": "javascript,typescript",
+        //触发的关键词
+        "prefix": "meta",
+        //填充模板
+        "body": [
+            "/****************************************",
+            " * Name: ",
+            " * Date: $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE", 
+            " * Author: Ais",
+            " * Project: ",
+            " * Desc: ",
+            " * Version: 0.1",
+            "****************************************/",
+        ]
+    },
+    //[javascript]: 类构造器注解
+    "JavaScript_ClassAnno": {
+        "scope": "javascript,typescript",
+        "prefix": "clsanno", 
+        "body": [
+            "/*----------------------------------------",
+            "@class: ",
+            "@desc: ",
+            "@property: ", 
+            "    * key(type): value",
+            "@method: ",
+            "    * method: func",
+            "@exp: ",
+            "----------------------------------------*/"
+        ]
+    },
+    //[javascript]: 方法注解
+    "JavaScript_Anno": {
+        "scope": "javascript,typescript",
+        "prefix": "anno",
+        "body": [
+            "/*----------------------------------------",
+            "@func: ",
+            "@desc: ",
+            "@params: ",
+            "    * key(type): value",
+            "@return(type): ",
+            "@exp: ",
+            "----------------------------------------*/",
+        ]
+    },
+    //[javascript]: 循环
+    "JavaScript_For": {
+        "scope": "javascript,typescript",
+        "prefix": "for",
+        "body": [
+            "for(let i=0, n=$0.length; i<n; i++) {",
+            "",
+            "}"
+        ]
+    },
+
+
+    //-------------------- vision代码片段 --------------------//
+    //构建间隔渲染器
+    "Vision_IntervalRanderer": {
+        "description": "构建间隔渲染器(IntervalRanderer)",
+        "scope": "javascript,typescript",
+        "prefix": "vis-int-randerer",
+        "body": [
+            "const randerer = new vision.randerer.IntervalRanderer().rander(() => {",
+            "    canvas.reflush();",
+            "});"
+        ]
+    },
+    //构建单帧渲染器
+    "Vision_SingleFrameRanderer": {
+        "description": "构建单帧渲染器(SingleFrameRanderer)",
+        "prefix": "vis-sf-randerer",
+        "body": [
+            "const randerer = new vision.randerer.SingleFrameRanderer().rander(",
+            "   (ft) => {",
+            "       pcs.action();",
+            "   },",
+            "   (ft) => {",
+            "       canvas.reflush();",
+            "   }",
+            ");",
+        ]
+    },
+    //构建截图器
+    "Vision_Capturer": {
+        "description": "导入截图器(Capturer)",
+        "scope": "javascript,typescript",
+        "prefix": "vis-capturer",
+        "body": [
+            "const capturer = new vision.capturer.Capturer(canvas).capturing();"
+        ]
+    }
+}
