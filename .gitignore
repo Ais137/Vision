@@ -1,5 +1,6 @@
 /node_modules
-/dist
+**/dist/*
+!**/dist/vision.js
 /dev
 /docs/dev.md
 index.js
