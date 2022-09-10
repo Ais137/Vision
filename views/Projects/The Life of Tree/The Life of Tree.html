@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title> The Life of Tree </title>
+    
+    <!-- 导入基础库 -->
+    <script src="./lib/Basic_Graphics.js"></script>
+    <script src="./lib/Motivation_System.js"></script>
+    <script src="./lib/ColorVariator.js"></script>
+    <script src="./lib/TrapezoidMotion.js"></script>
+    <script src="./lib/TreeIOModule.js"></script>
+
+    <!-- 导入树的数据 -->
+    <script src="./src/Spring/TreeData.js"></script>
+
+    <!-- 导入 Spring 场景组件 -->
+    <script src="./src/Spring/Tree.js"></script>
+    <script src="./src/Spring/TreeGrowModule.js"></script>
+
+    <!-- 导入 Summer 场景组件 -->
+    <script src="./src/Summer/Rain.js"></script>
+    <script src="./src/Summer/Lightning.js"></script>
+    <script src="./src/Summer/TreeSwayModule.js"></script>
+    
+    <!-- 导入 Autumn 场景组件 -->
+    <script src="./src/Autumn/TreeLeavesVariatorModule.js"></script>
+
+    <!-- 导入 Winter 场景组件 -->
+    <script src="./src/Winter/Snow.js"></script>
+    <script src="./src/Winter/TreeBranchVariatorModule.js"></script>
+
+    <!-- 导入 Logo 组建 -->
+    <script src="./src/Logo/Logo.js"></script>
+
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+
+    </style>
+    
+</head>
+
+<body>
+    <canvas id="Canvas"> 该浏览器不支持 Canvas 标签 </canvas>
+    <!-- <audio  id="BGM"  src="./bgm/Doria.mp3"  preload="auto"> 该浏览器不支持 Audio 标签 </audio> -->
+    <!-- <audio preload="auto" ></audio> -->
+
+    <script>
+        //设置第一个场景的定时器
+        window.onload = function () {
+            ScenesController.IntervalTimer = setInterval(Spring, 50);
+        }
+    </script>
+
+
+    <!--==========================  初始化基础组件  ===========================-->
+    <script>
+
+        //设定 Canvas 画布宽度
+        // var WIDTH = 1900, HEIGHT = 1050;
+        var WIDTH = window.screen.width, HEIGHT = window.screen.height;
+        //画布中心坐标
+        var Cx = WIDTH / 2, Cy = HEIGHT / 2;
+
+        //创建 Canvas 对象
+        var Canvas = new EsCanvas("Canvas", WIDTH, HEIGHT);
+        
+        //设置背景颜色
+        var BgRGB = {"R":50, "G":50, "B":50};
+        Canvas.background(BgRGB.R, BgRGB.G, BgRGB.B);
+
+
+        /***************************** 
+        场景控制对象:
+            * IntervalTimer =>  定时器对象
+            * time => 计时器
+
+            * Renovate => 画面刷新函数
+            * ChangeScene => 场景切换函数
+
+        *****************************/
+        //场景控制对象
+        var ScenesController = new Object();
+
+        //定时器对象 => 控制绘制的场景
+        ScenesController.IntervalTimer = null;
+
+        //计时器
+        ScenesController.time = 0;
+
+        //画面刷新函数
+        ScenesController.Renovate = function() {
+            Canvas.background(BgRGB.R, BgRGB.G, BgRGB.B);
+        } 
+            
+        //场景切换函数
+        ScenesController.ChangeScene = function(NextScene, IntervalDelayTime) {
+            //清除当前场景的定时器
+            clearInterval(this.IntervalTimer);
+            //初始化计时器
+            this.time = 0;
+            //设置下一个场景的计时器
+            this.IntervalTimer = setInterval(NextScene, IntervalDelayTime);
+        }
+
+
+        
+        /***************************** 
+        根分支参数:
+            * TreeRootNode => 根节点坐标: 树的第一个节点位置
+            * RootBranch_Len => 根分支长度
+            * RootBranch_Act => 根分支角度
+            * RootBranch_Width => 根分支宽度
+            * RootBranch_RGB => 根分支颜色
+        *****************************/
+        //根节点坐标
+        var TreeRootNode = Point(WIDTH*0.618, HEIGHT);
+        //长度
+        var RootBranch_Len = 200;
+        //角度
+        var RootBranch_Act = ATR(270);
+        //树枝宽度
+        var RootBranch_Width = 11;
+        //颜色
+        var RootBranch_RGB = {"R":10, "G":10, "B":10};
+
+
+        /*****************************
+                    构建树   
+        *****************************/
+        var tree = null;
+        /* 
+        //生成的树的层数
+        var TreeLayer = 11; 
+
+        //构建根分支
+        var RootBranch = new Branch(TreeRootNode, RootBranch_Len, RootBranch_Act, RootBranch_Width, RootBranch_RGB);
+        //根据根分支创建树
+        tree = new Tree(RootBranch);
+
+        //构造树
+        tree.Building(TreeLayer); 
+        */        
+        
+        /********* 导入已有的树数据 **********/
+        TreeData.RootBranch.Fnode.y = HEIGHT;
+        tree = TreeIOModule.ImportTree(TreeData);
+    </script>
+
+    
+
+    <!--===============================  Spring  ==================================-->
+    <script>
+
+        /***************************** 
+        树生长模块参数:  速度 = 长度 * 速率
+            * Branch_vRate => 树枝生长速率:  
+            * Leaf_vRate   => 树叶生长速率:  
+        *****************************/
+        var Branch_vRate = 0.03;
+        var Leaf_vRate = 0.01;
+        
+        //创建 生长模块 对象
+        var TreeGrower = new TreeGrowerModule(tree, Branch_vRate, Leaf_vRate);
+        
+ 
+        /************************************************** 
+                            场景: 春 树生长 
+        **************************************************/
+        function Spring(){
+
+            //播放背景音乐
+            if(ScenesController.time == 100) {
+                // document.getElementById("BGM").play();
+            }
+
+            if(ScenesController.time > 100) {
+
+                //判断树是否生长结束
+                if(TreeGrower.Grow() == false){
+                    TreeGrower.Draw(Canvas);
+                }
+                else
+                {
+                    //清除后续场景不需要的组件
+                    TreeGrower = null;
+                    
+                    //刷新画布
+                    ScenesController.Renovate();
+                    //绘制静态树
+                    tree.Draw(Canvas);
+                    ScenesController.ChangeScene(Summer, 35);
+                }
+            }
+
+            ScenesController.time++;
+        }
+
+    </script>
+
+
+
+    <!--===============================  Summer  ================================-->
+    <script>
+
+        /***************************** 
+                    树摆动模块  
+        *****************************/
+        //创建 树摆动模块
+        var TreeSwayer = new TreeSwayModule(tree);
+        //添加 摆动层简谐运动控制器:  BrachLayerSHM
+        //参数 => 1:摆动幅度(弧度)  2:摆动速率(角速度)  3:摆动层数
+        TreeSwayer.AddSHM(new BranchLayerSHM( ATR(6), 0.25, 2));
+        TreeSwayer.AddSHM(new BranchLayerSHM( ATR(4), 0.252, 5));
+
+
+
+        /***************************** 
+        闪电发生器: 
+            * lightning_xRange => 闪电产生的 x坐标 范围   
+            * lightning_yRange => 闪电产生的 y坐标 范围     
+        *****************************/
+        var lightning_xRange = {"s":WIDTH*(0.333) - 200, "e":WIDTH*(0.333) + 150};
+        var lightning_yRange = {"s":Cy+200, "e":HEIGHT};
+        
+        //创建闪电发生器
+        var lightning = new Lightning(lightning_xRange, lightning_yRange);
+        //初始化闪电发生器
+        lightning.Init();
+
+
+        /***************************** 
+        降雨器: 
+            * Raining_width, Raining_height  => 降雨范围
+            * MaxRainSize =>  最大可降雨量
+        *****************************/
+        var Raining_width = WIDTH;
+        var Raining_height = HEIGHT;
+        var MaxRainSize = 170;
+
+        //创建降雨器
+        var rain = new Rain(Raining_width, Raining_width, MaxRainSize);
+
+
+        /***************************** 
+        雨量控制器: 
+            * minRainSize  => 最小降雨量 
+            * maxRainSize =>  最大降雨量: 应小于降雨器的 最大可降雨量
+            * RainingTime => 降雨时间: 时间 = 帧数
+            * dRainSize => 雨量变化速度: 每一帧的增量
+        *****************************/
+        var minRainSize = 0;    
+        var maxRainSize = 150;
+
+        /*********** 降雨时间 **********/
+        var RainingTime = 1000;
+
+        var dRainSize = (maxRainSize - minRainSize) / RainingTime;
+        //创建雨量控制器
+        var RainSizeController = new TrapezoidMotion(minRainSize, maxRainSize, dRainSize);
+
+
+        /***************************** 
+        风力控制器: 
+            * minRainSize  => 最小降雨量 
+            * maxRainSize =>  最大降雨量: 应小于降雨器的 最大可降雨量
+            * dRainSize => 雨量变化速度: 每一帧的增量
+        *****************************/
+        var minWind = 0;
+        var maxWind = 15;
+        var dWind = (maxWind - minWind) / RainingTime;
+        //创建风力控制器
+        var SummerWindController = new TrapezoidMotion(minWind, maxWind, dWind);
+
+
+        
+        /************************************************** 
+                            场景: 夏 雷雨 
+        **************************************************/
+        function Summer() {
+
+            ScenesController.Renovate();
+
+            //产生闪电
+            if(ScenesController.time >= 100 && ScenesController.time <= 150 || ScenesController.time >= 1175 && ScenesController.time <= 1225)
+            {
+                //构造闪电
+                lightning.BuildLightning();
+                //绘制闪电
+                lightning.Draw(Canvas);
+            }
+            
+            //开始降雨
+            if(ScenesController.time > 200)
+            {
+                //雨量控制器 与 风力控制器 变化
+                RainSizeController.loop();
+                SummerWindController.loop();
+
+                //降雨
+                rain.Raining(RainSizeController.value, SummerWindController.value * 2, 40);
+                rain.Draw(Canvas);
+                
+                //树随风摇摆
+                TreeSwayer.Swing(SummerWindController.value);
+            }
+
+            //结束: 切换下一个场景
+            if(ScenesController.time > RainingTime*2 + 200)
+            {
+                //清除后续场景不需要的组件
+                lightning = null;
+                rain = null;
+                TreeSwayer = null;
+                SummerWindController = null;
+
+                //切换下一个场景
+                ScenesController.Renovate();
+                tree.Draw(Canvas);
+                ScenesController.ChangeScene(Autumn, 50);
+                return;
+            }
+
+            //绘制树
+            tree.Draw(Canvas);
+
+            ScenesController.time++;
+        }
+        
+    </script>
+
+
+    <!--===========================  Autumn  ============================-->
+    <script>
+
+        /************************** 
+                树叶变化模块 
+        ***************************/
+        //创建树叶变化模块
+        var LeavesVariator = new LeavesVariatorModule(tree.Leaves);
+        //设置树叶变化次数范围参数
+        LeavesVariator.ChangeNumRange = {"s":100 , "e":200};
+        //初始化模块
+        LeavesVariator.Init();
+
+
+        /**************************
+                风力控制器 
+        ***************************/
+        minWind = 1.5;
+        maxWind = 6;
+        dWind = 0.01;
+        var AutumnWindController = new TrapezoidMotion(minWind, maxWind, dWind);
+
+
+        /********* 重力大小:树叶下降速度 ********/
+        var Gravity = 4;
+
+
+        /************************************************** 
+                            场景: 秋 落叶 
+        **************************************************/
+        function Autumn() {
+
+            //树叶颜色变化
+            if(ScenesController.time > 50 && ScenesController.time <= 250) {
+                ScenesController.Renovate();
+                
+                LeavesVariator.Change(0, 0, 0);
+                
+                tree.DrawBranch(Canvas);
+                LeavesVariator.Draw(Canvas);
+            }
+
+            //树叶飘落
+            if(ScenesController.time > 250) {
+                ScenesController.Renovate();
+                //风力变化
+                AutumnWindController.loop();
+
+                LeavesVariator.Change(AutumnWindController.value, Gravity, ScenesController.time);
+
+                tree.DrawBranch(Canvas);
+                LeavesVariator.Draw(Canvas);
+            }
+
+            //切换下一个场景
+            if(ScenesController.time > 900) {
+                LeavesVariator = null;
+                AutumnWindController = null;
+
+                ScenesController.Renovate();
+                tree.DrawBranch(Canvas);
+                ScenesController.ChangeScene(Winter, 25);
+            }
+
+            ScenesController.time++;
+        }
+
+
+    </script>
+
+
+    <!--================================  Winter  ==================================-->
+    <script>
+
+        /***************************** 
+        降雪器: 
+            * Snowing_width, Snowing_height  => 降雨范围
+            * MaxSnowSize =>  最大可降雨量
+        *****************************/
+        var Snowing_width = WIDTH;
+        var Snowing_height = HEIGHT;
+        var MaxSnowSize = 140;
+
+        //创建降雪器
+        var snow = new Snow(Snowing_width, Snowing_width, MaxSnowSize);
+      
+
+        /***************************** 
+        雪量控制器: 
+            * minSnowSize  => 最小降雪量 
+            * maxSnowSize =>  最大降雪量: 应小于降雪器的 最大可降雪量
+            * SnowingTime => 降雪时间: 时间 = 帧数
+            * dSnowSize => 雪量变化速度: 每一帧的增量 => 建议设置为小数
+        *****************************/
+        var minSnowSize = 0;    
+        var maxSnowSize = 130;
+
+        /*********** 降雪时间 **********/
+        var SnowingTime = 1200;
+
+        var dSnowSize = (maxSnowSize - minSnowSize) / SnowingTime;
+        //创建雪量控制器
+        var SnowSizeController = new TrapezoidMotion(minSnowSize, maxSnowSize, dSnowSize);
+
+
+        /**************************
+                风力控制器 
+        ***************************/
+        minWind = 0;
+        maxWind = 12;
+        dWind = (maxWind - minWind) / SnowingTime;
+        var WinterWindController = new TrapezoidMotion(minWind, maxWind, dWind);
+
+
+        /****************************
+                树枝变化模块
+        *****************************/
+        var branchvariator = new BranchVariatorModule(tree.Branchs);
+        //颜色变化次数 控制参数
+        branchvariator.sNum = 200;
+        branchvariator.dNum = 60;
+        //初始化模块
+        branchvariator.Init();
+
+
+        
+        /**************************************************
+                            场景: 冬 雪飘 
+        ***************************************************/
+        function Winter() {
+            
+            //降雪时间段
+            if(ScenesController.time > 10 && ScenesController.time <= SnowingTime*2 + 20) {
+
+                ScenesController.Renovate();
+                
+                //雪量控制器 与 风力控制器 变化
+                SnowSizeController.loop();
+                WinterWindController.loop();
+                
+                //降雪
+                snow.Snowing(SnowSizeController.value, -WinterWindController.value, 8);
+                
+                //绘制雪
+                tree.DrawBranch(Canvas);
+                snow.Draw(Canvas);  
+            } 
+
+            //树枝颜色变化
+            if(ScenesController.time > SnowingTime + 200) {
+                branchvariator.Change();
+            }
+
+
+            //切换场景
+            if(ScenesController.time > SnowingTime*2 + 40) {
+                snow = null;
+                SnowSizeController = null;
+                WinterWindController = null;
+                branchvariator = null;
+
+
+                ScenesController.Renovate();
+                tree.DrawBranch(Canvas);                    
+                ScenesController.ChangeScene(BranchVanish, 50);
+            }
+
+
+            ScenesController.time++;
+
+        }
+
+    </script>
+
+
+    <!--===============================  BranchVanish:树消逝  ==================================-->
+    <script>
+
+        /************* 树枝消逝模块 ************/
+        var BranchVanishVariator = null;
+        //颜色参数 => 设置终止色为背景色 
+        var Bvv_dRGB = 0;
+        var Bvv_sRGB = BgRGB.R;
+        //颜色变化次数 控制参数
+        var Bvv_dNum = 25;
+        var Bvv_sNum = 50;
+
+
+        /**************************************************
+                            场景: 树枝消逝 
+        ***************************************************/
+        function BranchVanish(){
+
+            if (ScenesController.time == 1) {
+                //初始化模块
+                BranchVanishVariator = new BranchVariatorModule(tree.Branchs);
+                BranchVanishVariator.dRGB = Bvv_dRGB;
+                BranchVanishVariator.sRGB = Bvv_sRGB;
+                BranchVanishVariator.dNum = Bvv_dNum;
+                BranchVanishVariator.sNum = Bvv_sNum;
+                BranchVanishVariator.Init();
+            }
+        
+            if(ScenesController.time > 25) {
+                ScenesController.Renovate();
+                BranchVanishVariator.Change();
+                tree.DrawBranch(Canvas);
+            }
+
+            if(ScenesController.time > 400) {
+                ScenesController.Renovate();
+                ScenesController.ChangeScene(DisplayLogo, 25);
+            }
+
+    
+            ScenesController.time++;
+
+        }
+
+    </script>
+
+
+
+    <!--================================= Display Logo ===================================-->
+    <script>
+
+        //创建 Logo 对象
+        var Logo = new ThreeCurveLogo(Cx, Cy);
+
+        //Logo 移动器
+        var LogoMover = new TrapezoidMotion(Cx-300, Cx, 3, Cx);
+
+        //字体移动器 
+        //移动距离
+        var MoveDistance = 50;
+        var WordMover = new TrapezoidMotion(0, MoveDistance, 2, MoveDistance);
+
+        //字体颜色变化
+        var cA = new ColorVariator({"R":50, "G":50, "B":50}, {"R":0, "G":150, "B":200}, 200);
+        var ci = new ColorVariator({"R":50, "G":50, "B":50}, {"R":0, "G":175, "B":175}, 200);
+        var cs = new ColorVariator({"R":50, "G":50, "B":50}, {"R":0, "G":200, "B":150}, 200);
+
+        //绘制字体 Ais
+        function DisplayAis() {
+            Canvas.ctx.font="300px Arial";
+
+            var d = WordMover.value;
+
+            Canvas.ctx.fillStyle = cA.color();
+            Canvas.ctx.fillText("A", Cx+50, Cy+100 - d);
+            Canvas.ctx.fill();
+
+            Canvas.ctx.fillStyle = ci.color();
+            Canvas.ctx.fillText("i", Cx+300, Cy+100 + d);
+            Canvas.ctx.fill();
+
+            Canvas.ctx.fillStyle = cs.color();
+            Canvas.ctx.fillText("s", Cx+400, Cy+100 - d);
+            Canvas.ctx.fill();
+        }
+
+
+        //状态控制
+        var mode = 1;
+
+        /**************************************************
+                           显示 Logo  
+        ***************************************************/
+        function DisplayLogo() {
+            ScenesController.Renovate();
+
+            Logo.Move();
+            Logo.Draw(Canvas);
+
+            //绘制Logo: 展开
+            if(mode == 1) {
+                if(Logo.isEND == true) {
+                    mode = 2;
+                }
+            }
+
+            //Logo 移动
+            if(mode == 2) {
+                //Logo 移动
+                LogoMover.down();
+                Logo.BasePoint.x = LogoMover.value;
+
+                if(ScenesController.time++ > 100) {
+                    mode = 3;
+                    ScenesController.time = 0;
+                }
+            }
+
+            //显示字体
+            if(mode == 3) {
+                //字体颜色变化
+                cA.change();
+                ci.change();
+                cs.change();
+                //字体移动
+                WordMover.down();
+
+                DisplayAis();
+
+                if(ScenesController.time++ > 200) {
+                    mode = 4; 
+                }
+            }
+
+            //结束
+            if(mode == 4) {
+                DisplayAis();
+            }
+        }
+    </script>
+
+    <!--============================  END  ==================================-->
+
+</body>
