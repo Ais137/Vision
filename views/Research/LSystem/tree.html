@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> tree </title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+        const Views = vision.views.Views; Views.canvas = canvas;
+        const Tools = vision.tools.Tools;
+
+        //系统参数
+        const confs = {
+            //迭代次数
+            "n": 6,
+            //起始位置
+            "p": [canvas.cx, canvas.height-200],
+            //绘制向量
+            "v": [0, -10],
+            //偏转弧度
+            "rad": 45,
+            //线条颜色
+            "lc": [255, 255, 255]
+        }
+
+        //分形二叉树
+        let ls = new vision.LSystem.LSystem({
+            "S": "0",
+            "P": {
+                "0": "1[0]0",
+                "1": "11"
+            },
+            "ops": {
+                "0": (st) => {
+                    canvas.line(st.p.clone(), st.p.add(st.v));
+                },
+                "1": (st) => {
+                    canvas.line(st.p.clone(), st.p.add(st.v));
+                },
+                "[": (st) => {
+                    st.stack.unshift([st.p.clone(), st.v.clone()]);
+                    st.v.rotate(st.rad);
+                },
+                "]": (st) => {
+                    let status = st.stack.shift();
+                    st.p = status[0], st.v = status[1];
+                    st.v.rotate(-st.rad);
+                }
+            }
+        });
+
+        canvas.ctx.strokeStyle = Tools.RGB(confs.lc);
+        ls.act(ls.gen(confs.n), {
+            "p": new Vector(...confs.p),
+            "v": new Vector(...confs.v),
+            "rad": Tools.ATR(confs.rad),
+            "stack": []
+        })
+
+        let s_it = ls.iter(confs.n);
+        let s = ls.S;
+        const randerer = new vision.randerer.SingleFrameRanderer().rander(
+           (ft) => {
+                canvas.reflush();
+                s = s_it.next().value || s;
+                ls.act(s, {
+                    "p": new Vector(...confs.p),
+                    "v": new Vector(...confs.v),
+                    "rad": Tools.ATR(confs.rad),
+                    "stack": []
+                })
+           }
+        );
+
+        let act_it = ls.actIter(ls.gen(confs.n), {
+            "p": new Vector(...confs.p),
+            "v": new Vector(...confs.v),
+            "rad": Tools.ATR(confs.rad),
+            "stack": []
+        })
+
+    </script>
+</body>
+
+</html>

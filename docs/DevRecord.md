@@ -4,6 +4,7 @@
 ### [2022.09.05 - 2022.09.11]
 * (ADD|/src/views/capturer.js): Capturer -> 截图器，用于截取canvas图像并导出。
 * (ADD|/src/views/randerer.js): Randerer -> 渲染器，实现行为逻辑和图像绘制的调度。
+* (ADD|/src/algorithms/LSystem.js): LSystem -> L-System
 
 --------------------------------------------------
 ### [2022.08.29 - 2022.09.04]

@@ -26,7 +26,6 @@
 
 --------------------------------------------------
 ## Project
-* (Project): L-System
 * (Project): 主题 -> 环(Ring) 
 * (Project): 主题 -> 迭代&生长
 * (Project): 海浪
@@ -38,6 +37,7 @@
 * (Project): 碰撞分裂，给定一个粒子系统，粒子间的每次碰撞会使碰撞粒子产生分裂。
 * (Project): 元胞自动机 - 生命游戏(Game of Life)
 
+* F|(Project): L-System
 * F|(Project): NodeLink: 一种视觉效果，给定一个粒子群，当粒子间的距离小于R时，绘制粒子间的连线。
 
 

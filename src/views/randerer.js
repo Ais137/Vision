@@ -155,11 +155,11 @@ class SingleFrameRanderer extends Randerer {
         window.addEventListener("keydown", function(event) {
             if(event.keyCode == _this._rander_keyCode) {
                 //行为函数调用
-                for(let i=0; i<=_this.act_ft_n; i++) {
+                for(let i=0; i<_this.act_ft_n; i++) {
                     _this.act_func(_this._ft++);
                 }
                 //绘制函数调用
-                _this.draw_func(_this._ft);
+                _this.draw_func && _this.draw_func(_this._ft);
             }
         }); 
         return this;
