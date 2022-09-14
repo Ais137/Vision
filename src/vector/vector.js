@@ -60,6 +60,22 @@ class Vector {
         return new Vector(...v);
     }
 
+    /*----------------------------------------
+    @func: builder -> 生成随机二维向量
+    @desc: 生成一个圆范围内的随机向量
+    @params: 
+        * sR/eR(number:>0): 向量模长范围
+    @return(Vector)
+    @exp: 
+        Vector.rcv(300) -> 向量模长为300, 方向随机
+        Vector.rcv(100, 300) -> 向量模长范围为(100, 300), 方向随机
+    ----------------------------------------*/
+    static rcv(sR, eR=null) {
+        let rad = Math.random() * (Math.PI * 2);
+        let r = (eR == null ? Math.random()*sR : Math.random()*(eR-sR)+sR);
+        return new Vector(Math.cos(rad)*r, Math.sin(rad)*r);
+    }
+
     //分量接口
     get v() { return this._v; }
     get x(){ return this._v[0]; }

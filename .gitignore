@@ -4,5 +4,6 @@
 /dev
 /docs/dev.md
 index.js
-/img
+**/img/*
+!**/img/disp
 /DevPlan.md

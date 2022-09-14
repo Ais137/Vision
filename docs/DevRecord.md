@@ -1,6 +1,13 @@
 # DevRecord | 开发记录
 
 --------------------------------------------------
+### [2022.09.12 - 2022.09.18]
+* (UPT|/src/vector/vector.js): Vector.rcv -> 生成一个圆范围内的随机向量
+* (ADD|/views/Projects/Helix): Helix
+* (ADD|/views/Projects/Ring): LightRing, RotateRing
+* (ADD|/views/Projects/VectorRings): VectorRings -> 向量环
+
+--------------------------------------------------
 ### [2022.09.05 - 2022.09.11]
 * (ADD|/src/views/capturer.js): Capturer -> 截图器，用于截取canvas图像并导出。
 * (ADD|/src/views/randerer.js): Randerer -> 渲染器，实现行为逻辑和图像绘制的调度。

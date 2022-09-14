@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Helix </title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+        const Views = vision.views.Views; Views.canvas = canvas;
+        const Tools = vision.tools.Tools;
+        canvas.BGC = Tools.RGB([0, 0, 0])
+
+        class Helix {
+
+            constructor() {
+                //当前弧度
+                this.rad = 0;
+                //角速度(1)
+                this.w = Tools.ATR(1);
+                //当前半径
+                this.r = 0;
+                //最大半径
+                this.R = 500;
+                //半径增量(0.5)
+                this.dr = 0.5;
+                //SHM幅度(90)
+                this.SHM_A = Tools.ATR(90);
+                //SHM角速度(100)
+                this.SHM_W = Tools.ATR(100);
+                //中心坐标
+                this.o = new Vector(canvas.cx, canvas.cy);
+                //前一刻位置
+                this.p0 = this.o;
+                //当前位置
+                this.p = this.o;
+            }
+
+            action(t) {
+                this.p0 = this.p;
+                this.rad += this.w;
+                if(this.r < this.R) {
+                    this.r += this.dr;
+                }
+                let _rad = this.SHM_A * Math.sin(this.SHM_W * t) + this.rad;
+                this.p = new Vector(
+                    this.r*Math.cos(_rad) + this.o.x,
+                    this.r*Math.sin(_rad) + this.o.y
+                );
+                return this.p;
+            }
+        }
+        let helix = new Helix(); 
+
+        
+        //构建渲染器
+        canvas.reflush();
+        const randerer = new vision.randerer.IntervalRanderer().rander((t) => {
+            helix.action(t);
+            let c = parseInt((helix.R-helix.r) * (255/helix.R));
+            canvas.ctx.strokeStyle = Tools.RGB([c, c, c]);
+            canvas.line(helix.p, helix.p0);
+            //绘制边界圆
+            // canvas.circle(helix.o.x, helix.o.y, helix.R)
+            // canvas.circle(helix.p.x, helix.p.y, helix.r)
+
+        }).stop(helix.R/helix.dr*2);
+
+        const capturer = new vision.capturer.Capturer(canvas).capturing();
+
+    </script>
+</body>
+
+</html>

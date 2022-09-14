@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> RotateRing </title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+        const Views = vision.views.Views; Views.canvas = canvas;
+        const Tools = vision.tools.Tools;
+        canvas.BGC = Tools.RGB([0, 0, 0]);
+
+        //配置参数
+        const confs = {
+            //锚点参数
+            "ap": {
+                //圆心坐标
+                "ap_o": new Vector(canvas.cx, canvas.cy),
+                //起始半径
+                "ap_r": 50,
+                //旋转角速度
+                "ap_v": Tools.ATR(3)
+            },
+            //环层参数
+            "rings": {
+                //环层数
+                "N": 15,
+                //环间距
+                "inv_R": 30,
+                //角间距
+                "inv_rad": Tools.ATR(30),
+                //环层弧长
+                "ring_rad": Tools.ATR(250),
+            },
+            //绘制参数
+            "draw": {
+                //环层宽度
+                "rd": 5,
+                //起始颜色
+                "cs": [100, 200, 100],
+                //终止颜色
+                "ce": [100, 200, 200],
+            }
+        }
+
+        //旋转环
+        class RotateRing {
+
+            constructor({ap_o, ap_r, ap_v, N, inv_R, inv_rad, ring_rad}={}) {
+                //锚点
+                this.anchor_point = new vision.particle.CircularMotorParticle(
+                    ap_o || new Vector(canvas.cx, canvas.cy), ap_r || 30, ap_v || Tools.ATR(3)
+                );
+                //环层数
+                this.N = N || 12;
+                //环间距
+                this.inv_R = inv_R || 30;
+                //角间距
+                this.inv_rad = inv_rad || Tools.ATR(30);
+                //环层弧长
+                this.ring_rad = ring_rad || Tools.ATR(270);
+                //环层点数
+                this.ring_pn = parseInt(this.ring_rad/Tools.ATR(5));
+            }
+
+            //旋转锚点
+            action() {
+                this.anchor_point.action();
+            }
+
+            //计算环层坐标点
+            ring(n=0) {
+                let R = this.anchor_point.r + this.inv_R * n;
+                let rad = this.anchor_point.rad + this.inv_rad * n;
+                let inv_rad = this.ring_rad/this.ring_pn;
+                let points = [];
+                for(let i=0; i<this.ring_pn; i++) {
+                    points.push([
+                        R * Math.cos(rad + inv_rad*i) + this.anchor_point.o.x,
+                        R * Math.sin(rad + inv_rad*i) + this.anchor_point.o.y,
+                    ]);
+                }
+                return points;
+            }
+
+        }
+        let rings = new RotateRing({...confs.ap, ...confs.rings});
+
+        //构建渲染器
+        const randerer = new vision.randerer.IntervalRanderer().rander(() => {
+            rings.action();
+            canvas.reflush();
+            canvas.ctx.lineWidth = confs.draw.rd;
+            canvas.ctx.lineCap = "round";
+            for(let i=0; i<rings.N; i++) {
+                canvas.lines(rings.ring(i), new vision.color.ColorGradient(confs.draw.cs, confs.draw.ce, rings.ring_pn));
+            }
+        });
+
+        
+
+    </script>
+</body>
+
+</html>

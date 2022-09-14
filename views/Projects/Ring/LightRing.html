@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> LightRing </title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+        const Views = vision.views.Views; Views.canvas = canvas;
+        const Tools = vision.tools.Tools;
+        canvas.BGC = Tools.RGB([0, 0, 0]);
+
+        canvas.reflush();
+        Views.lightRing(canvas.cx, canvas.cy, 450, {
+            "n": 150,
+            "cs": [Tools.random(0, 255), Tools.random(0, 255), Tools.random(0, 255)]
+        });
+        const randerer = new vision.randerer.SingleFrameRanderer().rander(
+            (ft) => {
+                canvas.reflush();
+                Views.lightRing(canvas.cx, canvas.cy, 450, {
+                    "n": 150,
+                    "cs": [Tools.random(0, 255), Tools.random(0, 255), Tools.random(0, 255)]
+                });
+            },
+        );
+        
+
+    </script>
+</body>
+
+</html>

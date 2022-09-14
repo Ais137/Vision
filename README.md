@@ -5,6 +5,9 @@
 现阶段主要用于自己进行 **想法的验证** 和 **相关知识体系的学习**。
 
 --------------------------------------------------
+![Helix](./img/disp/Helix.png)
+
+--------------------------------------------------
 ## Spark · 火花
 > Vison: 视野; 想象; 幻象; 梦幻
 
@@ -46,3 +49,16 @@ npm run vtp -- -list
 npm run vtp -- 文件名 模板名  
 //exp: npm run vtp -- test pcs
 ```
+
+--------------------------------------------------
+## Application · 应用
+### *LightRing*
+![LightRing](./img/disp/LightRing.png)
+### *L-System*
+![L-System](./img/disp/plants.png)
+### *Helix*
+![Helix](./img/disp/Helix_2.png)
+### *TransfGravityParticle*
+![TransfGravityParticle](./img/disp/TransfGravityParticle.png)
+### *The Life of Tree*
+![The Life of Tree](./img/disp/TheLifeofTree.png)
