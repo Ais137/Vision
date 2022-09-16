@@ -88,7 +88,7 @@
         let s = ls.S;
         const randerer = new vision.randerer.SingleFrameRanderer().rander(
            (ft) => {
-                canvas.reflush();
+                canvas.refresh();
                 s = s_it.next().value || s;
                 ls.act(s, {
                     "p": new Vector(...confs.p),

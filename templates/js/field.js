@@ -49,7 +49,7 @@ const randerer = new vision.randerer.IntervalRanderer().rander(() => {
         border.limit(pcs.ps[i]);
     }
     //绘制
-    canvas.reflush();
+    canvas.refresh();
     canvas.colorStyle = "rgb(255, 255, 255)";
     for (let i = 0, n = pcs.ps.length; i < n; i++) {
         //绘制粒子轨迹

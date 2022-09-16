@@ -122,7 +122,7 @@
                 border.limit(pcs.ps[i]);
             }
             //绘制
-            canvas.reflush();
+            canvas.refresh();
             //绘制粒子连接
             Views.nodelink(pcs.ps, confs.draw.nR, new vision.color.ColorGradient(confs.draw.nColor, [50, 50, 50], confs.N))
             canvas.colorStyle = `rgb(${confs.draw.pColor[0]}, ${confs.draw.pColor[1]}, ${confs.draw.pColor[2]})`;

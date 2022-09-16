@@ -68,7 +68,7 @@
         "prefix": "vis-int-randerer",
         "body": [
             "const randerer = new vision.randerer.IntervalRanderer().rander(() => {",
-            "    canvas.reflush();",
+            "    canvas.refresh();",
             "});"
         ]
     },
@@ -82,7 +82,7 @@
             "       pcs.action();",
             "   },",
             "   (ft) => {",
-            "       canvas.reflush();",
+            "       canvas.refresh();",
             "   }",
             ");",
         ]

@@ -66,14 +66,14 @@ class PointCapturer {
             //清空坐标点
             } else if(event.button == 2) {
                 _this.points = [];
-                _this.is_disp && _this.canvas.reflush();
+                _this.is_disp && _this.canvas.refresh();
             }
         });
     }
 
     //绘制
     disp() {
-        this.canvas.reflush();
+        this.canvas.refresh();
         //绘制当前坐标点
         this.canvas.colorStyle = this.style.c;
         this.canvas.circle(this.p.x, this.p.y, this.style.r);

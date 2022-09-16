@@ -56,7 +56,7 @@ class IntervalRanderer extends Randerer {
         * stop: 设置停机时间点
     @exp: 
         const randerer = new vision.randerer.IntervalRanderer().rander(() => {
-            canvas.reflush();
+            canvas.refresh();
         });
     ----------------------------------------*/
     constructor(fps=60) {
@@ -119,7 +119,7 @@ class SingleFrameRanderer extends Randerer {
                 pcs.action();
             },
             (ft) => {
-                canvas.reflush();
+                canvas.refresh();
             }
         );
     ----------------------------------------*/

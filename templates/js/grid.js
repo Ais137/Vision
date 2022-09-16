@@ -12,7 +12,7 @@ renderer();
 
 //网格坐标系缩放
 document.getElementById("vision_canvas").addEventListener("mousewheel", function(event) { 
-    canvas.reflush();
+    canvas.refresh();
     let dv = 10;
     grid.dx = grid.dy = event.wheelDelta>0 ? grid.dx+dv : (grid.dx>dv ? grid.dx-dv : grid.dx)
     renderer();

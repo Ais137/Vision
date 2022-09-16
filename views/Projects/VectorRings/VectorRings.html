@@ -92,7 +92,7 @@
         const randerer = new vision.randerer.IntervalRanderer().rander(() => {
             pcs.action();
             //绘制
-            canvas.reflush();
+            canvas.refresh();
             let pcolor = new vision.color.ColorGradient(confs.cs, confs.ce, pcs.ps.length);
             for (let i = 0, n = pcs.ps.length; i < n; i++) {
                 canvas.colorStyle = pcolor.color();

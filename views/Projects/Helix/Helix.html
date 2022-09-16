@@ -80,7 +80,7 @@
 
         
         //构建渲染器
-        canvas.reflush();
+        canvas.refresh();
         const randerer = new vision.randerer.IntervalRanderer().rander((t) => {
             helix.action(t);
             let c = parseInt((helix.R-helix.r) * (255/helix.R));

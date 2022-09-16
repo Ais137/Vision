@@ -40,14 +40,14 @@ class Canvas {
             //颜色
             "C": "#FFFFFF"
         }
-        this.reflush();
+        this.refresh();
     }
 
     //设置canvas尺寸
     get width() { return this._width; }
-    set width(w) { this._width = this.canvas.width = w; this._cx = parseInt(this._width / 2); this.reflush(); }
+    set width(w) { this._width = this.canvas.width = w; this._cx = parseInt(this._width / 2); this.refresh(); }
     get height() { return this._height; }
-    set height(h) { this._height = this.canvas.height = h; this._cy = parseInt(this._height / 2); this.reflush(); }
+    set height(h) { this._height = this.canvas.height = h; this._cy = parseInt(this._height / 2); this.refresh(); }
     get cx() { return this._cx; }
     get cy() { return this._cy; }
 
@@ -63,7 +63,7 @@ class Canvas {
     }
 
     //刷新画布
-    reflush(color){
+    refresh(color){
         this.ctx.fillStyle = color || this.BGC;
         this.ctx.fillRect(0, 0, this._width, this._height);
     }

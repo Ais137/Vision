@@ -116,7 +116,7 @@
         //构建渲染器
         const randerer = new vision.randerer.IntervalRanderer().rander(() => {
             rings.action();
-            canvas.reflush();
+            canvas.refresh();
             canvas.ctx.lineWidth = confs.draw.rd;
             canvas.ctx.lineCap = "round";
             for(let i=0; i<rings.N; i++) {

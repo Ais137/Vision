@@ -74,7 +74,7 @@
                 pcs.action();
                 for(let i=0, n=pcs.ps.length; i<n; i++) { border.limit(pcs.ps[i], 1); }
                 //绘制
-                canvas.reflush();
+                canvas.refresh();
                 Views.nodelink(pcs.ps, confs.dR, new vision.color.ColorGradient(confs.LC[0], confs.LC[1]||confs.LC[0], confs.N));
             } 
         }
@@ -101,7 +101,7 @@
                 pcs.action();
                 for(let i=0, n=pcs.ps.length; i<n; i++) { border.limit(pcs.ps[i], 1); }
                 //绘制
-                canvas.reflush();
+                canvas.refresh();
                 Views.nodelink(pcs.ps, confs.dR, new vision.color.ColorGradient(confs.LC[0], confs.LC[1]||confs.LC[0], confs.N));
                 canvas.ctx.strokeStyle = "rgb(0, 175, 175)";
                 canvas.circle(border.po.x, border.po.y, border.r);
@@ -138,7 +138,7 @@
                 //运动
                 pcs.action();
                 //绘制
-                canvas.reflush();
+                canvas.refresh();
                 Views.nodelink(pcs.ps, confs.dR, new vision.color.ColorGradient(confs.LC[0], confs.LC[1]||confs.LC[0], confs.N));
             } 
         }

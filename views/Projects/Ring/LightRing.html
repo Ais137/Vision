@@ -37,14 +37,14 @@
         const Tools = vision.tools.Tools;
         canvas.BGC = Tools.RGB([0, 0, 0]);
 
-        canvas.reflush();
+        canvas.refresh();
         Views.lightRing(canvas.cx, canvas.cy, 450, {
             "n": 150,
             "cs": [Tools.random(0, 255), Tools.random(0, 255), Tools.random(0, 255)]
         });
         const randerer = new vision.randerer.SingleFrameRanderer().rander(
             (ft) => {
-                canvas.reflush();
+                canvas.refresh();
                 Views.lightRing(canvas.cx, canvas.cy, 450, {
                     "n": 150,
                     "cs": [Tools.random(0, 255), Tools.random(0, 255), Tools.random(0, 255)]

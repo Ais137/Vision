@@ -145,7 +145,7 @@ body {
                 pcs.ps[i].v.limit(confs.v_max);
             }
             //绘制
-            canvas.reflush();
+            canvas.refresh();
             for (let i = 0, n = pcs.ps.length; i < n; i++) {
                 //绘制粒子轨迹
                 canvas.lines(pcs.ps[i].tracker.trail, new vision.color.ColorGradient([50, 50, 50], confs.draw.tColor, confs.tn));
