@@ -52,13 +52,15 @@ npm run vtp -- 文件名 模板名
 
 --------------------------------------------------
 ## Application · 应用
-### *LightRing*
+### [*Mandelbrot_Set*](./views/Algorithm/Mandelbrot_Set/Mandelbrot_Set.html)
+![Mandelbrot_Set](./img/disp/Mandelbrot_Set.png)
+### [*LightRing*](./views/Projects/Ring/LightRing.html)
 ![LightRing](./img/disp/LightRing.png)
-### *L-System*
+### [*L-System*](./views/Algorithm/LSystem/plants.html)
 ![L-System](./img/disp/plants.png)
-### *Helix*
+### [*Helix*](./views/Projects/Helix/Helix.html)
 ![Helix](./img/disp/Helix_2.png)
-### *TransfGravityParticle*
+### [*TransfGravityParticle*](./views/Research/TransfGravityParticle/TransfGravityParticle.html)
 ![TransfGravityParticle](./img/disp/TransfGravityParticle.png)
-### *The Life of Tree*
+### [*The Life of Tree*](./views/Projects/The%20Life%20of%20Tree/The%20Life%20of%20Tree.html)
 ![The Life of Tree](./img/disp/TheLifeofTree.png)

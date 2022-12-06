@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Julia_Set </title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+<body oncontextmenu="return false;">
+    
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+        const Views = vision.views.Views; Views.canvas = canvas;
+        const Tools = vision.tools.Tools;
+        const MBS = vision.Mandelbrot_Set;
+        canvas.BGC = "rgb(0, 0, 0)";
+
+        //渲染参数
+        const confs = {
+            //像素尺寸
+            "width": 1920,
+            "height": 1080,
+            //定义域范围
+            "dod": [-2, 2],
+            //迭代固定参数
+            "C0": [-0.8, 0.156],
+            // "C0": [-0.576, 0.456],
+            // "C0": [0.285, 0.01],
+            //迭代次数
+            "n": 500,
+            //缩放率
+            "zr": 1,
+            //集合内颜色参数
+            "color_in": [0, 0, 0],
+            //集合外颜色参数
+            "color_out": [0, 255, 255]
+        }
+        //居中偏移量
+        confs.offset_x = (canvas.width-confs.width)/2;
+        confs.offset_y = (canvas.height-confs.height)/2;
+
+
+        //构建实数坐标系: 将屏幕像素坐标系映射到 MBS 计算用的坐标系
+        let rcs = new vision.coor.RCS(
+            co = Vector.v(confs.width/2, confs.height/2), 
+            scale = (confs.dod[1]-confs.dod[0])/confs.width
+        );
+        rcs.zoom(confs.zr);
+
+        /*----------------------------------------
+        @func: 颜色填充器
+        @desc: 
+            对于集合内的点，根据 confs.color_in 填充
+            对于集合外的点，以 confs.color_out 为基准，按照 res([flag, it_n]) 中的 it_n 为比率进行填充
+        @params: 
+            * confs(obj): 全局配装对象
+            * res(obj): 迭代结果 -> res([flag, it_n]), 其中
+                * flag: 表示是否在集合内(在指定迭代次数后是否发散)
+                * it_n: 为发散时的迭代次数
+        ----------------------------------------*/
+        const color = function(confs, res) {
+            if(res[0]) {
+                return confs.color_in;
+            } else {
+                let r = (res[1] / confs.n);
+                return [confs.color_out[0]*r, confs.color_out[1]*r, confs.color_out[2]*r];
+            }
+        }
+
+        /*----------------------------------------
+        @func: 朱利亚集渲染器
+        @desc: 计算和渲染朱利亚集
+        ----------------------------------------*/
+        const JBS_randerer = function() {
+            //构建图像容器
+            let img = canvas.ctx.createImageData(confs.width, confs.height);
+            //构建朱利亚集
+            let C0 = new MBS.Complex(...confs.C0);
+            for(let y=0; y<confs.height; y++) {
+                for(let x=0; x<confs.width; x++) {
+                    //计算
+                    let res = MBS.Julia_Set(new MBS.Complex(...rcs.to([x, y])), C0, confs.n);
+                    //绘制
+                    let c = color(confs, res);
+                    let i = (y * confs.width + x) * 4;
+                    img.data[i] = c[0], img.data[i+1] = c[1], img.data[i+2] = c[2], img.data[i+3] = 255; 
+                }
+            }
+            canvas.ctx.putImageData(img, confs.offset_x, confs.offset_y);
+        }
+        JBS_randerer()
+
+        let captuer = new vision.capturer.Capturer(canvas).capturing();
+</script>
+</body>
+
+</html>
