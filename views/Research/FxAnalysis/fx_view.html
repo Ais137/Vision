@@ -68,8 +68,10 @@
             //绘制函数值
             let fx = Fx();
             for(;!fx.end();) {
-                let fxp = grid.from(Vector.v(...fx.val(true)));
-                canvas.circle(fxp.x, fxp.y, grid.dx*0.02, "rgb(0, 255, 0)");
+                // let fxp = grid.from(Vector.v(...fx.val(true)));
+                // canvas.circle(fxp.x, fxp.y, grid.dx*0.02, "rgb(0, 255, 0)");
+                let fxp = grid.from(fx.val(true));
+                canvas.circle(fxp[0], fxp[1], grid.dx*0.02, "rgb(0, 255, 0)");
                 // canvas.line(fxp.x, fxp.y, fxp.x, canvas.cy)
             }
         }
