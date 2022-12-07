@@ -51,6 +51,10 @@ npm run vtp -- 文件名 模板名
 ```
 
 --------------------------------------------------
+## Blogs · 博客文档
+* [Mandelbrot_Set_Visualization · 曼德勃罗特集的可视化](./docs/blogs/Mandelbrot_Set_Visualization.md)
+
+--------------------------------------------------
 ## Application · 应用
 ### [*Mandelbrot_Set*](./views/Algorithm/Mandelbrot_Set/Mandelbrot_Set.html)
 ![Mandelbrot_Set](./img/disp/Mandelbrot_Set.png)
