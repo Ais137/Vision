@@ -1,5 +1,5 @@
 /****************************************
- * Name: 最优解通用求解器
+ * Name: optimum solution solver | 最优解通用求解器
  * Date: 2022-07-11
  * Author: Ais
  * Project: Vision
