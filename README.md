@@ -22,6 +22,31 @@
 > *Vision* 框架是一座桥梁，用于连接想法创意与现实。一种将想法与创意进行可视化的绘制框架。
 
 --------------------------------------------------
+## Blogs · 博客文档
+* [Mandelbrot_Set_Visualization · 曼德勃罗特集的可视化](./docs/blogs/Mandelbrot_Set_Visualization.md)
+
+--------------------------------------------------
+## Update · 更新日志
+* [NNS(Nearest Neighbor Search)](./src/algo/NNS.js): 邻近搜索算法，在数据(向量)集中搜索给定目标的邻近集。
+
+--------------------------------------------------
+## DevPlan · 开发计划
+### 阶段计划
+  * NNS(邻近搜索)算法实现: KD树
+  * boids(鸟群)算法实现
+  * PSO(粒子群优化)算法实现
+  * KNN分类器实现
+  * sort(排序)算法模块实现
+  * ParticleSystem(粒子系统)对象结构优化，考虑采用下载器中间件的架构，对力场与边界计算模式的结构进行封装。
+  * TrailTracker(轨迹追踪器)对象结构优化，考虑采用 Proxy | Reflect 实现。 
+  * 连杆系统
+  * 贝塞尔曲线
+### 持续开发
+  * 离线渲染模块(初步架构): WebSocket + Node Server + Selenium
+  * 文档自动构建工具: 基于源码的注解自动生成文档
+  * 计算性能优化(参考《高性能Javascript》)
+  * **Vector** 模块性能优化: 基于 *WebAssembly* 重构
+--------------------------------------------------
 ## Index · 项目目录结构索引
 * */build*: 项目构建目录
 * */docs*: 项目文件目录
@@ -50,9 +75,7 @@ npm run vtp -- 文件名 模板名
 //exp: npm run vtp -- test pcs
 ```
 
---------------------------------------------------
-## Blogs · 博客文档
-* [Mandelbrot_Set_Visualization · 曼德勃罗特集的可视化](./docs/blogs/Mandelbrot_Set_Visualization.md)
+
 
 --------------------------------------------------
 ## Application · 应用
