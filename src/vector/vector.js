@@ -5,6 +5,8 @@
  * Project: Vision
  * Desc: Vision框架核心组件
  * Version: 0.1
+ * Update:
+    * [2023-01-30]: 暴露 this._v 属性，提高计算效率。
 ****************************************/
 
 class Vector {
@@ -14,11 +16,11 @@ class Vector {
     @desc: 通过函数参数作为向量分量构建向量，默认构建(0, 0)的二维向量
     @return(Vector): obj(Vector)
     @exp: 
-        v = new Vector(1, 2, 3) -> v(1, 2, 3)
+        let v = new Vector(1, 2, 3) -> v(1, 2, 3)
     ----------------------------------------*/
     constructor(...v) {
         //向量分量
-        this._v = v.length > 0 ? [...v] : [0, 0];
+        this.v = v.length > 0 ? [...v] : [0, 0];
     }
 
     //static builder
@@ -77,13 +79,12 @@ class Vector {
     }
 
     //分量接口
-    get v() { return this._v; }
-    get x(){ return this._v[0]; }
-    get y(){ return this._v[1]; }
-    get z(){ return this._v[2]; }
-    set x(val){ this._v[0] = val; }
-    set y(val){ this._v[1] = val; }
-    set z(val){ this._v[2] = val; }
+    get x(){ return this.v[0]; }
+    get y(){ return this.v[1]; }
+    get z(){ return this.v[2]; }
+    set x(val){ this.v[0] = val; }
+    set y(val){ this.v[1] = val; }
+    set z(val){ this.v[2] = val; }
 
     /*----------------------------------------
     @func: 加法
@@ -103,8 +104,8 @@ class Vector {
     ----------------------------------------*/
     add(vector){
         let v = vector.v;
-        for(let i=0, end=this._v.length; i<end; i++) {
-            this._v[i] += (v[i] || 0);
+        for(let i=0, end=this.v.length; i<end; i++) {
+            this.v[i] += (v[i] || 0);
         }
         return this;
     }
@@ -128,8 +129,8 @@ class Vector {
         v1.mult(2) -> v(2, 4, 6) -> v1
     ----------------------------------------*/
     mult(k) {
-        for(let i=0, end=this._v.length; i<end; i++) {
-            this._v[i] *= k;
+        for(let i=0, end=this.v.length; i<end; i++) {
+            this.v[i] *= k;
         }
         return this;
     }
@@ -149,8 +150,8 @@ class Vector {
         // return this.add(vector.clone().mult(-1));
         //计算优化实现
         let v = vector.v;
-        for(let i=0, end=this._v.length; i<end; i++) {
-            this._v[i] -= (v[i] || 0);
+        for(let i=0, end=this.v.length; i<end; i++) {
+            this.v[i] -= (v[i] || 0);
         }
         return this;
     }
@@ -171,8 +172,8 @@ class Vector {
     ----------------------------------------*/
     dot(vector) {
         let t = 0, v = vector.v;
-        for(let i=0, end=this._v.length; i<end; i++) {
-            t += this._v[i] * (v[i] || 0);
+        for(let i=0, end=this.v.length; i<end; i++) {
+            t += this.v[i] * (v[i] || 0);
         }
         return t;
     }
@@ -220,11 +221,11 @@ class Vector {
             //[Vector]: _v.push(this.dot(new Vector(...m[i])));
             let _vi = 0;
             for(let k=0, endk=m[i].length; k<endk; k++) {
-                _vi += m[i][k] * (this._v[k] || 0);
+                _vi += m[i][k] * (this.v[k] || 0);
             }
             _v.push(_vi);
         }
-        this._v = _v;
+        this.v = _v;
         return this;
     }
     static LM(vector, m) {
@@ -260,16 +261,16 @@ class Vector {
     rotate(rad, angle=false) {
         /* 
         [Vector]:
-        this._v = this.LM([
+        this.v = this.LM([
             [Math.cos(rad), -Math.sin(rad)],
             [Math.sin(rad), Math.cos(rad)],
         ])
         */
         rad = angle ? (Math.PI/180*rad) : rad;
         let cos_rad = Math.cos(rad), sin_rad = Math.sin(rad);
-        let x = this._v[0] * cos_rad - this._v[1] * sin_rad;
-        let y = this._v[0] * sin_rad + this._v[1] * cos_rad;
-        this._v[0] = x, this._v[1] = y;
+        let x = this.v[0] * cos_rad - this.v[1] * sin_rad;
+        let y = this.v[0] * sin_rad + this.v[1] * cos_rad;
+        this.v[0] = x, this.v[1] = y;
         return this;
     }
     static rotate(vector, rad) {
@@ -296,10 +297,10 @@ class Vector {
             for(let i=0; i<_n; i++) {
                 v[i] = this.v[i] || 0;
             }
-            this._v = v;
+            this.v = v;
             return this;
         } else {
-            return this._v.length;
+            return this.v.length;
         }
     }
 
@@ -315,8 +316,8 @@ class Vector {
     norm(n=null) {
         //计算模长
         let t = 0;
-        for(let i=0, end=this._v.length; i<end; i++) {
-            t += this._v[i] * this._v[i];
+        for(let i=0, end=this.v.length; i<end; i++) {
+            t += this.v[i] * this.v[i];
         }
         let v_norm = Math.sqrt(t);
         //设置模长
@@ -355,7 +356,7 @@ class Vector {
     @return(Vector)
     ----------------------------------------*/
     clone() {
-        return new Vector(...this._v);
+        return new Vector(...this.v);
     }
     copy() {
         return this.clone();
@@ -379,8 +380,8 @@ class Vector {
             return this.norm();
         } else {
             let t = 0, v = vector.v;
-            for(let i=0, end=this._v.length; i<end; i++) {
-                t += (this._v[i] - v[i]) * (this._v[i] - v[i]);
+            for(let i=0, end=this.v.length; i<end; i++) {
+                t += (this.v[i] - v[i]) * (this.v[i] - v[i]);
             }
             return Math.sqrt(t);
         }
@@ -400,7 +401,7 @@ class Vector {
         v1.rad() -> v1与x轴正方向的弧度差
     ----------------------------------------*/
     rad(vector=null) {
-        let x = this._v[0], y = this._v[1];
+        let x = this.v[0], y = this.v[1];
         let rad = Math.atan(y/x);
         rad = (x>=0) ? (y >= 0 ? rad : Math.PI*2 + rad) : (Math.PI + rad);
         return  vector ? rad - vector.rad() : rad;
@@ -414,7 +415,7 @@ class Vector {
     @desc: 将分量转换成整数
     ----------------------------------------*/
     toint() {
-        for(let i=0, end=this._v.length; i<end; i++) { this._v[i] = parseInt(this._v[i]);}
+        for(let i=0, end=this.v.length; i<end; i++) { this.v[i] = parseInt(this.v[i]);}
     }
 
     /*----------------------------------------
@@ -429,7 +430,7 @@ class Vector {
     ----------------------------------------*/
     in(range=[]) {
         for(let i=0, end=range.length; i<end; i++) {
-            if(!(this._v[i] >= range[i][0] && this._v[i] <= range[i][1])) {
+            if(!(this.v[i] >= range[i][0] && this.v[i] <= range[i][1])) {
                 return false;
             }
         }
