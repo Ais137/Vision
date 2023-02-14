@@ -22,12 +22,17 @@
 > *Vision* 框架是一座桥梁，用于连接想法创意与现实。一种将想法与创意进行可视化的绘制框架。
 
 --------------------------------------------------
-## Blogs · 博客文档
+## Docs · 文档 
+* ### [Spark | 想法与灵感记录](./Spark.md)
+* ### [DevStandard | 开发规范](./docs/develop/DevStandard.md)
+
+--------------------------------------------------
+## Blogs · 博客
 * [Mandelbrot_Set_Visualization · 曼德勃罗特集的可视化](./docs/blogs/Mandelbrot_Set_Visualization.md)
 
 --------------------------------------------------
 ## Update · 更新日志
-* [NNS(Nearest Neighbor Search)](./src/algo/NNS.js): 邻近搜索算法，在数据(向量)集中搜索给定目标的邻近集。
+* [NNS(Nearest Neighbor Search)](./src/algo/NNS.js) : 邻近搜索算法，在数据(向量)集中搜索给定目标的邻近集。
 
 --------------------------------------------------
 ## DevPlan · 开发计划
@@ -46,36 +51,34 @@
   * 文档自动构建工具: 基于源码的注解自动生成文档
   * 计算性能优化(参考《高性能Javascript》)
   * **Vector** 模块性能优化: 基于 *WebAssembly* 重构
+
 --------------------------------------------------
-## Index · 项目目录结构索引
-* */build*: 项目构建目录
-* */docs*: 项目文件目录
-* */src*: 源码目录
-* */templates*: Views模板系统
-* */test*: 测试代码目录
-* */tools*: 辅助开发/设计工具
-* */views*: 项目应用目录
-* */Spark.md*: 想法记录
-* */docs/Vision.code-snippets*: 项目代码片段
+## Index · 项目目录结构索引(概览)
+* */build* : 项目构建工具目录
+* */docs* : 项目文档目录
+* */src* : 源码目录
+* */test* : 测试代码目录
+* */tools* : 辅助开发/设计工具目录
+* */views* : 项目应用目录
+* */vtp* : Views模板构建工具目录
+
+**详细目录结构索引** : [DevIndex](./docs/develop/DevIndex.md) 
 
 --------------------------------------------------
 ## Build · 项目构建
-* 构建器: 
+* 项目构建器 
 ```
 //构建项目
 npm run build
 ```
-* Views模板生成器
+* Views模板构建器
 ```
 //查看当前模板
 npm run vtp -- -list
-
 //生成模板
 npm run vtp -- 文件名 模板名  
 //exp: npm run vtp -- test pcs
 ```
-
-
 
 --------------------------------------------------
 ## Application · 应用
@@ -87,7 +90,7 @@ npm run vtp -- 文件名 模板名
 ![L-System](./img/disp/plants.png)
 ### [*Helix*](./views/Projects/Helix/Helix.html)
 ![Helix](./img/disp/Helix_2.png)
-### [*TransfGravityParticle*](./views/Research/TransfGravityParticle/TransfGravityParticle.html)
+### [*TransfGravityParticle*](./views/Research/ParticleSystem/TransfGravityParticle.html)
 ![TransfGravityParticle](./img/disp/TransfGravityParticle.png)
 ### [*The Life of Tree*](./views/Projects/The%20Life%20of%20Tree/The%20Life%20of%20Tree.html)
 ![The Life of Tree](./img/disp/TheLifeofTree.png)
