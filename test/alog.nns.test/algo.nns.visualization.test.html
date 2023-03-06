@@ -64,12 +64,12 @@
         });
 
         //构建粒子群
-        const pcs = vision.particle.ParticleSystem.Builder(() => {
+        const pcs = new vision.particle.ParticleSystem(() => {
             return new vision.particle.ForceParticle(
                 Vector.random([[0, canvas.width], [0, canvas.height]]), 
                 confs.isFixed ? null : Vector.random([confs.vR, confs.vR])
             );
-        }).init(confs.N);
+        }).build(confs.N);
 
         //构建NNS算法模块
         let nns = new confs.NNS(pcs.ps, (obj) => { return obj.p; }).build();
