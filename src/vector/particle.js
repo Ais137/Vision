@@ -3,24 +3,28 @@
  * Date: 2022-07-10
  * Author: Ais
  * Project: Vision
- * Desc: 通过向量描述粒子的运动
+ * Desc: 基于向量模拟抽象粒子的运动
  * Version: 0.1
+ * Update:
+    * (2023-03-06, Ais): ParticleSystem(粒子系统)结构优化 
 ****************************************/
 
+
 const Vector = require("./vector.js").Vector;
+
 
 //粒子(基类)
 class Particle {
 
     /*----------------------------------------
-    @class: Particle(粒子)
-    @desc: 通过向量描述粒子的运动
+    @class: Particle | 粒子
+    @desc: 基于向量模拟抽象粒子的运动
     @property: 
         * position(Vector): 位置矢量
         * velocity(Vector): 速度矢量
     @method:
-        * action(): 描述粒子运动模式 -> 粒子位置矢量(Vector)
-        * end(): 粒子停机状态 -> bool
+        * action: 描述粒子运动模式
+        * isEnd: 粒子停机状态
     @exp: 
         let p = new Particle(new Vector(100, 100), new Vector(2, 3));
     ----------------------------------------*/
@@ -43,9 +47,9 @@ class Particle {
     /*----------------------------------------
     @func: 停机状态
     @desc: 描述粒子的停机状态
-    @return(bool):  
+    @return(bool)
     ----------------------------------------*/
-    end() {
+    isEnd() {
         return false;
     }
 }
@@ -55,56 +59,41 @@ class Particle {
 class ParticleSystem {
 
     /*----------------------------------------
-    @class: ParticleSystem(粒子系统)
-    @desc: 描述粒子集群
+    @class: ParticleSystem | 粒子系统
+    @desc: 粒子集群容器，描述粒子的集群行为
     @property: 
         * ps(list:Particle): 粒子容器
-        * tp_builder(function): 粒子生成器函数
-        * max_pn(number[N+]): 最大粒子数(>=0)
-        * gen_pn(number[N+]): 迭代过程粒子生成数
-        * GENR(bool): 粒子生成开关, 用于在迭代过程(action)中生成新的粒子
+        * particle_builder(callable): 粒子生成器
+        * action_middlewares(obj:list:callable): action中间件(Hooks)
+        * max_pn(int, (0, N+)): 最大粒子数
+        * gen_pn(int, (0, N+)): 迭代过程粒子生成数
+        * GENR(bool): 粒子生成开关, 用于在迭代过程中生成新的粒子
         * DSTR(bool): 粒子销毁开关, 当容器中的粒子进入停机状态时，从容器中移除该粒子
-        * _END(bool): 粒子系统停机状态
     @method:
-        * init(): 对粒子系统进行初始化
-        * build(): 生成新的粒子
-        * action(): 描述粒子集群的行为模式
-        * end(): 返回粒子系统的停机状态
+        * build: 对粒子系统进行初始化
+        * particle_action: 粒子运动与生命周期管理
+        * action(): 粒子集群运动
     @exp: 
-        let ptcs = new ParticleSystem().init();
+        let pcs = new ParticleSystem().init();
     ----------------------------------------*/
-    constructor() {
+    constructor(particle_builder) {
         //粒子容器
         this.ps = [];
         //粒子生成器
-        this.tp_builder = null;
+        this.particle_builder = particle_builder;
+        //action中间件(Hook)
+        this.action_middlewares = {
+            "before": [],
+            "after": [],
+        }
         //最大粒子数
-        this.max_pn = Infinity;
+        this.max_pn = 500;
         //迭代过程粒子生成数
         this.gen_pn = 1;
         //粒子生成开关
         this.GENR = false;
         //粒子销毁开关
         this.DSTR = true;
-        //粒子系统停机标记
-        this._END = false;
-    }
-
-    /*----------------------------------------
-    @func: 构建器
-    @desc: 通过 tp_builder 构建粒子群
-    @params: 
-        * tp_builder(function): 粒子生成器函数
-    @return(ParticleSystem)
-    @exp: 
-        ParticleSystem.Builder(()=>{
-            return new Particle();
-        })
-    ----------------------------------------*/
-    static Builder(tp_builder) {
-        let ps = new ParticleSystem();
-        ps.tp_builder = tp_builder;
-        return ps;
     }
 
     /*----------------------------------------
@@ -112,62 +101,63 @@ class ParticleSystem {
     @desc: 对粒子系统进行初始化
     @return(this) 
     ----------------------------------------*/
-    init(n=0) {
+    build(pn=0) {
         this.ps = [];
-        for(let i=0; i<n; i++) { this.build(); }
+        for(let i=(pn < this.max_pn ? pn : this.max_pn); i--; ) {
+            this.ps.push(this.particle_builder());
+        }
         return this;
     }
 
     /*----------------------------------------
-    @func: 构建器
-    @desc: 生成新的粒子，并添加到容器中
-    @warning: 在重新该方法时，需要注意尽量不添加形参，这是由于当
-    this.GENR = true 时，会在action调用 this.build() 来构建新粒子
+    @func: 粒子运动与生命周期管理
+    @desc: 更新粒子容器中的粒子运动状态，并进行生命周期的管理
     ----------------------------------------*/
-    build() {
-        if(this.ps.length < this.max_pn) {
-            this.tp_builder && this.ps.push(this.tp_builder());
-        }
-    }
-
-    /*----------------------------------------
-    @func: 行为模式(迭代过程)
-    @desc: 描述粒子集群的行为模式
-    ----------------------------------------*/
-    action() {
-        let _ps = [], _END = true;
+    particle_action() {
+        //粒子运动
+        let _ps = [];
         for(let i=0, n=this.ps.length; i<n; i++) {
             //判断粒子的停机状态
-            let isEND = this.ps[i].end(); _END = isEND && _END;
-            if(!isEND) {
+            if(!this.ps[i].isEnd()) {
                 //调用粒子的行为模式方法
                 this.ps[i].action(); _ps.push(this.ps[i]);
             } else {
                 //根据"粒子销毁开关"判断是否销毁停机粒子
-                (this.DSTR == false) && _ps.push(this.ps[i]);
+                (!this.DSTR) && _ps.push(this.ps[i]);
             }
         }
-        //更新粒子容器和停机状态标记
-        this.ps = _ps; this._END = _END;
         //生成新的粒子
         if(this.GENR) {
-            for(let i=0, n=this.gen_pn; i<n; i++) {
-                this.build();
+            let diff_pn = this.max_pn - _ps.length;
+            for(let i=(diff_pn>=this.gen_pn ? this.gen_pn : diff_pn); i>0; i--) {
+                _ps.push(this.particle_builder())
             }
         }
+        //更新粒子容器
+        this.ps = _ps;
     }
 
     /*----------------------------------------
-    @func: 停机状态
-    @desc: 返回粒子系统的停机状态
+    @func: 粒子集群运动(迭代过程)
+    @desc: 描述粒子集群的行为模式
     ----------------------------------------*/
-    end() {
-        return this._END;
+    action() {
+        //action中间件挂载点(before)
+        for(let i=0, n=this.action_middlewares.before.length; i<n; i++) {
+            this.action_middlewares.before[i](this.ps);
+        }
+        //粒子运动与生命周期管理
+        this.particle_action();
+        //action中间件挂载点(after)
+        for(let i=0, n=this.action_middlewares.after.length; i<n; i++) {
+            this.action_middlewares.after[i](this.ps);
+        }
     }
+
 }
 
 
-//力粒子
+//作用力粒子
 class ForceParticle extends Particle {
 
     /*----------------------------------------
@@ -267,13 +257,13 @@ class LinearMotorParticle extends Particle {
     @desc: 描述粒子在什么条件下停机(停止运动)
     @return(bool): 状态
     ----------------------------------------*/
-    end() {
+    isEnd() {
         return this.p.dist(this._pe) <= this.v.norm() * this.end_dist_rate;
     }
 
     //运动模式
     action() {
-        if(!this.end()) {
+        if(!this.isEnd()) {
             this.p.add(this.v);
         } else {
             switch(this.mode){

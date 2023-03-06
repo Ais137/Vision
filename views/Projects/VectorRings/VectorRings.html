@@ -50,7 +50,7 @@
             //起始颜色
             "cs": [255, 255, 255],
             //终止颜色
-            "ce": [0, 0, 0]
+            "ce": [10, 10, 10]
         }
 
         //向量环
@@ -60,33 +60,26 @@
             @class: 向量环
             @desc: 构建一个粒子序列，让p[i]朝p[i+1]的方向移动，并构成一个环
             ----------------------------------------*/
-            constructor(vRate=0.03) {
-                super();
+            constructor(particle_builder, vRate=0.03) {
+                super(particle_builder);
                 //速度缩放率
                 this.vRate = vRate;
             }
 
-            //粒子构建器
-            build() {
-                let dy = (canvas.width - canvas.height)/2;
-                this.ps.push(
-                    new vision.particle.Particle(
-                        Vector.rcv(confs.gR, confs.gR).add(new Vector(canvas.cx, canvas.cy))
-                    )
-                );
-            }
-
-            //粒子行为
-            action() {
+            particle_action() {
                 for(let i=0, n=this.ps.length; i<n; i++) {
                     this.ps[i].v = Vector.sub(this.ps[(i+1)%n].p, this.ps[i].p).mult(this.vRate)
                     this.ps[i].action();
                 }
             }
-
-
         }   
-        const pcs = new VectorRings(confs.vRate).init(confs.N);
+
+        //构建向量环
+        let pcs = new VectorRings(() => {
+            return new vision.particle.Particle(
+                Vector.rcv(confs.gR, confs.gR).add(new Vector(canvas.cx, canvas.cy))
+            );
+        }, confs.vRate).build(confs.N);
 
         //渲染器
         const randerer = new vision.randerer.IntervalRanderer().rander(() => {

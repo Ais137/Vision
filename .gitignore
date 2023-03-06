@@ -7,3 +7,4 @@ index.js
 **/img/*
 !**/img/disp
 /DevPlan.md
+package-lock.json

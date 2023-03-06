@@ -54,25 +54,32 @@
             "LC": [[0, 200, 100], [0, 100, 200]],
         }
 
+
         //场景A: 匀速运动粒子
         const SceneA = function() {
             
             //构建粒子群
-            let pcs = vision.particle.ParticleSystem.Builder(()=>{
-                return new vision.particle.Particle(
+            let pcs = new vision.particle.ParticleSystem(() => {
+                return new vision.particle.ForceParticle(
                     Vector.random([[0, canvas.width], [0, canvas.height]]),
                     Vector.random([confs.vR, confs.vR])
                 );
-            }).init(confs.N);
-            
-            //边界限制器
-            let border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+            }).build(confs.N);
 
+            //边界处理
+            pcs.action_middlewares.after.push((function() {
+                //构建边界限制器
+                let border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+                //边界处理中间件
+                return function border_middleware(ps) {
+                    for(let i=ps.length; i--; ) { border.limit(ps[i]); }
+                }
+            }()));
+            
             //渲染器
             return function render() {
                 //运动
                 pcs.action();
-                for(let i=0, n=pcs.ps.length; i<n; i++) { border.limit(pcs.ps[i], 1); }
                 //绘制
                 canvas.refresh();
                 Views.nodelink(pcs.ps, confs.dR, new vision.color.ColorGradient(confs.LC[0], confs.LC[1]||confs.LC[0], confs.N));
@@ -82,24 +89,30 @@
 
         //场景B: 环形边界
         const SceneB = function() {
-            //边界限制器半径
-            confs.BR = 500;
             
             //构建粒子群
-            let pcs = vision.particle.ParticleSystem.Builder(()=>{
-                return new vision.particle.Particle(
+            let pcs = new vision.particle.ParticleSystem(() => {
+                return new vision.particle.ForceParticle(
                     Vector.random([[0, canvas.width], [0, canvas.height]]),
                     Vector.random([confs.vR, confs.vR])
                 );
-            }).init(confs.N);
+            }).build(confs.N);
 
-            //边界限制器
-            let border = new vision.border.RingReflectBorder(new Vector(canvas.cx, canvas.cy), confs.BR);
-            
+            //边界处理
+            pcs.action_middlewares.after.push((function() {
+                //边界限制器半径
+                confs.BR = 500;
+                //构建边界限制器
+                let border = new vision.border.RingReflectBorder(new Vector(canvas.cx, canvas.cy), confs.BR);
+                //边界处理中间件
+                return function border_middleware(ps) {
+                    for(let i=ps.length; i--; ) { border.limit(ps[i]); }
+                }
+            }()));
+
             return function render() {
                 //运动
                 pcs.action();
-                for(let i=0, n=pcs.ps.length; i<n; i++) { border.limit(pcs.ps[i], 1); }
                 //绘制
                 canvas.refresh();
                 Views.nodelink(pcs.ps, confs.dR, new vision.color.ColorGradient(confs.LC[0], confs.LC[1]||confs.LC[0], confs.N));
@@ -119,9 +132,9 @@
             confs.srR = [0, Math.PI*2];
             //可绘制的点距范围
             confs.dR = 150;
-            
+
             //构建粒子群
-            let pcs = vision.particle.ParticleSystem.Builder(()=>{
+            let pcs = new vision.particle.ParticleSystem(() => {
                 return new vision.particle.CircularMotorParticle(
                     //圆心坐标
                     Vector.v(canvas.cx, canvas.cy),
@@ -132,8 +145,8 @@
                     //起始弧度
                     Tools.random(...confs.srR)
                 );
-            }).init(confs.N);
-
+            }).build(confs.N);
+            
             return function render() {
                 //运动
                 pcs.action();

@@ -53,30 +53,40 @@
         }
 
         //构建粒子群
-        let pcs = vision.particle.ParticleSystem.Builder(() => {
+        let pcs = new vision.particle.ParticleSystem(() => {
             let p = new vision.particle.ForceParticle(
                 Vector.random([[0, canvas.width], [0, canvas.height]]),
                 Vector.random([confs.vR, confs.vR])
             );
             p.tracker = new vision.tracker.TrailTracker(p, confs.tn);
             return p;
-        }).init(confs.N);
+        }).build(confs.N);
         pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
-
-        //边界限制器
-        let border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
 
         //引力源
         const gf = new vision.field.Gravity(new Vector(canvas.cx, canvas.cy));
         gf.G = confs.G;
-
-        //渲染函数
-        const renderer = function () {
-            pcs.action();
-            for (let i = 0, n = pcs.ps.length; i < n; i++) {
-                gf.force(pcs.ps[i]);
-                // border.limit(pcs.ps[i]);
+        //矢量场作用
+        pcs.action_middlewares.before.push((function () {
+            //矢量场作用中间件
+            return function field_middleware(ps) {
+                for (let i = ps.length; i--;) { gf.force(ps[i]); }
             }
+        }()));
+
+        // //边界处理
+        // pcs.action_middlewares.after.push((function () {
+        //     //构建边界限制器
+        //     let border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+        //     //边界处理中间件
+        //     return function border_middleware(ps) {
+        //         for (let i = ps.length; i--;) { border.limit(ps[i]); }
+        //     }
+        // }()));
+
+        //渲染器
+        const randerer = new vision.randerer.IntervalRanderer().rander(() => {
+            pcs.action();
             //绘制
             canvas.refresh();
             canvas.colorStyle = "rgb(255, 255, 255)";
@@ -91,9 +101,8 @@
             canvas.colorStyle = "rgb(0, 255, 200)";
             canvas.circle(gf.gp.x, gf.gp.y, 3);
             canvas.ctx.fill();
-        };
+        });
 
-        setInterval(renderer, 17);
 
 
 

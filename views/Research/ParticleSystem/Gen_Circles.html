@@ -58,8 +58,8 @@
         //粒子系统生成器参数
         lmps.max_pn = 300; lmps.gen_pn = 20; lmps.GENR = true;
     
-        //迭代
-        setInterval(function(){
+        //渲染器
+        const randerer = new vision.randerer.IntervalRanderer().rander(() => {
             lmps.action();
             //绘制
             canvas.refresh();
@@ -68,8 +68,8 @@
                 canvas.circle(lmps.ps[i].p.x, lmps.ps[i].p.y, lmps.ps[i].R.val());
                 canvas.ctx.fill();
             }
+        });
 
-        }, 17);
 
     </script>
 

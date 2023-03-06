@@ -79,9 +79,9 @@ class RectLoopBorder extends Border {
     limit(p_obj, r=0) {
         for(let i=0; i<this.borders.length; i++) {
             if(p_obj.p.v[i]-r <= this.borders[i][0]) {
-                p_obj.p._v[i] = this.borders[i][1]-r;
+                p_obj.p.v[i] = this.borders[i][1]-r;
             } else if(p_obj.p.v[i]+r >= this.borders[i][1]) {
-                p_obj.p._v[i] = this.borders[i][0]+r;
+                p_obj.p.v[i] = this.borders[i][0]+r;
             }
         }
         return p_obj;

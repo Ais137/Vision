@@ -1,46 +1,47 @@
 {
-    //[javascript]: Meta信息
-    "JavaScript_Meta": {
-        //触发的文件类型
+    //源码文件元信息
+    "Meta_Annotation": {
+        "description": "描述源码文件元信息",
         "scope": "javascript,typescript",
-        //触发的关键词
         "prefix": "meta",
-        //填充模板
         "body": [
             "/****************************************",
-            " * Name: ",
+            " * Name: $1",
             " * Date: $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE", 
             " * Author: Ais",
-            " * Project: ",
-            " * Desc: ",
+            " * Project: $2",
+            " * Desc: $0",
             " * Version: 0.1",
+            " * Update: ",
             "****************************************/",
         ]
     },
-    //[javascript]: 类构造器注解
-    "JavaScript_ClassAnno": {
+    //类构造器注解
+    "Class_Annotation": {
+        "description": "描述class的架构设计",
         "scope": "javascript,typescript",
         "prefix": "clsanno", 
         "body": [
             "/*----------------------------------------",
-            "@class: ",
-            "@desc: ",
+            "@class: $1",
+            "@desc: $2",
             "@property: ", 
-            "    * key(type): value",
+            "    * key(type): desc",
             "@method: ",
             "    * method: func",
             "@exp: ",
             "----------------------------------------*/"
         ]
     },
-    //[javascript]: 方法注解
-    "JavaScript_Anno": {
+    //方法注解
+    "Method_Annotation": {
+        "description": "描述method(方法)的功能",
         "scope": "javascript,typescript",
         "prefix": "anno",
         "body": [
             "/*----------------------------------------",
-            "@func: ",
-            "@desc: ",
+            "@func: $1",
+            "@desc: $2",
             "@params: ",
             "    * key(type): value",
             "@return(type): ",
@@ -48,51 +49,110 @@
             "----------------------------------------*/",
         ]
     },
-    //[javascript]: 循环
-    "JavaScript_For": {
+
+
+    //-------------------- 常用js代码片段 --------------------//
+    //for循环
+    "JavaScript_for_loop": {
+        "description": "for循环",
         "scope": "javascript,typescript",
         "prefix": "for",
         "body": [
-            "for(let i=0, n=$0.length; i<n; i++) {",
-            "",
+            "for(let i=0, n=$1.length; i<n; i++) {",
+            "    $2",
             "}"
         ]
     },
 
+    
+    //-------------------- 粒子系统代码片段 --------------------//
+    //构建粒子系统
+    "Vision_ParticleSystem": {
+        "description": "构建粒子系统(ParticleSystem)",
+        "scope": "javascript,typescript",
+        "prefix": "vis-pcs",
+        "body": [
+            "//构建粒子群",
+            "let pcs = new vision.particle.ParticleSystem(() => {",
+            "    return new vision.particle.ForceParticle(",
+            "        Vector.random([[0, canvas.width], [0, canvas.height]]),",
+            "        Vector.random([confs.vR, confs.vR])",
+            "    );",
+            "}).build(confs.N);",
+        ]
+    },
+    //粒子系统action中间件
+    "Vision_action_middlewares": {
+        "description": "粒子系统action中间件",
+        "scope": "javascript,typescript",
+        "prefix": "vis-pcs-md",
+        "body": [
+            "pcs.action_middlewares.${1|before,after|}.push((function() {",
+            "    $2",
+            "    return function middleware(ps) {",
+            "        for(let i=ps.length; i--; ) { }",
+            "    }",
+            "}()));",
+        ]
+    },
+    //边界限制器
+    "Vision_Border": {
+        "description": "构建边界限制器(Border)",
+        "scope": "javascript,typescript",
+        "prefix": "vis-pcs-border",
+        "body": [
+            "//边界处理",
+            "pcs.action_middlewares.after.push((function() {",
+            "    //构建边界限制器",
+            "    let border = new vision.border.${1|RectReflectBorder,LoopReflectBorder|}([[0, canvas.width], [0, canvas.height]]);",
+            "    //边界处理中间件",
+            "    return function border_middleware(ps) {",
+            "        for(let i=ps.length; i--; ) { border.limit(ps[i]); }",
+            "    }",
+            "}()));",
+        ]
+    },
 
-    //-------------------- vision代码片段 --------------------//
+
+    //-------------------- 渲染器代码片段 --------------------//
     //构建间隔渲染器
     "Vision_IntervalRanderer": {
         "description": "构建间隔渲染器(IntervalRanderer)",
         "scope": "javascript,typescript",
-        "prefix": "vis-int-randerer",
+        "prefix": "vis-randerer",
         "body": [
+            "//渲染器",
             "const randerer = new vision.randerer.IntervalRanderer().rander(() => {",
             "    canvas.refresh();",
-            "});"
+            "    $1",
+            "});",
         ]
     },
     //构建单帧渲染器
     "Vision_SingleFrameRanderer": {
         "description": "构建单帧渲染器(SingleFrameRanderer)",
-        "prefix": "vis-sf-randerer",
+        "prefix": "vis-randerer-sf",
         "body": [
+            "//渲染器",
             "const randerer = new vision.randerer.SingleFrameRanderer().rander(",
-            "   (ft) => {",
-            "       pcs.action();",
-            "   },",
-            "   (ft) => {",
-            "       canvas.refresh();",
-            "   }",
+            "    (ft) => {",
+            "        pcs.action();",
+            "        $1",
+            "    },",
+            "    (ft) => {",
+            "        canvas.refresh();",
+            "    }",
             ");",
         ]
     },
+
     //构建截图器
     "Vision_Capturer": {
-        "description": "导入截图器(Capturer)",
+        "description": "构建截图器(Capturer)",
         "scope": "javascript,typescript",
         "prefix": "vis-capturer",
         "body": [
+            "//截图器",
             "const capturer = new vision.capturer.Capturer(canvas).capturing();"
         ]
     }

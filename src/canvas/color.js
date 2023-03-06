@@ -1,13 +1,15 @@
 /****************************************
  * Name: color | 颜色
- * Date: 2022-07-018
+ * Date: 2022-07-18
  * Author: Ais
  * Project: Vision
  * Desc: 颜色容器
  * Version: 0.1
 ****************************************/
 
+
 const Vector = require("../vector/vector.js").Vector;
+
 
 //颜色向量
 class ColorVector extends Vector {
@@ -30,29 +32,29 @@ class ColorVector extends Vector {
     constructor(r=0, g=0, b=0, a=1) {
         super();
         //颜色分量
-        this._v = a==1 ? [r, g, b] : [r, g, b, a];
+        this.v = a==1 ? [r, g, b] : [r, g, b, a];
     }
 
-    get r(){ return this._v[0]; }
-    get g(){ return this._v[1]; }
-    get b(){ return this._v[2]; }
-    get a(){ return this._v[3]; }
-    set r(val){ this._v[0] = val; }
-    set g(val){ this._v[1] = val; }
-    set b(val){ this._v[2] = val; }
-    set a(val){ this._v[3] = val; }
+    get r(){ return this.v[0]; }
+    get g(){ return this.v[1]; }
+    get b(){ return this.v[2]; }
+    get a(){ return this.v[3]; }
+    set r(val){ this.v[0] = val; }
+    set g(val){ this.v[1] = val; }
+    set b(val){ this.v[2] = val; }
+    set a(val){ this.v[3] = val; }
 
     color(tolist=false) {
-        if(this._v.length<=3) {
-            return tolist ? [this._v[0], this._v[1], this._v[2]] : `rgb(${this._v[0]}, ${this._v[1]}, ${this._v[2]})`;
+        if(this.v.length<=3) {
+            return tolist ? [this.v[0], this.v[1], this.v[2]] : `rgb(${this.v[0]}, ${this.v[1]}, ${this.v[2]})`;
         } else {
-            return tolist ? [this._v[0], this._v[1], this._v[2], this._v[3]] : `rgb(${this._v[0]}, ${this._v[1]}, ${this._v[2]})`;
+            return tolist ? [this.v[0], this.v[1], this.v[2], this.v[3]] : `rgb(${this.v[0]}, ${this.v[1]}, ${this.v[2]})`;
         }
     }
     val(tolist=false) { return this.color(tolist); }
 
     clone() {
-        return new ColorVector(...this._v);
+        return new ColorVector(...this.v);
     }
 }
 
@@ -98,7 +100,7 @@ class ColorGradient {
     } 
     val(tolist=false) { return this.color(tolist); }
 
-    end() {
+    isEnd() {
         return !(this._count > 0);
     }
 

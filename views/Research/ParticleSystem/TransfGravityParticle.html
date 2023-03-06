@@ -36,7 +36,7 @@ body {
 
         /********************************************
          * 当粒子临近范围(TG.N=200)时，粒子群呈现出一种随机游走的趋势
-         * 但是当粒子临近范围(TG.N=300, 400, ...)时，粒子群会在中心产生一种群聚的趋势。
+         * 但是当粒子临近范围(TG.R=300, 400, ...)时，粒子群会在中心产生一种群聚的趋势。
         *********************************************/
         
         //系统参数
@@ -77,19 +77,29 @@ body {
         }
 
         //构建粒子群
-        const pcs = vision.particle.ParticleSystem.Builder(() => {
+        let pcs = new vision.particle.ParticleSystem(() => {
             let p = new vision.particle.ForceParticle(
                 Vector.random([[0, canvas.width], [0, canvas.height]]),
                 Vector.random([confs.vR, confs.vR])
             );
             p.tracker = new vision.tracker.TrailTracker(p, confs.tn);
             return p;
-        }).init(confs.N);
+        }).build(confs.N);
         pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
 
-        //边界限制器
-        const border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
-        // const border = new vision.border.RingReflectBorder(new Vector(canvas.cx, canvas.cy), 500);
+        //边界处理
+        pcs.action_middlewares.after.push((function() {
+            //构建边界限制器
+            let border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+            // let border = new vision.border.RingReflectBorder(new Vector(canvas.cx, canvas.cy), 500);
+            //边界处理中间件
+            return function border_middleware(ps) {
+                for(let i=ps.length; i--; ) { 
+                    border.limit(ps[i]); 
+                    pcs.ps[i].v.limit(confs.v_max);
+                }
+            }
+        }()));
 
         //变换引力场
         class TransfGravity extends vision.field.Field {
@@ -136,14 +146,10 @@ body {
         }
         const field = new TransfGravity();
 
-        //渲染函数
-        const renderer = function () {
+        //渲染器
+        const randerer = new vision.randerer.IntervalRanderer().rander(() => {
             field.force(pcs.ps);
             pcs.action();
-            for (let i = 0, n = pcs.ps.length; i < n; i++) {
-                border.limit(pcs.ps[i]);
-                pcs.ps[i].v.limit(confs.v_max);
-            }
             //绘制
             canvas.refresh();
             for (let i = 0, n = pcs.ps.length; i < n; i++) {
@@ -154,9 +160,9 @@ body {
                 canvas.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, confs.draw.pR);
                 canvas.ctx.fill();
             }
-        };
+            
+        });
 
-        setInterval(renderer, 17);
         
     </script>
 </body>

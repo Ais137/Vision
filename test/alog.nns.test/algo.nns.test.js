@@ -46,11 +46,11 @@ test("algo.NNS", () => {
         "k": 7
     }
     //生成测试数据集
-    let ps = particle.ParticleSystem.Builder(() => {
+    let ps = new particle.ParticleSystem(() => {
         return new particle.Particle(
             Vector.random([confs.dod, confs.dod]),
         );
-    }).init(confs.N).ps;
+    }).build(confs.N).ps;
     let vect = function(obj) { return obj.p; };
     //构建目标测试数据
     let tp = new particle.Particle(Vector.random([confs.dod, confs.dod]));

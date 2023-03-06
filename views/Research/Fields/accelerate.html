@@ -51,29 +51,40 @@
         }
 
         //构建粒子群
-        const pcs = vision.particle.ParticleSystem.Builder(() => {
+        let pcs = new vision.particle.ParticleSystem(() => {
             let p = new vision.particle.ForceParticle(
                 Vector.random([[0, canvas.width], [0, canvas.height]]),
                 Vector.random([confs.vR, confs.vR])
             );
             p.tracker = new vision.tracker.TrailTracker(p, confs.tn);
             return p;
-        }).init(confs.N);
+        }).build(confs.N);
         pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
 
-        //边界限制器
-        const border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
-
         //匀加速场
-        const field = new vision.field.AccelerateField(new Vector(0.1, -0.1));
-
-        //渲染函数
-        const renderer = function () {
-            pcs.action();
-            for (let i = 0, n = pcs.ps.length; i < n; i++) {
-                field.force(pcs.ps[i]);
-                border.limit(pcs.ps[i]);
+        pcs.action_middlewares.before.push((function() {
+            //构建矢量场
+            let field = new vision.field.AccelerateField(new Vector(0.1, -0.1));
+            //矢量场作用中间件
+            return function field_middleware(ps) {
+                for(let i=ps.length; i--; ) { field.force(ps[i]); }
             }
+        }()));
+
+        //边界处理
+        pcs.action_middlewares.after.push((function() {
+            //构建边界限制器
+            let border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+            //边界处理中间件
+            return function border_middleware(ps) {
+                for(let i=ps.length; i--; ) { border.limit(ps[i]); }
+            }
+        }()));
+
+        //渲染器
+        const randerer = new vision.randerer.IntervalRanderer().rander(() => {
+            canvas.refresh();
+            pcs.action();
             //绘制
             canvas.refresh();
             canvas.colorStyle = "rgb(255, 255, 255)";
@@ -87,10 +98,7 @@
                 // canvas.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, 3);
                 // canvas.ctx.fill();
             }
-        };
-
-        setInterval(renderer, 17);
-
+        });
 
 
     </script>
