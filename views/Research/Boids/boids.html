@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> boids </title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const Vector = vision.vector.Vector;
+        const Views = vision.views.Views; Views.canvas = canvas;
+        const Tools = vision.tools.Tools;
+        canvas.BGC = 'rgb(20, 20, 20)'; 
+
+        //配置参数
+        const confs = {
+            //粒子数
+            "N": 300,
+            //粒子速度范围
+            "vR": [-5, 5],
+            //是否生成新粒子
+            "GENR": false,
+            //粒子生成速度
+            "gn": 5,
+            //最大速度限制
+            "max_v": 3,
+            //感知视野范围
+            "view_rad": 50,
+            //种群特征值
+            "K": [0.5, 0.5, 0.05],
+            //轨迹长度
+            "tn":30,
+        } 
+
+        //构建粒子群
+        let pcs = new vision.particle.ParticleSystem(() => {
+            let p = new vision.Boids.Boid(
+                Vector.random([[0, canvas.width], [0, canvas.height]]),
+                Vector.random([confs.vR, confs.vR]),
+                confs.view_rad,
+                confs.K,
+            );
+            p.tracker = new vision.tracker.TrailTracker(p, confs.tn);
+            return p;
+        }).build(confs.N);
+        pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
+
+        //鸟群模型规则集作用
+        pcs.action_middlewares.before.push(
+            vision.Boids.boids_middlewares(
+                new vision.NNS.GridNNS([], function(obj){ return obj.p }, confs.view_rad)
+            )
+        );
+
+        //速度限制
+        pcs.action_middlewares.after.push((function() {
+            return function v_limit_middleware(ps) {
+                for(let i=ps.length; i--; ) { ps[i].v.limit(confs.max_v) }
+            }
+        }()));
+
+        //边界处理
+        pcs.action_middlewares.after.push((function () {
+            //构建边界限制器
+            let border = new vision.border.RectLoopBorder([[0, canvas.width], [0, canvas.height]]);
+            //边界处理中间件
+            return function border_middleware(ps) {
+                for (let i = ps.length; i--;) { border.limit(ps[i]); }
+            }
+        }()));
+
+        //渲染器
+        const randerer = new vision.randerer.IntervalRanderer().rander(() => {
+            pcs.action();
+            //绘制
+            canvas.refresh();
+            for (let i = 0, n = pcs.ps.length; i < n; i++) {
+                Views.trail(pcs.ps[i].tracker.trail, {"color": new vision.color.ColorGradient([50, 50, 50], [255, 255, 255], pcs.ps[i].tracker.trail.length)});
+            }
+        });
+
+
+    </script>
+</body>
+
+</html>

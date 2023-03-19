@@ -7,6 +7,7 @@
  * Version: 0.1
 ****************************************/
 
+
 const color = require("../canvas/color");
 const Vector = require("../vector/vector").Vector;
 
@@ -138,6 +139,33 @@ class Views {
             Views.canvas.circle(x, y, dR*i);
             Views.canvas.ctx.fill();
         }  
+    }
+
+    /*----------------------------------------
+    @func: 绘制轨迹
+    @desc: 
+        解决“循环边界”下的轨迹绘制异常，通过将完整轨迹按照阈值进行分段绘制。
+    @params: 
+        * trail(list:Vector): 轨迹向量列表
+        * split_x(number): x轴分量分段阈值
+        * split_y(number): y轴分量分段阈值
+        * color: 轨迹颜色(支持渐变对象)
+    @exp: 
+        trail(pcs.ps[i].tracker.trail, {"color": new vision.color.ColorGradient([50, 50, 50], [255, 255, 255], pcs.ps[i].tracker.trail.length)});
+    ----------------------------------------*/
+    static trail(trail, {split_x=100, split_y=100, color='rgb(255, 255, 255)'}={}) {
+        let split_trail = [[]];
+        //按照分量分段阈值对轨迹进行分段
+        for(let i=0, n=trail.length-1; i<n; i++) {
+            split_trail[split_trail.length-1].push(trail[i])
+            if(Math.abs(trail[i].x-trail[i+1].x)>split_x | Math.abs(trail[i].y-trail[i+1].y)>split_y) {
+                split_trail.push([]);
+            }
+        }
+        for(let i=0, n=split_trail.length; i<n; i++) {
+            if(split_trail[i].length <= 1) { continue; }
+            Views.canvas.lines(split_trail[i], color)
+        }
     }
 }
 

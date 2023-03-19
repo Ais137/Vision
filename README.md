@@ -23,8 +23,8 @@
 
 --------------------------------------------------
 ## Docs · 文档 
-* [Spark | 想法与灵感记录](./Spark.md)
-* [DevStandard | 开发规范](./docs/develop/DevStandard.md)
+* [Spark · 想法与灵感记录](./Spark.md)
+* [DevStandard · 开发规范](./docs/develop/DevStandard.md)
 
 --------------------------------------------------
 ## Blogs · 博客
@@ -34,12 +34,12 @@
 ## Update · 更新日志
 * [NNS(Nearest Neighbor Search)](./src/algo/NNS.js) : 邻近搜索算法，在数据(向量)集中搜索给定目标的邻近集。
 * [ParticleSystem](./src/vector/particle.js) : 粒子系统结构优化，新增Hook机制。
+* [Boids](./src/algo/Boids.js) : 集群行为模拟 —— *Boids* 基础模型实现 [(演示)](./views/Research/Boids/boids.html)
 
 --------------------------------------------------
 ## DevPlan · 开发计划
 ### 阶段计划
   * NNS(邻近搜索)算法实现: KD树
-  * boids(鸟群)算法实现
   * PSO(粒子群优化)算法实现
   * KNN分类器实现
   * sort(排序)算法模块实现
@@ -47,10 +47,11 @@
   * 连杆系统
   * 贝塞尔曲线
 ### 持续开发
-  * 离线渲染模块(初步架构): WebSocket + Node Server + Selenium
-  * 文档自动构建工具: 基于源码的注解自动生成文档
+  * ***VisionProtocol*** 绘制协议 : 通过该抽象层实现绘制模块与绘图上下文容器的解耦
+  * 离线渲染模块(初步架构) : WebSocket + Node Server + Selenium
+  * 文档自动构建工具 : 基于源码的注解自动生成文档
   * 计算性能优化(参考《高性能Javascript》)
-  * **Vector** 模块性能优化: 基于 *WebAssembly* 重构
+  * **Vector** 模块性能优化 : 基于 *WebAssembly* 重构
 
 --------------------------------------------------
 ## Index · 项目目录结构索引(概览)
@@ -67,17 +68,21 @@
 --------------------------------------------------
 ## Build · 项目构建
 * 项目构建器 
-```
-//构建项目
+```shell
 npm run build
 ```
+
 * Views模板构建器
-```
-//查看当前模板
+```shell
+# 查看当前模板
 npm run vtp -- -list
-//生成模板
+# 生成模板
 npm run vtp -- 文件名 模板名  
-//exp: npm run vtp -- test pcs
+# exp: npm run vtp -- test pcs
+```
+* 项目测试(基于jest)
+```shell
+npm run test
 ```
 
 --------------------------------------------------
