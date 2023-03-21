@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> boids </title>
+    <title> boids_M0S1 </title>
     <!-- 导入模块 -->
     <script src="../../../dist/vision.js"></script>
     <style>
@@ -37,10 +37,16 @@
         const Tools = vision.tools.Tools;
         canvas.BGC = 'rgb(0, 0, 0)'; 
 
+        /*----------------------------------------
+        model: M0(基准模型)
+        sample: S1
+        feature: 根据概率生成具有不同种群特征值的个体
+        ----------------------------------------*/
+
         //配置参数
         const confs = {
             //粒子数
-            "N": 300,
+            "N": 400,
             //粒子速度范围
             "vR": [-5, 5],
             //是否生成新粒子
@@ -51,24 +57,35 @@
             "max_v": 3,
             //感知视野范围
             "view_rad": 100,
-            //种群特征值
-            "K": [0.5, 0.5, 0.05],
+            //种群特征(种群特征值, 绘制的颜色, 生成概率)
+            "K_set": [
+                //基准值
+                [[[0.5, 0.5, 0.05], [255, 255, 255]], 0.8],
+                //提高个体的靠近行为权重
+                [[[0.5, 0.5, 0.25], [0, 200, 100]], 0.2],
+                //提高个体的分离行为权重
+                [[[0.5, 5, 0.05], [255, 0, 100]], 0.1],
+            ],
             //轨迹长度
-            "tn":30,
+            "tn": 40,
         } 
+
+        //种群特征值随机生成器
+        const K_random_generator = new vision.random.RandomSelector(confs.K_set);
 
         //构建粒子群
         let pcs = new vision.particle.ParticleSystem(() => {
+            let [K, color] = K_random_generator.select();
             let p = new vision.Boids.Boid(
                 Vector.random([[0, canvas.width], [0, canvas.height]]),
                 Vector.random([confs.vR, confs.vR]),
                 confs.view_rad,
-                confs.K,
+                K,
             );
+            p.color = color;
             p.tracker = new vision.tracker.TrailTracker(p, confs.tn);
             return p;
-        }).build(confs.N);
-        pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
+        }, {max_pn: confs.N, gen_pn: confs.gn, GENR: confs.GENR}).build(confs.N);
 
         //鸟群模型规则集作用
         pcs.action_middlewares.before.push(
@@ -100,7 +117,8 @@
             //绘制
             canvas.refresh();
             for (let i = 0, n = pcs.ps.length; i < n; i++) {
-                Views.trail(pcs.ps[i].tracker.trail, {"color": new vision.color.ColorGradient([0, 0, 0], [255, 255, 255], pcs.ps[i].tracker.trail.length)});
+                // Views.trail(pcs.ps[i].tracker.trail, {"color": new vision.color.ColorGradient([50, 50, 50], [255, 255, 255], pcs.ps[i].tracker.trail.length)});
+                Views.trail(pcs.ps[i].tracker.trail, {"color": new vision.color.ColorGradient([0, 0, 0], pcs.ps[i].color, pcs.ps[i].tracker.trail.length)});
             }
         });
 

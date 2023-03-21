@@ -13,7 +13,7 @@ const Vector = require("../vector/vector").Vector;
 const particle = require("../vector/particle");
 
 
-//鸟群个体(基准模型)
+//鸟群个体(基准模型:M0)
 class Boid extends particle.Particle {
 
     //基础规则集
@@ -84,7 +84,7 @@ class Boid extends particle.Particle {
             Boid.RuleSet.cohesion
         ];
         //速度增量
-        this._acc = new Vector();
+        this.acc = new Vector(0, 0);
     }
 
     /*----------------------------------------
@@ -100,12 +100,14 @@ class Boid extends particle.Particle {
         for(let i=0, n=this.rules.length; i<n; i++) {
             rule_vectors[i] = this.rules[i](this, ns);
         }
-        this._acc = Vector.LC(rule_vectors, this.K);
+        this.acc.add(Vector.LC(rule_vectors, this.K));
     }
 
     //行为迭代
     action() {
-        return this.p.add(this.v.add(this._acc));
+        this.p.add(this.v.add(this.acc));
+        this.acc = new Vector(0, 0);
+        return this.p;
     }
 }
 
@@ -132,7 +134,6 @@ const boids_middlewares = function(nns) {
         }
     }
 }
-
 
 
 module.exports.Boid = Boid;

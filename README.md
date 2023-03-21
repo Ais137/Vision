@@ -95,6 +95,8 @@ npm run test
 ![L-System](./img/disp/plants.png)
 ### [*Helix*](./views/Projects/Helix/Helix.html)
 ![Helix](./img/disp/Helix_2.png)
+### [*Boids*](./views/Research/Boids/boids_M0S1.html)
+![Boids](./img/disp/boids_M0S1.png)
 ### [*TransfGravityParticle*](./views/Research/ParticleSystem/TransfGravityParticle.html)
 ![TransfGravityParticle](./img/disp/TransfGravityParticle.png)
 ### [*The Life of Tree*](./views/Projects/The%20Life%20of%20Tree/The%20Life%20of%20Tree.html)
