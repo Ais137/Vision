@@ -80,8 +80,7 @@
             //偏移场作用参数
             p.Q = Tools.random(...confs.qR);
             return p;
-        }).build();
-        pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
+        }, {max_pn: confs.N, gen_pn: confs.gn, GENR: confs.GENR}).build();
 
         //构建边界限制器
         let border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);

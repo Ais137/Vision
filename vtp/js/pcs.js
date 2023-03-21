@@ -16,8 +16,7 @@ let pcs = new vision.particle.ParticleSystem(() => {
         Vector.random([[0, canvas.width], [0, canvas.height]]),
         Vector.random([confs.vR, confs.vR])
     );
-}).build(confs.N);
-pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
+}, {max_pn: confs.N, gen_pn: confs.gn, GENR: confs.GENR}).build(confs.N);
 
 //边界处理
 pcs.action_middlewares.after.push((function() {

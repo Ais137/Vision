@@ -76,7 +76,7 @@ class ParticleSystem {
     @exp: 
         let pcs = new ParticleSystem().init();
     ----------------------------------------*/
-    constructor(particle_builder) {
+    constructor(particle_builder, {max_pn=500, gen_pn=1, GENR=false, DSTR=true}={}) {
         //粒子容器
         this.ps = [];
         //粒子生成器
@@ -87,13 +87,13 @@ class ParticleSystem {
             "after": [],
         }
         //最大粒子数
-        this.max_pn = 500;
+        this.max_pn = max_pn;
         //迭代过程粒子生成数
-        this.gen_pn = 1;
+        this.gen_pn = gen_pn;
         //粒子生成开关
-        this.GENR = false;
+        this.GENR = GENR;
         //粒子销毁开关
-        this.DSTR = true;
+        this.DSTR = DSTR;
     }
 
     /*----------------------------------------

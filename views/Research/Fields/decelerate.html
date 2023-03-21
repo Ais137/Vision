@@ -61,8 +61,7 @@
                 return p.v.norm() < 0.05;
             }
             return p;
-        }).build(confs.N);
-        pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
+        }, {max_pn: confs.N, gen_pn: confs.gn, GENR: confs.GENR}).build(confs.N);
 
         //构建减速场
         let field = new vision.field.DecelerateField(0.01, new vision.area.CircleArea(new Vector(canvas.cx, canvas.cy), 400));

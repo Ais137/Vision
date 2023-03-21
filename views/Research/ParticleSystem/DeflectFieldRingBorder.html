@@ -66,8 +66,7 @@
                 return v_val > 30000 || v_val < 5;
             }
             return p;
-        }).build(confs.N);
-        pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
+        }, {max_pn: confs.N, gen_pn: confs.gn, GENR: confs.GENR}).build(confs.N);
 
         //力场计算与边界处理
         pcs.action_middlewares.after.push((function () {

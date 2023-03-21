@@ -35,8 +35,7 @@ let pcs = new vision.particle.ParticleSystem(() => {
     );
     p.tracker = new vision.tracker.TrailTracker(p, confs.tn);
     return p;
-}).build(confs.N);
-pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
+}, {max_pn: confs.N, gen_pn: confs.gn, GENR: confs.GENR}).build(confs.N);
 
 //力场作用
 pcs.action_middlewares.before.push((function() {
