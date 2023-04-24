@@ -7,11 +7,11 @@
 * ### ***/docs*** : 项目文档目录
     * ### */blogs* : 博客文档
     * ### */develop* : 开发文档
-        * [DevIndex]() : 项目结构索引
-        * [DevDevStandard](./DevStandard.md) : 项目开发规范
         * [Vision.code-snippets](./Vision.code-snippets) : 代码片段(vscode) 
     * ### */framework* : 架构设计文档
     * ### */intro* : 简介教程
+    * [DevIndex]() : 项目结构索引
+    * [DevDevStandard](./DevStandard.md) : 项目开发规范
 * ### ***/src***: 源码目录
     * ### */algo*: 算法模块
         * [L-System.js](../../src/algo/LSystem.js): L-系统

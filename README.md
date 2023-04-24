@@ -23,8 +23,8 @@
 
 --------------------------------------------------
 ## Docs · 文档 
+* [DevStandard · 开发规范](./docs/DevStandard.md)
 * [Spark · 想法与灵感记录](./Spark.md)
-* [DevStandard · 开发规范](./docs/develop/DevStandard.md)
 
 --------------------------------------------------
 ## Blogs · 博客
@@ -63,7 +63,7 @@
 * */views* : 项目应用目录
 * */vtp* : Views模板构建工具目录
 
-**详细目录结构索引** : [DevIndex](./docs/develop/DevIndex.md) 
+**详细目录结构索引** : [DevIndex](./docs/DevIndex.md) 
 
 --------------------------------------------------
 ## Build · 项目构建

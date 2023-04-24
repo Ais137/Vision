@@ -1,6 +1,6 @@
 {
     "name": "vision",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Build for Spark and Imagination",
     "main": "index.js",
     "directories": {
@@ -21,7 +21,6 @@
     "license": "ISC",
     "devDependencies": {
         "jest": "^28.1.1",
-        "webpack": "^5.73.0",
-        "ws": "^8.8.1"
+        "webpack": "^5.73.0"
     }
 }
