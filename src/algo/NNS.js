@@ -8,7 +8,7 @@
 ****************************************/
 
 
-const Vector = require("../vector/vector").Vector;
+import { Vector } from "../vector/vector.js";
 
 
 //邻近搜索算法(基类)
@@ -551,7 +551,4 @@ class KDTreeNNS extends NearestNeighborSearch {
 }
 
 
-module.exports.NearestNeighborSearch = NearestNeighborSearch;
-module.exports.LinearNNS = LinearNNS;
-module.exports.GridNNS = GridNNS;
-module.exports.KDTreeNNS = KDTreeNNS;
+export { NearestNeighborSearch, LinearNNS, GridNNS, KDTreeNNS };

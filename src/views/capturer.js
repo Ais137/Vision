@@ -79,4 +79,4 @@ class Capturer {
 }
 
 
-module.exports.Capturer = Capturer;
+export { Capturer };

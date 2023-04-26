@@ -3,40 +3,45 @@
 * ### ***/build*** : 项目构建工具目录
     * [build](../../build/build.js) : 项目构建工具脚本
     * builder.config.js : 构建器配置文件
+    * rollup.config.js : rollup配置文件
     * webpack.config.js : webpack配置文件
 * ### ***/docs*** : 项目文档目录
     * ### */blogs* : 博客文档
     * ### */develop* : 开发文档
-        * [Vision.code-snippets](./Vision.code-snippets) : 代码片段(vscode) 
+        * [Vision.code-snippets](./develop/Vision.code-snippets) : 代码片段(vscode) 
     * ### */framework* : 架构设计文档
-    * ### */intro* : 简介教程
+    * ### */technology* : 技术方案评估文档
+    * ### */tutorial* : 简介教程
     * [DevIndex]() : 项目结构索引
     * [DevDevStandard](./DevStandard.md) : 项目开发规范
 * ### ***/src***: 源码目录
     * ### */algo*: 算法模块
-        * [L-System.js](../../src/algo/LSystem.js): L-系统
-        * [Mandelbrot_Set](../../src/algo/Mandelbrot_Set.js): 曼德勃罗特集
-        * [NNS](../../src/algo/NNS.js): 邻近搜索算法模块
-        * [OSS](../../src/algo/OSS.js): 最优解求解器(PSO的一种简化实现)
-    * ### */canvas* : 基础绘制API封装
-        * [canvas](../../src/canvas/canvas.js) : Canvas绘制API封装
-        * [color](../../src/canvas/color.js) : 颜色容器
+        * [Boids.js](../src/algo/Boids.js) : 鸟群算法
+        * [L-System.js](../src/algo/LSystem.js): L-系统
+        * [Mandelbrot_Set](../src/algo/Mandelbrot_Set.js): 曼德勃罗特集
+        * [NNS](../src/algo/NNS.js): 邻近搜索算法模块
+        * [OSS](../src/algo/OSS.js): 最优解求解器(PSO的一种简化实现)
+    * ### */context* : 绘图上下文容器
+        * [canvas](../src/context/canvas.js) : Canvas绘制API封装
+    * ### */particle* : 粒子模块(核心模块)
+        * [particle](../src/particle/particle.js) : 粒子类
+        * [particle_system](../src/particle/particle_system.js) : 粒子系统
+        * [field](../src/particle/field.js) : 矢量场
+        * [area](../src/particle/area.js) : 区域类
+        * [border](../src/particle/border.js) : 边界类
+        * [coor](../src/particle/coor.js) : 坐标系
+        * [tracker](../src/particle/tracker.js) : 轨迹追踪器
     * ### */utils* : 工具模块
-        * [iterator](../../src/utils/iterator.js) : 迭代器
-        * [random](../../src/utils/random.js) : 随机选择器
-        * [tools](../../src/utils/tools.js) : 常用工具代码封装
+        * [iterator](../src/utils/iterator.js) : 迭代器
+        * [random](../src/utils/random.js) : 随机选择器
+        * [tools](../src/utils/tools.js) : 常用工具代码封装
     * ### ***/vector*** : 向量模块(核心模块)
-        * [vector](../../src/vector/vector.js) : 向量类(核心模块)
-        * [particle](../../src/vector/particle.js) : 粒子系统
-        * [field](../../src/vector/field.js) : 矢量场
-        * [area](../../src/vector/area.js) : 区域类
-        * [border](../../src/vector/border.js) : 边界类
-        * [coor](../../src/vector/coor.js) : 坐标系
-        * [tracker](../../src/vector/tracker.js) : 轨迹追踪器
+        * [vector](../src/vector/vector.js) : 向量类(核心模块)
     * ### */views* : 视觉效果模块(高层次绘制API)
-        * [capturer](../../src/views/capturer.js) : 截图器
-        * [randerer](../../src/views/randerer.js) : 渲染器
-        * [views](../../src/views/views.js) : 绘制模式封装
+        * [capturer](../src/views/capturer.js) : 截图器
+        * [color](../src/views/color.js) : 颜色容器
+        * [randerer](../src/views/randerer.js) : 渲染器
+        * [views](../src/views/views.js) : 绘制模式封装
 * ### ***/test*** : 测试代码目录
 * ### ***/tools*** : 辅助开发/设计工具目录
 * ### ***/vtp*** : Views模板构建工具

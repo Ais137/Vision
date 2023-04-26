@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision</title>
+    <!-- 导入模块 -->
+    <script src="../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            cursor: none;
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.Canvas("vision_canvas");
+        const Vector = vision.Vector;
+        
+
+        //构建顶点集区域
+        let vps_area = new vision.particle.area.Area(Vector.vpoints(JSON.parse('[[711,500],[821,325],[1095,317],[1254,550],[1102,745],[819,830],[664,686]]')));
+        // vps_area.reverse = true;
+
+        //矩形区域
+        let r_area = new vision.particle.area.RectArea([[200, 500], [-Infinity, Infinity]]);
+        // r_area.reverse = true;
+
+        //圆形区域
+        let c_area = new vision.particle.area.CircleArea(new Vector(1574, 254), 200);
+        // c_area.reverse = true;
+
+        //绘制
+        const disp = function() {
+            canvas.lines(vps_area.vps, color='rgb(255, 255, 255)', close=true);
+            canvas.rect((r_area.borders[0][1]-r_area.borders[0][0])/2+r_area.borders[0][0], 0, (r_area.borders[0][1]-r_area.borders[0][0])/2, canvas.height);
+            canvas.circle(c_area.po.x, c_area.po.y, c_area.r);
+        }
+
+        document.getElementById("vision_canvas").addEventListener("mousemove", function(event) {
+            canvas.refresh(); disp();
+            let p = new Vector(event.clientX, event.clientY);
+            canvas.colorStyle = 'rgb(255, 255, 255)';
+            if(vps_area.in(p)) { canvas.colorStyle = 'rgb(0, 200, 0)'; } 
+            if(r_area.in(p)) { canvas.colorStyle = 'rgb(200, 0, 0)'; } 
+            if(c_area.in(p)) { canvas.colorStyle = 'rgb(0, 0, 200)'; } 
+            canvas.circle(p.x, p.y, 10);
+            canvas.ctx.fill();
+        });
+
+        disp();
+
+    </script>
+
+
+</body>
+</html>

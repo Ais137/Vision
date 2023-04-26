@@ -7,6 +7,7 @@
  * Version: 0.1
 ****************************************/
 
+
 //渲染器基类
 class Randerer {
 
@@ -186,6 +187,4 @@ class SceneFlowRanderer extends Randerer {
 }
 
 
-// module.exports.Randerer = Randerer;
-module.exports.IntervalRanderer = IntervalRanderer;
-module.exports.SingleFrameRanderer = SingleFrameRanderer;
+export { IntervalRanderer, SingleFrameRanderer };

@@ -9,12 +9,12 @@
 ****************************************/
 
 
-const Vector = require("../vector/vector").Vector;
-const particle = require("../vector/particle");
+import { Vector  } from "../vector/vector.js";
+import { Particle } from "../particle/particle.js";
 
 
 //鸟群个体(基准模型:M0)
-class Boid extends particle.Particle {
+class Boid extends Particle {
 
     //基础规则集
     static RuleSet = {
@@ -136,5 +136,4 @@ const boids_middlewares = function(nns) {
 }
 
 
-module.exports.Boid = Boid;
-module.exports.boids_middlewares = boids_middlewares;
+export { Boid, boids_middlewares };

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision</title>
+    <!-- 导入模块 -->
+    <script src="../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.Canvas("vision_canvas");
+        const Vector = vision.Vector;
+
+        //构建测试粒子
+        let p = new vision.particle.Particle(
+            Vector.random([[0, canvas.width], [0, canvas.height]]),
+            Vector.random([[5, 10], [-5, -5]]),
+        )
+        //构建轨迹追踪器
+        let tracker = new vision.particle.TrailTracker(p, 100);
+        //构建边界限制器
+        const border = new vision.particle.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+
+        //绘制
+        setInterval(function(){
+            canvas.refresh();
+            p.action();
+            border.limit(p);
+            //绘制测试粒子
+            canvas.colorStyle = 'rgb(0, 200, 0)';
+            canvas.circle(p.p.x, p.p.y, 2);
+            canvas.ctx.fill();
+            //构建颜色渐变器
+            let cg = new vision.views.ColorGradient([0, 200, 200], [50, 50, 50], tracker.trail.length);
+            //绘制轨迹
+            canvas.ctx.lineWidth = 4;
+            canvas.lines(tracker.trail.slice().reverse(), color=cg);
+        }, 17);
+
+
+    </script>
+
+
+</body>
+</html>

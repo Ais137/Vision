@@ -33,7 +33,7 @@
 --------------------------------------------------
 ## Update · 更新日志
 * [NNS(Nearest Neighbor Search)](./src/algo/NNS.js) : 邻近搜索算法，在数据(向量)集中搜索给定目标的邻近集。
-* [ParticleSystem](./src/vector/particle.js) : 粒子系统结构优化，新增Hook机制。
+* [ParticleSystem](./src/particle/particle.js) : 粒子系统结构优化，新增Hook机制。
 * [Boids](./src/algo/Boids.js) : 集群行为模拟 —— *Boids* 基础模型实现 [(演示)](./views/Research/Boids/boids.html)
 
 --------------------------------------------------

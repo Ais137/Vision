@@ -74,5 +74,4 @@ class RandomSelector {
 }
 
 
-
-module.exports.RandomSelector = RandomSelector;
+export { RandomSelector };

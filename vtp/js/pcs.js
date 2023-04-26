@@ -21,7 +21,7 @@ let pcs = new vision.particle.ParticleSystem(() => {
 //边界处理
 pcs.action_middlewares.after.push((function() {
     //构建边界限制器
-    let border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+    let border = new vision.particle.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
     //边界处理中间件
     return function border_middleware(ps) {
         for(let i=ps.length; i--; ) { border.limit(ps[i]); }

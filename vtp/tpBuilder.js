@@ -9,11 +9,14 @@
     * [0.1 -> 0.2]: 添加渲染器(renderer)代码块 
 ****************************************/
 
-const fs = require("fs");
-const path = require("path");
+import * as fs from "node:fs";
+import * as path from "node:path";
 
 //导入模板配置文件
-const TPS_CONFS = require("./tpBuilder.confs").TPS_CONFS;
+import { TPS_CONFS } from "./tpBuilder.confs.js";
+
+import { fileURLToPath } from 'node:url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 //Views模板生成器
 class TemplatesBuilder {
