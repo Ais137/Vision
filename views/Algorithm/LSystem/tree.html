@@ -31,10 +31,10 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.canvas.Canvas("vision_canvas");
-        const Vector = vision.vector.Vector;
-        const Views = vision.views.Views; Views.canvas = canvas;
-        const Tools = vision.tools.Tools;
+        const canvas = new vision.Canvas("vision_canvas");
+        const Vector = vision.Vector;
+        const Views = vision.Views; Views.context = canvas;
+        const Tools = vision.Tools;
 
         //系统参数
         const confs = {
@@ -51,7 +51,7 @@
         }
 
         //分形二叉树
-        let ls = new vision.LSystem.LSystem({
+        let ls = new vision.algo.LSystem({
             "S": "0",
             "P": {
                 "0": "1[0]0",

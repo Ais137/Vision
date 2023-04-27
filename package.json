@@ -1,17 +1,18 @@
 {
     "name": "vision",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Build for Spark and Imagination",
     "main": "index.js",
+    "type": "module",
     "directories": {
         "doc": "docs",
         "lib": "lib",
         "test": "test"
     },
     "scripts": {
-        "test": "jest",
-        "build": "node ./build/build.js",
-        "vtp": "node ./vtp/tpBuilder.js"
+        "vtp": "node ./vtp/tpBuilder.js",
+        "build": "rollup --config ./build/rollup.config.js",
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
     },
     "keywords": [
         "vision",
@@ -21,7 +22,6 @@
     "license": "ISC",
     "devDependencies": {
         "jest": "^28.1.1",
-        "webpack": "^5.73.0",
-        "ws": "^8.8.1"
+        "rollup": "^3.21.0"
     }
 }

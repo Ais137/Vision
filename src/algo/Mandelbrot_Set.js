@@ -105,8 +105,4 @@ const Julia_Set = function(Z0, C, n=500) {
 }
 
 
-
-module.exports.Complex = Complex;
-module.exports.Mandelbrot_Set = Mandelbrot_Set;
-module.exports.Julia_Set = Julia_Set;
-
+export { Complex, Mandelbrot_Set, Julia_Set };

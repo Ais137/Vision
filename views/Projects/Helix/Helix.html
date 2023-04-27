@@ -31,10 +31,10 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.canvas.Canvas("vision_canvas");
-        const Vector = vision.vector.Vector;
-        const Views = vision.views.Views; Views.canvas = canvas;
-        const Tools = vision.tools.Tools;
+        const canvas = new vision.Canvas("vision_canvas");
+        const Vector = vision.Vector;
+        const Views = vision.Views; Views.context = canvas;
+        const Tools = vision.Tools;
         canvas.BGC = Tools.RGB([0, 0, 0])
 
         class Helix {
@@ -92,7 +92,7 @@
 
         }).stop(helix.R/helix.dr*2);
 
-        const capturer = new vision.capturer.Capturer(canvas).capturing();
+        const capturer = new vision.views.Capturer(canvas).capturing();
 
     </script>
 </body>

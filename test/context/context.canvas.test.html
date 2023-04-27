@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision</title>
+    <!-- 导入模块 -->
+    <script src="../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const canvas = new vision.Canvas("vision_canvas");
+        const Vector = vision.Vector;
+
+        //绘制点
+        canvas.point(100, 100);
+        canvas.point(new Vector(100, 150));
+        canvas.POINT.R = 3, canvas.POINT.C = 'rgb(0, 255, 0)';
+        canvas.point(100, 200);
+        canvas.point(new Vector(100, 250));
+        canvas.POINT.R = 6, canvas.POINT.C = 'rgb(0, 200, 200)';
+        canvas.point(100, 300);
+        canvas.point(new Vector(100, 350));
+
+        //绘制线
+        canvas.ctx.lineWidth = 2;
+        canvas.ctx.strokeStyle = 'rgb(255, 255, 255)';
+        canvas.line(200, 100, 400, 100);
+        canvas.ctx.lineWidth = 5;
+        canvas.ctx.strokeStyle = 'rgb(0, 255, 0)';
+        canvas.line(new Vector(200, 150), new Vector(400, 150));
+        
+        //绘制线集
+        canvas.ctx.lineWidth = 2;
+        canvas.ctx.strokeStyle = 'rgb(0, 200, 200)';
+        canvas.lines([[200, 200], [200, 300], [250, 300], [250, 200], [350, 200], [350, 250], [400, 250]])
+        canvas.ctx.strokeStyle = 'rgb(0, 250, 200)';
+        canvas.lines([
+            Vector.V(200, 350),
+            Vector.random([[200, 250], [350, 450]]),
+            Vector.random([[250, 300], [350, 450]]),
+            Vector.random([[300, 350], [350, 450]]),
+            Vector.random([[350, 400], [350, 450]]),
+        ])
+
+
+        //绘制圆
+        canvas.ctx.strokeStyle = 'rgb(255, 255, 255)';
+        canvas.circle(550, 150, 50)
+        canvas.ctx.lineWidth = 5
+        canvas.ctx.strokeStyle = 'rgb(0, 200, 200)';
+        canvas.circle(550, 350, 100)
+        canvas.ctx.lineWidth = 2
+        canvas.ctx.fillStyle = 'rgb(0, 250, 200)';
+        canvas.circle(550, 350, 50)
+        canvas.ctx.fill()
+
+        //绘制矩形
+        canvas.colorStyle = 'rgb(250, 0, 0)';
+        canvas.rect(750, 150, 50, 25);
+        canvas.ctx.fill();
+        
+    </script>
+
+
+</body>
+</html>

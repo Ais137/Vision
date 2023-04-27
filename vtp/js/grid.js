@@ -1,5 +1,5 @@
 //构建网格坐标系
-const grid = new vision.coor.Grid(new Vector(canvas.cx, canvas.cy), 50, 50, true);
+const grid = new vision.particle.coor.Grid(new Vector(canvas.cx, canvas.cy), 50, 50, true);
 
 //渲染函数
 const renderer = function() {

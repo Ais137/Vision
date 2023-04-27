@@ -92,5 +92,4 @@ class Tools {
 }
 
 
-
-module.exports.Tools = Tools;
+export { Tools };

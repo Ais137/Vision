@@ -1,10 +1,11 @@
-const path = require('path');
+import { resolve } from 'path';
+import { fileURLToPath } from 'url';
 
-module.exports = {
-    entry: './build/index.js',
+export default {
+    entry: './src/vision.js',
     output: {
-        path: path.resolve(__dirname, '../dist'),
-        filename: 'vision.js',
+        path: resolve(fileURLToPath(import.meta.url), '../../dist'),
+        filename: 'vision-webpack.js',
         library: 'vision',
     },
     mode: "development",

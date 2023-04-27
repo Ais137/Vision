@@ -36,9 +36,9 @@
             2. 点击鼠标右键触发计算 
         ****************************************************/
 
-        const canvas = new vision.canvas.Canvas("vision_canvas");
+        const canvas = new vision.Canvas("vision_canvas");
         // const canvas = new vision.canvas.Canvas("vision_canvas", 3840, 2160);
-        const Vector = vision.vector.Vector;
+        const Vector = vision.Vector;
 
         //目标函数构建器
         const tfunc_builder = function(points) {
@@ -80,7 +80,7 @@
         const solve = function(vps) {
 
             //构建最优解求解器集群
-            oss = new vision.OSS.OptimumSolutionSolvers();
+            oss = new vision.algo.OptimumSolutionSolvers();
             //求解器数量
             oss.n = 50;
             //目标函数

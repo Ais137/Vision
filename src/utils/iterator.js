@@ -7,6 +7,7 @@
  * Version: 0.1
 ****************************************/
 
+
 //迭代器(基类)
 class Iterator {
 
@@ -165,6 +166,4 @@ class FuncIterator extends Iterator {
 }
 
 
-module.exports.Iterator = Iterator;
-module.exports.Range = Range;
-module.exports.FuncIterator = FuncIterator;
+export { Iterator, Range, FuncIterator };

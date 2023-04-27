@@ -8,14 +8,14 @@
 ****************************************/
 
 
-const color = require("../canvas/color");
-const Vector = require("../vector/vector").Vector;
+import { Vector } from "../vector/vector.js";
+import { ColorVector, ColorGradient } from "./color.js";
 
 
 class Views {
 
-    //canvas对象
-    canvas = null;
+    //绘图上下文
+    context = null;
 
     /*----------------------------------------
     @func: 节点连接器
@@ -30,7 +30,7 @@ class Views {
         let pdr = (typeof dr === "number") ? [0, dr] : dr;
         let d = pdr[1] - pdr[0];
         //颜色向量|颜色渐变器
-        let cv = line_color.color ? line_color : new color.ColorVector(...line_color);
+        let cv = line_color.color ? line_color : new ColorVector(...line_color);
         //绘制
         for(let i=0, n=ps.length; i<n; i++) {
             let c = cv.color(true);
@@ -38,8 +38,8 @@ class Views {
                 //计算点距
                 let pd = ps[i].p.dist(ps[k].p);
                 if(pd >= pdr[0] && pd <= pdr[1]) {
-                    Views.canvas.ctx.strokeStyle = `rgb(${c[0]}, ${c[1]}, ${c[2]}, ${1-pd/d})`;
-                    Views.canvas.line(ps[i].p, ps[k].p);
+                    Views.context.ctx.strokeStyle = `rgb(${c[0]}, ${c[1]}, ${c[2]}, ${1-pd/d})`;
+                    Views.context.line(ps[i].p, ps[k].p);
                 }
             }
         }
@@ -60,28 +60,28 @@ class Views {
     ----------------------------------------*/
     static grid({co, dx, dy, xR, yR, color=[255, 255, 255], center=true}) {
         //中心坐标
-        co = co || new Vector(Views.canvas.cx, Views.canvas.cy);
+        co = co || new Vector(Views.context.cx, Views.context.cy);
         //网格单元尺寸
         dy = dy || dx;
         //x轴范围
-        xR = xR || [-parseInt(Views.canvas.cx/dx)-1, parseInt(Views.canvas.cx/dx)+1];
+        xR = xR || [-parseInt(Views.context.cx/dx)-1, parseInt(Views.context.cx/dx)+1];
         let xs = xR[0]*dx+co.x, xe = xR[1]*dx+co.x;
         //y轴范围
-        yR = yR || [-parseInt(Views.canvas.cy/dy)-1, parseInt(Views.canvas.cy/dy)+1];
+        yR = yR || [-parseInt(Views.context.cy/dy)-1, parseInt(Views.context.cy/dy)+1];
         let ys = yR[0]*dy+co.y, ye = yR[1]*dy+co.y;
         //居中偏移量
         let cdx = (center ? 0 : dx/2), cdy = (center ? 0 : dy/2); 
         //设置颜色
-        Views.canvas.ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]||0.25})`
+        Views.context.ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]||0.25})`
         //绘制x轴平行线
         for(let x=xR[0], n=xR[1]; x<=n; x++) {
             let _x = x*dx+co.x+cdx;
-            Views.canvas.line(_x, ys, _x, ye);
+            Views.context.line(_x, ys, _x, ye);
         }
         //绘制y轴平行线
         for(let y=yR[0], n=yR[1]; y<=n; y++) {
             let _y = y*dy+co.y+cdy;
-            Views.canvas.line(xs, _y, xe, _y);
+            Views.context.line(xs, _y, xe, _y);
         }
     }
 
@@ -101,14 +101,14 @@ class Views {
         //Lfx函数在[1, n]区间的最值, 用于进行后续归一化处理
         let max = Lfx(1), min = Lfx(n);
         //绘制光线
-        Views.canvas.ctx.lineCap = "round";
+        Views.context.ctx.lineCap = "round";
         for(let i=n; i>0; i--) {
             //计算亮度
             let lr = (Lfx(i) - min) / (max - min);
             let lc = [(cs[0]-ce[0])*lr+ce[0], (cs[1]-ce[1])*lr+ce[1], (cs[2]-ce[2])*lr+ce[2]];
             //绘制光线层
-            Views.canvas.ctx.lineWidth = i * d;
-            Views.canvas.lines(ps, new color.ColorGradient(lc, ce, ps.length));
+            Views.context.ctx.lineWidth = i * d;
+            Views.context.lines(ps, new ColorGradient(lc, ce, ps.length));
         }  
     }
 
@@ -135,9 +135,9 @@ class Views {
             let lr = (Lfx(point ? i : n-i) - min) / (max - min);
             let lc = [(cs[0]-ce[0])*lr+ce[0], (cs[1]-ce[1])*lr+ce[1], (cs[2]-ce[2])*lr+ce[2]];
             //绘制光环
-            Views.canvas.colorStyle = `rgb(${lc[0]}, ${lc[1]}, ${lc[2]})`;
-            Views.canvas.circle(x, y, dR*i);
-            Views.canvas.ctx.fill();
+            Views.context.colorStyle = `rgb(${lc[0]}, ${lc[1]}, ${lc[2]})`;
+            Views.context.circle(x, y, dR*i);
+            Views.context.ctx.fill();
         }  
     }
 
@@ -151,7 +151,7 @@ class Views {
         * split_y(number): y轴分量分段阈值
         * color: 轨迹颜色(支持渐变对象)
     @exp: 
-        trail(pcs.ps[i].tracker.trail, {"color": new vision.color.ColorGradient([50, 50, 50], [255, 255, 255], pcs.ps[i].tracker.trail.length)});
+        trail(pcs.ps[i].tracker.trail, {"color": new vision.views.ColorGradient([50, 50, 50], [255, 255, 255], pcs.ps[i].tracker.trail.length)});
     ----------------------------------------*/
     static trail(trail, {split_x=100, split_y=100, color='rgb(255, 255, 255)'}={}) {
         let split_trail = [[]];
@@ -164,11 +164,10 @@ class Views {
         }
         for(let i=0, n=split_trail.length; i<n; i++) {
             if(split_trail[i].length <= 1) { continue; }
-            Views.canvas.lines(split_trail[i], color)
+            Views.context.lines(split_trail[i], color)
         }
     }
 }
 
 
-module.exports.Views = Views;
-
+export { Views };

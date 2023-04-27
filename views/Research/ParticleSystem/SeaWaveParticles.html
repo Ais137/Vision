@@ -31,10 +31,10 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.canvas.Canvas("vision_canvas");
-        const Vector = vision.vector.Vector;
-        const Views = vision.views.Views; Views.canvas = canvas;
-        const Tools = vision.tools.Tools;
+        const canvas = new vision.Canvas("vision_canvas");
+        const Vector = vision.Vector;
+        const Views = vision.Views; Views.context = canvas;
+        const Tools = vision.Tools;
 
         //配置参数
         const confs = {
@@ -83,7 +83,7 @@
         }, {max_pn: confs.N, gen_pn: confs.gn, GENR: confs.GENR}).build();
 
         //构建边界限制器
-        let border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+        let border = new vision.particle.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
         //边界处理
         pcs.action_middlewares.after.push((function() {
             //边界处理中间件
@@ -93,10 +93,10 @@
         }()));
 
         //构建减速场
-        const dec_field = new vision.field.DecelerateField(confs.decf_D);
+        const dec_field = new vision.particle.field.DecelerateField(confs.decf_D);
         
         //构建偏转场
-        class QDeflectField extends vision.field.Field {
+        class QDeflectField extends vision.particle.field.Field {
 
             constructor(W) {
                 super();
@@ -112,7 +112,7 @@
         //力场作用
         pcs.action_middlewares.before.push((function() {
             //构建减速场
-            let dec_field = new vision.field.DecelerateField(confs.decf_D);
+            let dec_field = new vision.particle.field.DecelerateField(confs.decf_D);
             //构建偏转场
             let qdfc_field = new QDeflectField(confs.qdfc_W);
             //力场作用中间件

@@ -1,5 +1,5 @@
 //模板配置文件
-const TPS_CONFS = {
+export const TPS_CONFS = {
     //vision模块路径
     "vmpath": "../dist/vision.js",
     //基础模板
@@ -47,5 +47,3 @@ const TPS_CONFS = {
         }
     }
 }
-
-module.exports.TPS_CONFS = TPS_CONFS;

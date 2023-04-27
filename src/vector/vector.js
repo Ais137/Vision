@@ -9,6 +9,7 @@
     * (2023-01-30, Ais): 暴露 this._v 属性，提高计算性能。
 ****************************************/
 
+
 class Vector {
 
     /*----------------------------------------
@@ -460,5 +461,4 @@ class Vector {
 }
 
 
-module.exports.Vector = Vector;
-
+export { Vector };

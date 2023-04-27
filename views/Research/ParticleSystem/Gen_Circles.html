@@ -31,8 +31,10 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.canvas.Canvas("vision_canvas");
-        const Vector = vision.vector.Vector;
+        const canvas = new vision.Canvas("vision_canvas");
+        const Vector = vision.Vector;
+        const Views = vision.Views; Views.context = canvas;
+        const Tools = vision.Tools;
 
         let lmps = new vision.particle.ParticleSystem(() => {
             //粒子生成位置参数(半径, 角度)
@@ -50,9 +52,9 @@
             //粒子速度
             p.v_count = n;
             //粒子颜色
-            p.C = new vision.color.ColorGradient(Vector.random([[100, 100], [100, 255], [100, 255]]).v, [50, 50, 50], n);
+            p.C = new vision.views.ColorGradient(Vector.random([[100, 100], [100, 255], [100, 255]]).v, [50, 50, 50], n);
             //粒子半径(线性迭代器)
-            p.R = vision.iterator.Range.N(Vector.random([[50, 100]]).x, 1, n);
+            p.R = vision.utils.iter.Range.N(Vector.random([[50, 100]]).x, 1, n);
             return p;
         }).build(50);
         //粒子系统生成器参数

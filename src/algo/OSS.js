@@ -7,8 +7,10 @@
  * Version: 0.1
 ****************************************/
 
-const Vector = require("../vector/vector").Vector;
-const Particle = require("../vector/particle").Particle;
+
+import { Vector } from "../vector/vector.js";
+import { Particle } from "../particle/particle.js";
+
 
 /***************************************  
 算法思路:
@@ -161,4 +163,4 @@ class OptimumSolutionSolvers {
 }
 
 
-module.exports.OptimumSolutionSolvers = OptimumSolutionSolvers;
+export { OptimumSolutionSolvers };

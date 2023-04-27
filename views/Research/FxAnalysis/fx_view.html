@@ -31,30 +31,30 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.canvas.Canvas("vision_canvas");
-        const Vector = vision.vector.Vector;
-        const Tools = vision.tools.Tools;
-        const Views = vision.views.Views; Views.canvas = canvas;
+        const canvas = new vision.Canvas("vision_canvas");
+        const Vector = vision.Vector;
+        const Views = vision.Views; Views.context = canvas;
+        const Tools = vision.Tools;
 
         
         //函数构建器
         const Fx = function(dr=100, di=0.05) {
             //定义域
-            let dod = new vision.iterator.Range(-dr, dr, di);
+            let dod = new vision.utils.iter.Range(-dr, dr, di);
             //目标函数
-            // let fx = new vision.iterator.FuncIterator((x) => { return x*x; }, dod);
-            // let fx = new vision.iterator.FuncIterator((x) => { return (0.1)*x**3; }, dod);
-            // let fx = new vision.iterator.FuncIterator((x) => { return 5/x; }, dod);
-            // let fx = new vision.iterator.FuncIterator((x) => { return (5)*x+100; }, dod);
-            // let fx = new vision.iterator.FuncIterator((x) => { return Math.sin(3*x) + Math.cos(2.5*x); }, dod);
-            // let fx = new vision.iterator.FuncIterator((x) => { return x**x; }, dod);
-            let fx = new vision.iterator.FuncIterator((x) => { return 1/(x+0.0001); }, dod);
+            // let fx = new vision.utils.iter.FuncIterator((x) => { return x*x; }, dod);
+            // let fx = new vision.utils.iter.FuncIterator((x) => { return (0.1)*x**3; }, dod);
+            // let fx = new vision.utils.iter.FuncIterator((x) => { return 5/x; }, dod);
+            // let fx = new vision.utils.iter.FuncIterator((x) => { return (5)*x+100; }, dod);
+            // let fx = new vision.utils.iter.FuncIterator((x) => { return Math.sin(3*x) + Math.cos(2.5*x); }, dod);
+            // let fx = new vision.utils.iter.FuncIterator((x) => { return x**x; }, dod);
+            let fx = new vision.utils.iter.FuncIterator((x) => { return 1/(x+0.0001); }, dod);
          
             return fx;
         }
 
         //构建网格坐标系
-        const grid = new vision.coor.Grid(new Vector(canvas.cx, canvas.cy), 50, 50, true);
+        const grid = new vision.particle.coor.Grid(new Vector(canvas.cx, canvas.cy), 50, 50, true);
 
         //平移坐标系
         

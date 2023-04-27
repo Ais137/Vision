@@ -149,4 +149,4 @@ class LSystem {
 }
 
 
-module.exports.LSystem = LSystem;
+export { LSystem };
