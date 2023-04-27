@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>vector/vector.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Tutorials</h3><ul><li><a href="tutorial-01-快速入门.html">01-快速入门</a></li><li><a href="tutorial-02-模板生成器.html">02-模板生成器</a></li></ul><h3>Modules</h3><ul><li><a href="module-algo_Boids.html">algo/Boids</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_Boids.html#~boids_middlewares">boids_middlewares</a></li></ul></li><li><a href="module-algo_LSystem.html">algo/LSystem</a></li><li><a href="module-algo_Mandelbrot_Set.html">algo/Mandelbrot_Set</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set.html#~Mandelbrot_Set">Mandelbrot_Set</a></li><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set.html#~Julia_Set">Julia_Set</a></li></ul></li><li><a href="module-algo_NNS.html">algo/NNS</a></li><li><a href="module-algo_OSS.html">algo/OSS</a></li><li><a href="module-context_canvas.html">context/canvas</a></li><li><a href="module-particle_area.html">particle/area</a></li><li><a href="module-particle_border.html">particle/border</a></li><li><a href="module-particle_coor.html">particle/coor</a></li><li><a href="module-particle_field.html">particle/field</a></li><li><a href="module-particle_particle.html">particle/particle</a></li><li><a href="module-particle_particle_system.html">particle/particle_system</a></li><li><a href="module-particle_tracker.html">particle/tracker</a></li><li><a href="module-utils_iterator.html">utils/iterator</a></li><li><a href="module-utils_random.html">utils/random</a></li><li><a href="module-utils_tools.html">utils/tools</a></li><li><a href="module-vector_vector.html">vector/vector</a></li><li><a href="module-views_capturer.html">views/capturer</a></li><li><a href="module-views_color.html">views/color</a></li><li><a href="module-views_randerer.html">views/randerer</a></li><li><a href="module-views_views.html">views/views</a></li></ul><h3>Classes</h3><ul><li><a href="module-algo_Boids-Boid.html">Boid</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_Boids-Boid.html#rules_action">rules_action</a></li><li data-type='method' style='display: none;'><a href="module-algo_Boids-Boid.html#action">action</a></li></ul></li><li><a href="module-algo_LSystem-LSystem.html">LSystem</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#next">next</a></li><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#gen">gen</a></li><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#iter">iter</a></li><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#act">act</a></li><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#actIter">actIter</a></li></ul></li><li><a href="module-algo_Mandelbrot_Set-Complex.html">Complex</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set-Complex.html#add">add</a></li><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set-Complex.html#mult">mult</a></li><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set-Complex.html#norm">norm</a></li></ul></li><li><a href="module-algo_NNS-NearestNeighborSearch.html">NearestNeighborSearch</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#build">build</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#near">near</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#k_near">k_near</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#nps">nps</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#.toGraph">toGraph</a></li></ul></li><li><a href="module-algo_NNS-LinearNNS.html">LinearNNS</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_NNS-LinearNNS.html#near">near</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-LinearNNS.html#k_near">k_near</a></li></ul></li><li><a href="module-algo_NNS-GridNNS.html">GridNNS</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridNNS.html#.GridContainer">GridContainer</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridNNS.html#build">build</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridNNS.html#near">near</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridNNS.html#k_near">k_near</a></li></ul></li><li><a href="module-algo_NNS-GridContainer.html">GridContainer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#toGrid">toGrid</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#index">index</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#gns">gns</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#set">set</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#get">get</a></li></ul></li><li><a href="module-algo_OSS-Solver.html">Solver</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_OSS-Solver.html#action">action</a></li><li data-type='method' style='display: none;'><a href="module-algo_OSS-Solver.html#isEnd">isEnd</a></li></ul></li><li><a href="module-algo_OSS-OptimumSolutionSolvers.html">OptimumSolutionSolvers</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_OSS-OptimumSolutionSolvers.html#init">init</a></li><li data-type='method' style='display: none;'><a href="module-algo_OSS-OptimumSolutionSolvers.html#next">next</a></li><li data-type='method' style='display: none;'><a href="module-algo_OSS-OptimumSolutionSolvers.html#isEnd">isEnd</a></li></ul></li><li><a href="module-context_canvas-Canvas.html">Canvas</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#resize">resize</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#refresh">refresh</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#point">point</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#line">line</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#lines">lines</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#circle">circle</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#rect">rect</a></li></ul></li><li><a href="module-particle_area-BaseArea.html">BaseArea</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_area-BaseArea.html#in">in</a></li></ul></li><li><a href="module-particle_area-Area.html">Area</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_area-Area.html#in">in</a></li></ul></li><li><a href="module-particle_area-RectArea.html">RectArea</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_area-RectArea.html#in">in</a></li></ul></li><li><a href="module-particle_area-CircleArea.html">CircleArea</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_area-CircleArea.html#in">in</a></li></ul></li><li><a href="module-particle_border-Border.html">Border</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-Border.html#limit">limit</a></li></ul></li><li><a href="module-particle_border-RectReflectBorder.html">RectReflectBorder</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-RectReflectBorder.html#limit">limit</a></li></ul></li><li><a href="module-particle_border-RectLoopBorder.html">RectLoopBorder</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-RectLoopBorder.html#limit">limit</a></li></ul></li><li><a href="module-particle_border-RingReflectBorder.html">RingReflectBorder</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-RingReflectBorder.html#limit">limit</a></li></ul></li><li><a href="module-particle_border-RingLoopBorder.html">RingLoopBorder</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-RingLoopBorder.html#limit">limit</a></li></ul></li><li><a href="module-particle_coor-CoordinateSystem.html">CoordinateSystem</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_coor-CoordinateSystem.html#to">to</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-CoordinateSystem.html#from">from</a></li></ul></li><li><a href="module-particle_coor-RCS.html">RCS</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_coor-RCS.html#to">to</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-RCS.html#from">from</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-RCS.html#zoom">zoom</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-RCS.html#move">move</a></li></ul></li><li><a href="module-particle_coor-Grid.html">Grid</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_coor-Grid.html#to">to</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-Grid.html#from">from</a></li></ul></li><li><a href="module-particle_coor-PolarCS.html">PolarCS</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_coor-PolarCS.html#to">to</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-PolarCS.html#from">from</a></li></ul></li><li><a href="module-particle_field-Field.html">Field</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-Field.html#force">force</a></li></ul></li><li><a href="module-particle_field-Gravity.html">Gravity</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-Gravity.html#force">force</a></li><li data-type='method' style='display: none;'><a href="module-particle_field-Gravity.html#.gravity">gravity</a></li></ul></li><li><a href="module-particle_field-AccelerateField.html">AccelerateField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-AccelerateField.html#force">force</a></li></ul></li><li><a href="module-particle_field-DecelerateField.html">DecelerateField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-DecelerateField.html#force">force</a></li></ul></li><li><a href="module-particle_field-DeflectField.html">DeflectField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-DeflectField.html#force">force</a></li></ul></li><li><a href="module-particle_particle-Particle.html">Particle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-Particle.html#action">action</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-Particle.html#isEnd">isEnd</a></li></ul></li><li><a href="module-particle_particle-ForceParticle.html">ForceParticle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-ForceParticle.html#force">force</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-ForceParticle.html#action">action</a></li></ul></li><li><a href="module-particle_particle-LinearMotorParticle.html">LinearMotorParticle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-LinearMotorParticle.html#isEnd">isEnd</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-LinearMotorParticle.html#action">action</a></li></ul></li><li><a href="module-particle_particle-CircularMotorParticle.html">CircularMotorParticle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-CircularMotorParticle.html#action">action</a></li></ul></li><li><a href="module-particle_particle-RandomWalkerParticle.html">RandomWalkerParticle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-RandomWalkerParticle.html#_probability">_probability</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-RandomWalkerParticle.html#rv_select">rv_select</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-RandomWalkerParticle.html#action">action</a></li></ul></li><li><a href="module-particle_particle_system-ParticleSystem.html">ParticleSystem</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle_system-ParticleSystem.html#build">build</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle_system-ParticleSystem.html#particle_action">particle_action</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle_system-ParticleSystem.html#action">action</a></li></ul></li><li><a href="module-particle_tracker-TrailTracker.html">TrailTracker</a></li><li><a href="module-utils_iterator-Iterator.html">Iterator</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_iterator-Iterator.html#val">val</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Iterator.html#end">end</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Iterator.html#tolist">tolist</a></li></ul></li><li><a href="module-utils_iterator-Range.html">Range</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#.S">S</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#.N">N</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#val">val</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#end">end</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#clone">clone</a></li></ul></li><li><a href="module-utils_iterator-FuncIterator.html">FuncIterator</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_iterator-FuncIterator.html#val">val</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-FuncIterator.html#end">end</a></li></ul></li><li><a href="module-utils_random-RandomSelector.html">RandomSelector</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_random-RandomSelector.html#_probability">_probability</a></li><li data-type='method' style='display: none;'><a href="module-utils_random-RandomSelector.html#select">select</a></li></ul></li><li><a href="module-utils_tools-Tools.html">Tools</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.regular_polygon">regular_polygon</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.ATR">ATR</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.RTA">RTA</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.random">random</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.rselect">rselect</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.RGB">RGB</a></li></ul></li><li><a href="module-vector_vector-Vector.html">Vector</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.v">v</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.ones">ones</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.zeros">zeros</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.random">random</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.rcv">rcv</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#add">add</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#mult">mult</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#sub">sub</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#dot">dot</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#inner">inner</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.LC">LC</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#LM">LM</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#lerp">lerp</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#rotate">rotate</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#dim">dim</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#norm">norm</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#normalization">normalization</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#limit">limit</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#clone">clone</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#copy">copy</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#dist">dist</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#rad">rad</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#toint">toint</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#in">in</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.vpoints">vpoints</a></li></ul></li><li><a href="module-views_capturer-Capturer.html">Capturer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_capturer-Capturer.html#capturing">capturing</a></li><li data-type='method' style='display: none;'><a href="module-views_capturer-Capturer.html#capture">capture</a></li></ul></li><li><a href="module-views_color-ColorVector.html">ColorVector</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_color-ColorVector.html#color">color</a></li><li data-type='method' style='display: none;'><a href="module-views_color-ColorVector.html#val">val</a></li><li data-type='method' style='display: none;'><a href="module-views_color-ColorVector.html#clone">clone</a></li></ul></li><li><a href="module-views_color-ColorGradient.html">ColorGradient</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_color-ColorGradient.html#color">color</a></li><li data-type='method' style='display: none;'><a href="module-views_color-ColorGradient.html#isEnd">isEnd</a></li></ul></li><li><a href="module-views_randerer-Randerer.html">Randerer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_randerer-Randerer.html#rander">rander</a></li></ul></li><li><a href="module-views_randerer-IntervalRanderer.html">IntervalRanderer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_randerer-IntervalRanderer.html#rander">rander</a></li><li data-type='method' style='display: none;'><a href="module-views_randerer-IntervalRanderer.html#stop">stop</a></li></ul></li><li><a href="module-views_randerer-SingleFrameRanderer.html">SingleFrameRanderer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_randerer-SingleFrameRanderer.html#rander">rander</a></li></ul></li><li><a href="module-views_views-Views.html">Views</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.nodelink">nodelink</a></li><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.grid">grid</a></li><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.lightLine">lightLine</a></li><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.lightRing">lightRing</a></li><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.trail">trail</a></li></ul></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">vector/vector.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module
+ * @desc     向量系统(Vision框架核心组件)
+ * @project  Vision
+ * @author   Ais
+ * @date     2022-06-20
+ * @version  0.1.0
+ * @since    (2023-01-30, Ais): 暴露 this._v 属性，提高计算性能。
+*/
+
+
+class Vector {
+
+    /**
+     * @classdesc 向量类: 提供向量计算支持
+     * 
+     * @property { number[] } v - 向量分量容器(内部存储结构)
+     * @property { get/set } x - 向量x轴分量(this.v[0])
+     * @property { get/set } y - 向量y轴分量(this.v[1])
+     * @property { get/set } z - 向量z轴分量(this.v[2])
+     * 
+     * @param {...number} v - 向量分量
+     * 
+     * @example 
+     * let v = new Vector(1, 2, 3);  //vector(1, 2, 3)
+     */
+    constructor(...v) {
+        this.v = v.length > 0 ? [...v] : [0, 0];
+    }
+
+    //分量接口
+    get x(){ return this.v[0]; }
+    get y(){ return this.v[1]; }
+    get z(){ return this.v[2]; }
+    set x(val){ this.v[0] = val; }
+    set y(val){ this.v[1] = val; }
+    set z(val){ this.v[2] = val; }
+
+    /**
+     * Vector静态构建器
+     * 
+     * @param {...number} v - 向量分量 
+     * @returns { Vector } 向量
+     * @example 
+     * let v = new Vector.v(1, 2);  //vector(1, 2)
+     * let v = new Vector.V(1, 2);  //vector(1, 2)
+     */
+    static v(...v) {
+        return new Vector(...v);
+    }
+    static V(...v) {
+        return new Vector(...v);
+    }
+
+    /**
+     * 构建分量全为 *1* 的向量
+     * 
+     * @param { number } [dim=2] 向量维度 
+     * @returns { Vector } 向量
+     * @example let v = new Vector.ones(3);  //vector(1, 1, 1);
+     */
+    static ones(dim=2) {
+        return new Vector(...Array(dim).fill(1))
+    }
+
+    /**
+     * 构建分量全为 *0* 的向量
+     * 
+     * @param { number } [dim=2] 向量维度 
+     * @returns { Vector } 向量
+     * @example let v = new Vector.zeros(3);  //vector(0, 0, 0);
+     */
+    static zeros(dim=2) {
+        return new Vector(...Array(dim).fill(0))
+    }
+
+    /**
+     * 生成指定范围内的随机向量
+     * 
+     * @param { Array[] } range - 向量分量范围，v.dim == range.length
+     * @param { boolean } isint - 分量值类型 true(int) | false(float)
+     * @returns { Vector } 向量
+     * @example 
+     * Vector.random([[1, 3], [1, 3]]);          //vector(1.13, 2.54)
+     * Vector.random([[1, 3], [1, 3]], true);    //vector(1, 2)
+     * Vector.random([[1, 3], [1, 3], [4, 7]]);  //vector(2.13, 0.54, 5.56)
+     */
+    static random(range=[], isint=false) {
+        let v = [], r = 0;
+        for(let i=0, end=range.length; i&lt;end; i++){
+            r = Math.random() * (range[i][1] - range[i][0]) + range[i][0];
+            isint ? v.push(parseInt(r)) : v.push(r);
+        }
+        return new Vector(...v);
+    }
+
+    /**
+     * 生成一个圆范围内的随机二维向量: 模长范围在[sR, eR]，方向随机
+     * 
+     * @param { number } sR - 向量模长起始值(sR>0) 
+     * @param { number } eR - 向量模长终止值(eR>0)
+     * @returns { Vector } 向量
+     * @example
+     * Vector.rcv(300);       //向量模长为300, 方向随机
+     * Vector.rcv(100, 300);  //向量模长范围为(100, 300), 方向随机
+     */
+    static rcv(sR, eR=null) {
+        let rad = Math.random() * (Math.PI * 2);
+        let r = (eR == null ? Math.random()*sR : Math.random()*(eR-sR)+sR);
+        return new Vector(Math.cos(rad)*r, Math.sin(rad)*r);
+    }
+
+    /**
+     * 向量加法: 向量的对应分量相加  
+     * 当操作数维数小于当前向量维数: 空缺分量默认值作为 *0* 处理  
+     * 当操作数维数大于当前向量维数: 操作数分量将截取到当前向量维数进行计算
+     * 
+     * @param { Vector } vector - 操作数 
+     * @returns { Vector } this
+     * @example
+     * //维数相同的情况
+     * let v1 = new Vector(1, 2, 3);
+     * let v2 = new Vector(4, 5, 6);
+     * v1.add(v2);  // v1 -> vector(5, 7, 9)  
+     * 
+     * //维数不同的情况
+     * let v1 = new Vector(1, 2, 3);
+     * v1.add(new Vector(1, 2, 3, 4, 5));  // v1 -> vector(2, 4, 6)
+     * v1.add(new Vector(1, 2));           // v1 -> vector(2, 4, 3)
+     */
+    add(vector){
+        for(let i=0, end=this.v.length; i&lt;end; i++) {
+            this.v[i] += (vector.v[i] || 0);
+        }
+        return this;
+    }
+    static add(...vector) {
+        let v = Vector.zeros(vector[0].dim());
+        for(let i=0, end=vector.length; i&lt;end; i++) {
+            v.dim()&lt;vector[i].dim() &amp;&amp; v.dim(vector[i].dim())
+            v.add(vector[i]);
+        }
+        return v;
+    }
+
+    /**
+     * 标量乘法: 数k乘以向量的每个分量
+     * 
+     * @param { number } k - 操作数 
+     * @returns { Vector } this
+     * @example
+     * let v1 = new Vector(1, 2, 3); 
+     * v1.mult(2);  //vector(2, 4, 6)
+     */
+    mult(k) {
+        for(let i=0, end=this.v.length; i&lt;end; i++) {
+            this.v[i] *= k;
+        }
+        return this;
+    }
+    static mult(vector, k) {
+        return vector.clone().mult(k);
+    }
+
+    /**
+     * 向量减法: 可以视作向量加法的特殊情况 v1.add(v2.mult(-1))
+     * 
+     * @param { Vector } vector - 操作数
+     * @returns { Vector } this
+     * @example
+     * let v1 = new Vector(1, 2, 3);
+     * let v2 = new Vector(4, 5, 6);
+     * v1.sub(v2);  //vector(-3, -3, -3)
+     */
+    sub(vector){
+        //向量方法实现
+        // return this.add(vector.clone().mult(-1));
+        //计算优化实现
+        for(let i=0, end=this.v.length; i&lt;end; i++) {
+            this.v[i] -= (vector.v[i] || 0);
+        }
+        return this;
+    }
+    static sub(...vector) {
+        let v = vector[0].clone();
+        for(let i=1, end=vector.length; i&lt;end; i++) {
+            v.sub(vector[i]);
+        }
+        return v;
+    }
+
+    /**
+     * 标量积(点积):   
+     * v1·v2 -> sum(v1[i]*v2[i]) -> |v1|*|v2|*cos(rad)
+     * 
+     * @param { Vector } vector - 操作数 
+     * @returns { number } 标量积
+     * @example new Vector(1, 1).dot(new Vector(1, 1));  //2
+     */
+    dot(vector) {
+        let t = 0;
+        for(let i=0, end=this.v.length; i&lt;end; i++) {
+            t += this.v[i] * (vector.v[i] || 0);
+        }
+        return t;
+    }
+    /** 标量积(点积) */
+    inner(vector) {
+        return this.dot(vector);
+    }
+
+    /**
+     * 线性组合(Linear Combination):  
+     * lc = v1*w[1] + v2*w[2] + ... + vn*w[n]  
+     * condition: vectors[i].dim() == w.length
+     * 
+     * @param { Vector[] } vectors - 向量组 
+     * @param { number[] } w - 权
+     * @returns { Vector } 向量
+     * @example
+     * LC([
+     *     new Vector(1, 1),
+     *     new Vector(2, 2),
+     *     new Vector(3, 3),
+     * ], [6, 3, 2]);  //vector(18, 18)
+     */
+    static LC(vectors, w) {
+        let v = Vector.zeros(vectors[0].dim());
+        for(let i=0, n=vectors.length; i&lt;n; i++) {
+            v.add(vectors[i].clone().mult(w[i]));
+        }
+        return v;
+    }
+
+    /**
+     * 线性映射(Linear Mapping):   
+     * 对向量进行线性变换，有以下两种实现方式:  
+     *   * 行向量: 设 vi 为 m[i] 构成的行向量，则 LM(m) -> o.add(v.dot(vi)), 即 v 与 vi 的点积之和
+     *   * 列向量: 设 vk 为 m[i][k=(1, 2, 3...)] 的列向量，则 LM(m) -> LC(vk, v), 即以 v 的分量为权，对m的列向量的线性组合
+     * 
+     * @param { Array[] } m - 映射矩阵(数组形式)
+     * @returns { Vector } 映射后的向量
+     */
+    LM(m) {
+        let _v = [];
+        for(let i=0, endi=m.length; i&lt;endi; i++) {
+            //[Vector]: _v.push(this.dot(new Vector(...m[i])));
+            let _vi = 0;
+            for(let k=0, endk=m[i].length; k&lt;endk; k++) {
+                _vi += m[i][k] * (this.v[k] || 0);
+            }
+            _v.push(_vi);
+        }
+        this.v = _v;
+        return this;
+    }
+    static LM(vector, m) {
+        return vector.clone().map(m);
+    }
+
+    /**
+     * 线性插值:  
+     * v(t) = (1-t)*v1 + t*v2 -> v1 + t*(v2-v1)
+     * 
+     * @param { Vector } vector - 目标向量 
+     * @param { number } t - [0, 1] 
+     * @returns { Vector } 向量
+     */
+    lerp(vector, t) {
+        return (t>0 &amp;&amp; t&lt;1) ? vector.clone().sub(this).mult(t).add(this) : (t&lt;=0 ? this.clone() : vector.clone());
+    }
+    static lerp(v_from, v_to, t) {
+        return v_from.lerp(v_to, t);
+    }
+
+    /**
+     * 二维向量的旋转变换: 对向量(dim=2)进行旋转(线性变换)
+     * 
+     * @param { number } rad - 旋转角度 
+     * @param { boolean } angle - rad参数格式 -> true(弧度)|false(角度)
+     * @returns { Vector } this
+     * @example
+     * v.rotate(Math.PI/4); 
+     * v.rotate(45, true);
+     */
+    rotate(rad, angle=false) {
+        /* 
+        [Vector]:
+        this.v = this.LM([
+            [Math.cos(rad), -Math.sin(rad)],
+            [Math.sin(rad), Math.cos(rad)],
+        ])
+        */
+        rad = angle ? (Math.PI/180*rad) : rad;
+        let cos_rad = Math.cos(rad), sin_rad = Math.sin(rad);
+        let x = this.v[0] * cos_rad - this.v[1] * sin_rad;
+        let y = this.v[0] * sin_rad + this.v[1] * cos_rad;
+        this.v[0] = x, this.v[1] = y;
+        return this;
+    }
+    static rotate(vector, rad) {
+        return vector.clone().rotate(rad);
+    }
+
+    /**
+     * 维度(分量数)(get/set)
+     * 
+     * @param { number } [n=null] 设置的向量维度(int &amp; n>0)
+     * @returns { number | Vector } 当前的向量维度，v.dim() -> int | v.dim(3) -> this
+     * @example
+     * let v = new Vector([1, 3, 5, 7]);
+     * v.dim();   //4
+     * v.dim(3);  //vector(1, 3, 5)
+     * v.dim(5);  //vector(1, 3, 5, 7, 0);
+     */
+    dim(n=null) {
+        if(n!=null) {
+            let v = [], _n = parseInt(n);
+            for(let i=0; i&lt;_n; i++) {
+                v[i] = this.v[i] || 0;
+            }
+            this.v = v;
+            return this;
+        } else {
+            return this.v.length;
+        }
+    }
+
+    /**
+     * 模长(get/set)
+     * 
+     * @param { number } n - 设置的模长
+     * @returns { number | Vector } 当前的向量模长，v.norm() -> float | v.norm(3) -> this
+     * @example 
+     * let v = new Vector(3, 4);
+     * v.norm();   //5
+     * v.norm(1);  //设置向量的模长为1
+     */
+    norm(n=null) {
+        //计算模长
+        let t = 0;
+        for(let i=0, end=this.v.length; i&lt;end; i++) {
+            t += this.v[i] * this.v[i];
+        }
+        let v_norm = Math.sqrt(t);
+        //设置模长
+        (n!=null) &amp;&amp; (v_norm != 0) &amp;&amp; this.mult(n/v_norm);
+        return (n==null) ? v_norm : this;
+    }
+
+    /**
+     * 单位化: v.norm(1)
+     * 
+     * @returns { Vector } this
+     */
+    normalization() {
+        let _norm = this.norm();
+        (_norm != 0) &amp;&amp; this.mult(1/_norm);
+        return this;
+    }
+
+    /**
+     * 模长限制器: 当向量模长超过范围边界值时，设置模长为邻近的边界值
+     * 
+     * @param { number } max - 最大值边界
+     * @param { number } min - 最小值边界
+     * @returns { Vector } this
+     * @example 
+     * v.limit(5);     //(0 &lt; v.norm() &lt;5)
+     * v.limit(2, 5);  //(2 &lt; v.norm() &lt;=5)
+     */
+    limit(max, min=null) {
+        let _max, _min, _norm = this.norm();
+        if(min == null){_min=0, _max=Math.abs(max);} else {_min=Math.abs(max), _max=Math.abs(min);}
+        (_norm>=_min &amp;&amp; _norm&lt;=_max) ? null : this.norm(_norm>_max ? _max : _min);
+        return this;
+    }
+
+    /**
+     * 复制向量
+     * 
+     * @returns { Vector } 复制的向量
+     */
+    clone() {
+        return new Vector(...this.v);
+    }
+    /**
+     * 复制向量
+     * 
+     * @returns { Vector } 复制的向量
+     */
+    copy() {
+        return this.clone();
+    }
+
+    /**
+     * 计算两个向量之间的欧式距离(坐标视角)
+     * 
+     * @param { Vector } vector - 目标向量 
+     * @returns { number } 与目标向量的欧式距离
+     * @example
+     * v1.dist(v2);  //v1与v2的欧式距离
+     * v1.dist();    //v1到原点的距离(v.norm())
+     */
+    dist(vector=null) {
+        //向量法实现
+        // return this.clone().sub(vector).norm();
+        //计算优化
+        if(vector == null) {
+            return this.norm();
+        } else {
+            let t = 0, v = vector.v;
+            for(let i=0, end=this.v.length; i&lt;end; i++) {
+                t += (this.v[i] - v[i]) * (this.v[i] - v[i]);
+            }
+            return Math.sqrt(t);
+        }
+    }
+    static dist(v1, v2) {
+        return v1.dist(v2);
+    }
+
+    /**
+     * 计算两个向量之间的弧度差(极坐标视角)
+     * 
+     * @param { Vector } vector - 目标向量 
+     * @returns { number } 弧度差
+     * @example
+     * v1.rad(v2);  //v1与v2的弧度差
+     * v1.rad();    //v1与x轴正方向的弧度差
+     */
+    rad(vector=null) {
+        let x = this.v[0], y = this.v[1];
+        let rad = Math.atan(y/x);
+        rad = (x>=0) ? (y >= 0 ? rad : Math.PI*2 + rad) : (Math.PI + rad);
+        return  vector ? rad - vector.rad() : rad;
+    }
+    static rad(v1, v2) {
+        return v1.rad(v2);
+    }
+
+    /**
+     * 整数化: 将分量转换成整数
+     * 
+     * @returns { Vector } this
+     * @example
+     * let v = new Vector(1.23, 2.45, 5.44);
+     * v.toint();  //vector(1, 2, 5)
+     */
+    toint() {
+        for(let i=0, end=this.v.length; i&lt;end; i++) { this.v[i] = parseInt(this.v[i]);}
+    }
+
+    /**
+     * 判断向量的分量是否在指定范围
+     * 
+     * @param { Array[] } range - 分量范围
+     * @returns { boolean } 判定结果
+     * @example
+     * new Vector(1, 2).in([[1, 5], [1, 5]]);  //true
+     * new Vector(1, 2).in([[1, 5], [0, 1]]);  // false
+     */
+    in(range=[]) {
+        for(let i=0, end=range.length; i&lt;end; i++) {
+            if(!(this.v[i] >= range[i][0] &amp;&amp; this.v[i] &lt;= range[i][1])) {
+                return false;
+            }
+        }
+        return true;
+    }
+    static in(vector, range) {
+        return vector.in(range);
+    }
+
+    /**
+     * 从坐标数组中构建向量:  
+     * [[x1, y1], [x2, y2], ..., [xn, yn]] -> [v1, v2, ..., vn]
+     * 
+     * @param { Array[] } ps - 坐标点的数组形式
+     * @returns { Vector[] } 坐标点的向量形式
+     * @example
+     * Vector.vpoints([[100, 100], [200, 200]]);  //-> [Vector(100, 100), Vector(200, 200)]
+     */
+    static vpoints(ps) {
+        let vps = [];
+        for(let i=0, n=ps.length; i&lt;n; i++) {
+            vps.push(new Vector(...ps[i]));
+        }
+        return vps;
+    }
+
+}
+
+
+export { Vector };</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Fri Apr 28 2023 00:11:47 GMT+0800 (香港标准时间) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>
