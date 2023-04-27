@@ -1,0 +1,46 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "source": {
+        "include": "./src",
+        "includePattern": "\\.js$"
+    },
+    "plugins": [
+        "plugins/markdown"
+    ],
+    "opts": {
+        "template": "./build/docdash-templates",
+        "encoding": "utf8",
+        "destination": "api/",
+        "readme": "./docs/tutorials/01-快速入门.md",
+        "tutorials": "./docs/tutorials",
+        "recurse": true,
+        "verbose": true
+    },
+    "templates": {
+        "cleverLinks": false,
+        "monospaceLinks": false,
+        "default": {
+            "staticFiles": {
+                "paths": [
+                    {
+                        "src": "./img/disp",
+                        "out": "/img"
+                    }
+                ]
+            }
+        }
+    },
+    "docdash": {
+        "static": true,
+        "sort": false,
+        "collapse": true,
+        "search": true,
+        "sectionOrder": [          
+            "Tutorials",
+            "Modules",
+            "Classes"
+        ]
+    }
+}

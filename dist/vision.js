@@ -1,278 +1,4038 @@
-/*
- * ATTENTION: The "eval" devtool has been used (maybe by default in mode: "development").
- * This devtool is neither made for production nor for readable output files.
- * It uses "eval()" calls to create a separate source file in the browser devtools.
- * If you are trying to read the output file, select a different devtool (https://webpack.js.org/configuration/devtool/)
- * or disable the default devtool with "devtool: false".
- * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
- */
-var vision;
-/******/ (() => { // webpackBootstrap
-/******/ 	var __webpack_modules__ = ({
-
-/***/ "./build/index.js":
-/*!************************!*\
-  !*** ./build/index.js ***!
-  \************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("module.exports.Boids = __webpack_require__(/*! ./src/algo/Boids.js */ \"./src/algo/Boids.js\");\nmodule.exports.LSystem = __webpack_require__(/*! ./src/algo/LSystem.js */ \"./src/algo/LSystem.js\");\nmodule.exports.Mandelbrot_Set = __webpack_require__(/*! ./src/algo/Mandelbrot_Set.js */ \"./src/algo/Mandelbrot_Set.js\");\nmodule.exports.NNS = __webpack_require__(/*! ./src/algo/NNS.js */ \"./src/algo/NNS.js\");\nmodule.exports.OSS = __webpack_require__(/*! ./src/algo/OSS.js */ \"./src/algo/OSS.js\");\nmodule.exports.canvas = __webpack_require__(/*! ./src/canvas/canvas.js */ \"./src/canvas/canvas.js\");\nmodule.exports.color = __webpack_require__(/*! ./src/canvas/color.js */ \"./src/canvas/color.js\");\nmodule.exports.iterator = __webpack_require__(/*! ./src/utils/iterator.js */ \"./src/utils/iterator.js\");\nmodule.exports.random = __webpack_require__(/*! ./src/utils/random.js */ \"./src/utils/random.js\");\nmodule.exports.tools = __webpack_require__(/*! ./src/utils/tools.js */ \"./src/utils/tools.js\");\nmodule.exports.area = __webpack_require__(/*! ./src/vector/area.js */ \"./src/vector/area.js\");\nmodule.exports.border = __webpack_require__(/*! ./src/vector/border.js */ \"./src/vector/border.js\");\nmodule.exports.coor = __webpack_require__(/*! ./src/vector/coor.js */ \"./src/vector/coor.js\");\nmodule.exports.field = __webpack_require__(/*! ./src/vector/field.js */ \"./src/vector/field.js\");\nmodule.exports.matrix = __webpack_require__(/*! ./src/vector/matrix.js */ \"./src/vector/matrix.js\");\nmodule.exports.particle = __webpack_require__(/*! ./src/vector/particle.js */ \"./src/vector/particle.js\");\nmodule.exports.tracker = __webpack_require__(/*! ./src/vector/tracker.js */ \"./src/vector/tracker.js\");\nmodule.exports.vector = __webpack_require__(/*! ./src/vector/vector.js */ \"./src/vector/vector.js\");\nmodule.exports.capturer = __webpack_require__(/*! ./src/views/capturer.js */ \"./src/views/capturer.js\");\nmodule.exports.randerer = __webpack_require__(/*! ./src/views/randerer.js */ \"./src/views/randerer.js\");\nmodule.exports.views = __webpack_require__(/*! ./src/views/views.js */ \"./src/views/views.js\");\nmodule.exports.point_capturer = __webpack_require__(/*! ./src/viewtools/point_capturer.js */ \"./src/viewtools/point_capturer.js\");\n\n\n//# sourceURL=webpack://vision/./build/index.js?");
-
-/***/ }),
-
-/***/ "./src/algo/Boids.js":
-/*!***************************!*\
-  !*** ./src/algo/Boids.js ***!
-  \***************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("/****************************************\r\n * Name: 鸟群算法(boids: bird-oid object)\r\n * Date: 2023-03-19\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 集群行为模拟\r\n * Version: 0.1\r\n * Update: \r\n****************************************/\r\n\r\n\r\nconst Vector = (__webpack_require__(/*! ../vector/vector */ \"./src/vector/vector.js\").Vector);\r\nconst particle = __webpack_require__(/*! ../vector/particle */ \"./src/vector/particle.js\");\r\n\r\n\r\n//鸟群个体(基准模型:M0)\r\nclass Boid extends particle.Particle {\r\n\r\n    //基础规则集\r\n    static RuleSet = {\r\n        /*----------------------------------------\r\n        @func: 对齐行为\r\n        @desc: 个体的速度倾向于与感知野中其他个体的速度保持一致\r\n        ----------------------------------------*/\r\n        alignment: (tp, ns) => {\r\n            let v_ali = new Vector(0, 0);\r\n            for(let i=0, n=ns.length; i<n; i++) { \r\n                v_ali.add(ns[i].v); \r\n            }\r\n            return v_ali.mult(1/ns.length);\r\n        },\r\n        /*----------------------------------------\r\n        @func: 分离行为\r\n        @desc: 个体有远离周围个体的趋势，防止相互碰撞\r\n        ----------------------------------------*/\r\n        separation: (tp, ns) => {\r\n            let v_sep = new Vector(0, 0);\r\n            for(let i=0, n=ns.length; i<n; i++) { \r\n                let r = tp.p.dist(ns[i].p);\r\n                v_sep.add(Vector.sub(tp.p, ns[i].p).norm(1/r*r)); \r\n            }\r\n            return v_sep;\r\n        },\r\n        /*----------------------------------------\r\n        @func: 靠近行为\r\n        @desc: 个体有向感知野中其他个体中心位置的移动趋势\r\n        ----------------------------------------*/\r\n        cohesion: (tp, ns) => {\r\n            //计算视野范围内对象的中心位置\r\n            let center = new Vector(0, 0);\r\n            for(let i=0, n=ns.length; i<n; i++) { \r\n                center.add(ns[i].p); \r\n            }\r\n            center.mult(1/ns.length);\r\n            return Vector.sub(center, tp.p);\r\n        }\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @class: Boid\r\n    @desc: 鸟群个体(基准模型)，集群行为模拟\r\n    @property: \r\n        * R(number): 感知(视野)范围\r\n        * K(list:number): 种群特征值(权重数组)，用于与规则集产生的向量进行线性组合。\r\n        * visual_field(callable): 视野场，用于定义个体的感知野，默认采用半径R的环形视野。\r\n        * rules(list:callable): 集群行为规则集 \r\n    @method: \r\n        * rules_action: 对个体进行规则集的作用，在 action 之前调用。\r\n        * action: 行为迭代\r\n    @exp: \r\n    ----------------------------------------*/\r\n    constructor(p, v, R, K) {\r\n        super(p, v)\r\n        //感知(视野)范围\r\n        this.R = R;\r\n        //种群特征值\r\n        this.K = K;\r\n        //视野场(hook point)\r\n        this.visual_field = (tp, ns) => { return ns };\r\n        //集群行为规则集\r\n        this.rules = [\r\n            Boid.RuleSet.alignment,\r\n            Boid.RuleSet.separation,\r\n            Boid.RuleSet.cohesion\r\n        ];\r\n        //速度增量\r\n        this.acc = new Vector();\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 规则集作用\r\n    @desc: 对个体进行规则集的作用，在 action 之前调用。\r\n    @params: \r\n        * ns(list:Boid): 个体感知野范围内的邻近集\r\n    ----------------------------------------*/\r\n    rules_action(ns) {\r\n        if(ns.length == 0) { return }\r\n        ns = this.visual_field(this, ns);\r\n        let rule_vectors = [];\r\n        for(let i=0, n=this.rules.length; i<n; i++) {\r\n            rule_vectors[i] = this.rules[i](this, ns);\r\n        }\r\n        this.acc.add(Vector.LC(rule_vectors, this.K));\r\n    }\r\n\r\n    //行为迭代\r\n    action() {\r\n        this.p.add(this.v.add(this.acc));\r\n        this.acc = new Vector(0, 0);\r\n        return this.p;\r\n    }\r\n}\r\n\r\n\r\n/*----------------------------------------\r\n@func: 鸟群模型规则集作用中间件\r\n@desc: 作为粒子系统(ParticleSystem)的action中间件，用于 Boid.rules_action 的调用。\r\n@params: \r\n    * nns(NNS.NearestNeighborSearch): 邻近搜索算法模块\r\n@return(type): boids_rules_middleware(callable), ParticleSystem action 中间件\r\n@exp: \r\n    pcs.action_middlewares.before.push(\r\n        boids_middlewares(\r\n            new vision.NNS.GridNNS([], function(obj){ return obj.p }, 100)\r\n        )\r\n    );\r\n----------------------------------------*/\r\nconst boids_middlewares = function(nns) {\r\n    //鸟群集群运动\r\n    return function boids_rules_middleware(ps) {\r\n        nns.build(ps);\r\n        for (let i = ps.length; i--;) {\r\n            ps[i].rules_action(nns.near(ps[i], ps[i].R));\r\n        }\r\n    }\r\n}\r\n\r\n\r\n\r\n\r\n\r\n\r\nmodule.exports.Boid = Boid;\r\nmodule.exports.boids_middlewares = boids_middlewares;\n\n//# sourceURL=webpack://vision/./src/algo/Boids.js?");
-
-/***/ }),
-
-/***/ "./src/algo/LSystem.js":
-/*!*****************************!*\
-  !*** ./src/algo/LSystem.js ***!
-  \*****************************/
-/***/ ((module) => {
-
-eval("/****************************************\r\n * Name: L-System | L系统\r\n * Date: 2022-09-11\r\n * Author: Ais\r\n * Project: \r\n * Desc: 一种并行重写系统和一种形式语法\r\n * Version: 0.1\r\n****************************************/\r\n\r\n//L系统\r\nclass LSystem {\r\n\r\n    /*----------------------------------------\r\n    @class: L系统\r\n    @desc: \r\n        G = (S, V, P)\r\n    @property: \r\n        * S(str): 系统起始状态(公理)\r\n        * V(list:str): 符号表(终结符号&非终结符)\r\n        * P(obj|map): 生成式\r\n        * ops(obj|map): 符号->行为映射表\r\n    @method: \r\n        * method: func\r\n    @exp: \r\n        ls = new LSystem({\r\n            \"S\": \"A\",\r\n            \"V\": [\"A\", \"B\", \"[\", \"]\"],\r\n            \"P\": {\r\n                \"A\": \"B[A]A\",\r\n                \"B\": \"BB\"\r\n            },\r\n            \"ops\": {\r\n                \"A\": (st) => {\r\n                    canvas.line(st.p.clone(), st.p.add(st.v));\r\n                },\r\n                \"B\": (st) => {\r\n                    canvas.line(st.p.clone(), st.p.add(st.v));\r\n                },\r\n                \"[\": (st) => {\r\n                    st.stack.unshift([st.p.clone(), st.v.clone()]);\r\n                    st.v.rotate(st.rad);\r\n                },\r\n                \"]\": (st) => {\r\n                    let status = st.stack.shift();\r\n                    st.p = status[0], st.v = status[1];\r\n                    st.v.rotate(-st.rad);\r\n                }\r\n            }\r\n        });\r\n    ----------------------------------------*/\r\n    constructor({S=\"\", V=[], P={}, ops={}} = {}) {\r\n        //系统起始状态(公理)\r\n        this.S = S;\r\n        //符号表(终结符号&非终结符)\r\n        this.V = V;\r\n        //生成式\r\n        this.P = P;\r\n        //符号->行为映射表\r\n        this.ops = ops;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 迭代\r\n    @desc: 根据生成式生成下一代语句\r\n    @params: \r\n        * s(str): 语句\r\n    @return(str) \r\n    ----------------------------------------*/\r\n    next(s=this.S) {\r\n        let _s = \"\";\r\n        for(let i=0, n=s.length; i<n; i++) {\r\n            _s += (s[i] in this.P ? this.P[s[i]] : s[i]);\r\n        }\r\n        return _s;\r\n    } \r\n\r\n    /*----------------------------------------\r\n    @func: 推导(重复迭代)\r\n    @desc: 根据生成式从公理出发推导到第n代语句\r\n    @params: \r\n        * n(int:>=0): 迭代代数\r\n    @return(str): 语句\r\n    ----------------------------------------*/\r\n    gen(n=0) {\r\n        let s = this.S;\r\n        for(let i=0; i<n; i++) {\r\n            s = this.next(s);\r\n        }\r\n        return s;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 推导(迭代器)\r\n    @desc: 以迭代器的形式进行推导，用于输出中间代语句\r\n    @params: \r\n        * n(int:>=0): 迭代代数\r\n    @return(iterator): 迭代器\r\n    @exp: \r\n        it = ls.iter(5);\r\n        it.next().value;\r\n    ----------------------------------------*/\r\n    *iter(n=0) {\r\n        let s = this.S;\r\n        for(let i=0; i<n; i++) {\r\n            s = this.next(s);\r\n            yield s;\r\n        }\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 绘制/行动\r\n    @desc: 根据语句和ops进行绘制\r\n    @params: \r\n        * s(str): 语句\r\n        * status(obj): 状态表\r\n    @return(status): 状态表\r\n    @exp: \r\n        ls.act(ls.gen(5), {\r\n            \"p\": new Vector(canvas.cx, canvas.height),\r\n            \"v\": new Vector(0, -10),\r\n            \"rad\": Tools.ATR(45),\r\n            \"stack\": []\r\n        })\r\n    ----------------------------------------*/\r\n    act(s, status) {\r\n        for(let i=0, n=s.length; i<n; i++) {\r\n            (s[i] in this.ops) && this.ops[s[i]](status);\r\n        }\r\n        return status;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 绘制/行动(迭代器模式)\r\n    @exp: \r\n        act_it = ls.act(ls.gen(3), {\r\n            \"p\": new Vector(canvas.cx, canvas.height),\r\n            \"v\": new Vector(0, -1),\r\n            \"rad\": Tools.ATR(25),\r\n            \"stack\": []\r\n        });\r\n        act_it.next();\r\n    ----------------------------------------*/\r\n    *actIter(s, status) {\r\n        for(let i=0, n=s.length; i<n; i++) {\r\n            yield (s[i] in this.ops) && this.ops[s[i]](status);\r\n        }\r\n    }\r\n\r\n}\r\n\r\n\r\nmodule.exports.LSystem = LSystem;\n\n//# sourceURL=webpack://vision/./src/algo/LSystem.js?");
-
-/***/ }),
-
-/***/ "./src/algo/Mandelbrot_Set.js":
-/*!************************************!*\
-  !*** ./src/algo/Mandelbrot_Set.js ***!
-  \************************************/
-/***/ ((module) => {
-
-eval("/****************************************\r\n * Name: 曼德勃罗特集\r\n * Date: 2022-12-06\r\n * Author: Ais\r\n * Project: \r\n * Desc: \r\n * Version: 0.1\r\n****************************************/\r\n\r\n//复数\r\nclass Complex {\r\n\r\n    /*----------------------------------------\r\n    @class: 复数\r\n    @desc: 实现复数计算\r\n    @property: \r\n        * r(number): 实部\r\n        * i(number): 虚部\r\n    @method: \r\n        * add: 加法\r\n        * mult: 乘法\r\n        * norm: 求模\r\n    @exp: \r\n        let c = new Complex(1, 1);\r\n    ----------------------------------------*/\r\n    constructor(r, i) {\r\n        //实部\r\n        this.r = r;\r\n        //虚部\r\n        this.i = i;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 复数加法\r\n    ----------------------------------------*/\r\n    add(complex) {\r\n        this.r += complex.r;\r\n        this.i += complex.i;\r\n        return this;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 复数乘法\r\n    @desc: (a+bi)(c+di)=(ac-bd)+(bc+ad)i\r\n    ----------------------------------------*/\r\n    mult(complex) {\r\n        let a = this.r, b = this.i, c = complex.r, d = complex.i;\r\n        this.r = a * c - b * d;\r\n        this.i = b * c + a * d;\r\n        return this;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 求模长\r\n    ----------------------------------------*/\r\n    norm() {\r\n        return Math.sqrt(this.r * this.r + this.i * this.i);\r\n    }\r\n\r\n}\r\n\r\n\r\n/*----------------------------------------\r\n@func: 曼德勃罗特集: Z(n+1) = Z(n) ^ 2 + C\r\n@desc: 判断给定参数(C)经过有限次迭代是否收敛\r\n@params: \r\n    * C(Complex): 复数参数\r\n    * n(int>0): 迭代次数\r\n@return(type): [是否属于该集合, 迭代次数]\r\n@exp: \r\n    Mandelbrot_Set(new Complex(0, 0)) -> [true, n]\r\n----------------------------------------*/\r\nconst Mandelbrot_Set = function(C, n=500) {\r\n    let z = new Complex(0, 0);\r\n    for(let i=0; i<=n; i++) {\r\n        z = z.mult(z).add(C);\r\n        if(z.norm() > 2) {\r\n            return [false, i];\r\n        }\r\n    }\r\n    return [true, n]\r\n}\r\n\r\n\r\n/*----------------------------------------\r\n@func: 朱利亚集: Z(n+1) = Z(n) ^ 2 + C\r\n@desc: 固定参数C, 判断Z0是否在有限次迭代后收敛\r\n@params: \r\n    * Z0(Complex): 初始迭代参数\r\n    * C(Complex): 固定复数参数\r\n    * n(int>0): 迭代次数\r\n@return(type): [是否属于该集合, 迭代次数]\r\n@exp: \r\n    Julia_Set(new Complex(0, 0), new Complex(-0.8, 0.156)) -> [true, n]\r\n----------------------------------------*/\r\nconst Julia_Set = function(Z0, C, n=500) {\r\n    let z = Z0;\r\n    for(let i=0; i<=n; i++) {\r\n        z = z.mult(z).add(C);\r\n        if(z.norm() > 2) {\r\n            return [false, i];\r\n        }\r\n    }\r\n    return [true, n]\r\n}\r\n\r\n\r\n\r\nmodule.exports.Complex = Complex;\r\nmodule.exports.Mandelbrot_Set = Mandelbrot_Set;\r\nmodule.exports.Julia_Set = Julia_Set;\r\n\r\n\n\n//# sourceURL=webpack://vision/./src/algo/Mandelbrot_Set.js?");
-
-/***/ }),
-
-/***/ "./src/algo/NNS.js":
-/*!*************************!*\
-  !*** ./src/algo/NNS.js ***!
-  \*************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("/****************************************\r\n * Name: Nearest Neighbor Search | 邻近搜索算法\r\n * Date: 2023-01-30\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 在向量集中搜索给定目标向量的邻近集\r\n * Version: 0.1\r\n****************************************/\r\n\r\n\r\nconst Vector = (__webpack_require__(/*! ../vector/vector */ \"./src/vector/vector.js\").Vector);\r\n\r\n\r\n//邻近搜索算法(基类)\r\nclass NearestNeighborSearch {\r\n\r\n    /*----------------------------------------\r\n    @class: NearestNeighborSearch \r\n    @desc: 邻近搜索算法模块，用于在向量集中搜索给定目标向量的邻近元素集\r\n    @property: \r\n        * ps(list:obj): 对象集，算法基于该属性进行数据结构的构建与邻近集的计算\r\n        * vect(callable): 向量提取器(可调用对象), 用于从对象中提取向量作为算法处理单元\r\n        * IS_LOOP_BORDER(bool): 循环边界标记, 用于标记算法是否在循环边界下进行计算\r\n    @method: \r\n        * build: 构建算法的数据结构\r\n        * near: 根据距离(dist)计算目标对象(tp)的邻近集\r\n        * k_near: 计算离给定目标对象(tp)最近的“k”个对象\r\n        * nps: 根据对象集生成每个元素的邻近集\r\n    @exp: \r\n        let NNS = new NearestNeighborSearch(ps, function(particle){return particle.p;});\r\n    @question: 怎样让算法模块支持其他距离计算方式\r\n        NNS(NearestNeighborSearch)算法模块通过 \"vect\" 属性从对象中提取出一个向量对象(Vector)\r\n        作为算法的计算处理单元，默认情况下通过 \"Vector.dist\" 计算的是欧式距离，为了使算法模块支持\r\n        其他的距离计算类型(比如曼哈顿距离)，可以从 \"Vector\" 类派生一个子类，并重写 \"dist\" 方法来实现。\r\n    ----------------------------------------*/\r\n    constructor(ps, vect) {\r\n        /*----------------------------------------\r\n        @func: 向量提取器\r\n        @desc: \r\n            给定一个对象，从中提取出向量对象(Vector)作为算法的处理单元\r\n            设计该属性的目的是为了提高模块可处理对象的适应性，并让算法的处理单元统一成向量对象。\r\n        @params: \r\n            * obj(obj): 任意对象\r\n        @return(Vector): 对象的某个向量属性\r\n        @exp: \r\n            this.vect = function(particle_obj) { return particle_obj.p }\r\n        ----------------------------------------*/\r\n        this.vect = vect || function(obj) { return obj; };\r\n        //对象集: 用于算法数据结构(状态)的构建\r\n        this.ps = ps;\r\n        //循环边界标记: 该标记为(true)时, 在有边界限制的情况下需要将边界当成循环边界进行处理\r\n        this.IS_LOOP_BORDER = false;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 构建算法的数据结构\r\n    @desc: \r\n        更新 this.ps 属性并基于对象集(ps)构建算法数据结构，主要用于使用数据结构(状态)进行邻近集计算的算法实现，\r\n        当ps的状态发生变化时，通过该方法重新构建内部数据结构。\r\n    @params: \r\n        * ps(list:obj): 对象集\r\n    @return(this) \r\n    @exp: \r\n        let NNS = new NearestNeighborSearch(ps).build();\r\n        let NNS = new NearestNeighborSearch().build(ps);\r\n    ----------------------------------------*/\r\n    build(ps=null) {\r\n        this.ps = ps || this.ps;\r\n        return this;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 生成距离(dist)邻近集\r\n    @desc: 根据距离(dist)计算目标对象(tp)在对象集(ps)中的邻近集\r\n    @params: \r\n        * tp(obj): 目标对象(与对象集(ps)中的元素类型一致，或者具有必要属性(从鸭子类型的观点来看))\r\n        * dist(number:>=0): 算法的判定距离\r\n    @return(list:obj): [ps[i], ps[k], ps[j], ...]\r\n    @exp: \r\n        let ns = new NearestNeighborSearch(ps).near(tp, 100);\r\n    ----------------------------------------*/\r\n    near(tp, dist) {\r\n        return [];\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 生成\"k\"邻近集\r\n    @desc: 给定目标对象(tp), 计算在对象集(ps)中, 离\"tp\"最近的\"k\"个元素\r\n    @params: \r\n        * tp(obj): 目标对象\r\n        * k(int:>0): k个最近的元素(k >= nps.length)\r\n    @return(list:obj): [ps[i], ps[k], ps[j], ...]\r\n    @exp: \r\n        let ns = new NearestNeighborSearch(ps).k_near(tp, 5);\r\n    ----------------------------------------*/\r\n    k_near(tp, k) {\r\n        return [];\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 计算对象集的邻近集\r\n    @desc: 计算给定对象集中每个元素的邻近集\r\n    @params: \r\n        * d(number): dist or k, 根据模式确定\r\n        * mode(enum): \"dist\" || \"k\" \r\n    @return(list:obj): [{\"tp\": ps[i], \"nps\": [...]}, ...]\r\n    @exp: \r\n        let ns = new NearestNeighborSearch(ps).nps(100);\r\n        let ns = new NearestNeighborSearch(ps).nps(5, \"k\");\r\n    @TODO: 计算结构优化\r\n    ----------------------------------------*/\r\n    nps(d, mode=\"dist\") {\r\n        //@ERR: 该方式将导致\"this\"的隐式绑定丢失, 从而导致目标方法(near || k_near)被调用时，无法引用 this.vect 属性。\r\n        // let _near = (mode==\"dist\" ? this.near : this.k_near);\r\n        let _near = (mode==\"dist\" ? this.near : this.k_near).bind(this);\r\n        let np_set = [];\r\n        for(let i=0, n=this.ps.length; i<n; i++) {\r\n            let _nps = _near(this.ps[i], d);\r\n            (_nps.length > 0) && np_set.push({\"tp\": this.ps[i], \"nps\": _nps});\r\n        }\r\n        return np_set;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 将邻近集转换成图结构\r\n    @desc: \r\n    @params: \r\n        * nps(list: ns): 邻近集\r\n    @return(type): \r\n    @exp: \r\n    ----------------------------------------*/\r\n    static toGraph(nps) {\r\n        return ;\r\n    }\r\n}\r\n\r\n\r\n//线性邻近搜索\r\nclass LinearNNS extends NearestNeighborSearch {\r\n\r\n    /*----------------------------------------\r\n    @class: LinearNNS \r\n    @desc: 线性邻近搜索，通过遍历对象集(ps)来计算目标对象(tp)的邻近集\r\n    @algo:\r\n        由于该算法结构简单，并且不要维护内部数据结构支撑算法计算(无状态)，因此适用于 ps 对象动态变化的场景，\r\n        比如可以在 boids 算法中用来计算邻近视野中的对象。但是缺点也很明显，算法的计算量依赖于 ps 的规模，\r\n        当 ps 规模过大时，算法效率会很低。\r\n    @exp: \r\n        let LNNS = new LinearNNS(ps, function(particle){return particle.p;});\r\n    ----------------------------------------*/\r\n    constructor(ps, vect) {\r\n        super(ps, vect);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: dist邻近集\r\n    ----------------------------------------*/\r\n    near(tp, dist, ps=null) {\r\n        ps = ps || this.ps;\r\n        let tp_v = this.vect(tp), nps = [];\r\n        for(let i=0, n=ps.length; i<n; i++) {\r\n            (!(tp === ps[i]) && tp_v.dist(this.vect(ps[i])) <= dist) && nps.push(ps[i]);\r\n        }\r\n        return nps;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: k邻近集\r\n    ----------------------------------------*/\r\n    k_near(tp, k, ps=null) {\r\n        ps = ps || this.ps;\r\n        let tp_v = this.vect(tp), dist_ps = [];\r\n        for(let i=0, n=ps.length; i<n; i++) { \r\n            if(tp === ps[i]) { continue; }\r\n            //计算当前元素与目标元素的距离\r\n            let dist = tp_v.dist(this.vect(ps[i]));\r\n            if(dist_ps.length == 0) {\r\n                dist_ps.push({\"dist\": dist, \"p\": ps[i]})\r\n                continue;\r\n            }\r\n            //当前元素距离小于邻近集中的最大距离(插入排序)\r\n            if(dist < dist_ps[dist_ps.length-1].dist || dist_ps.length < k) {\r\n                for(let j=dist_ps.length-1; j>=0; j--) {\r\n                    if(dist>=dist_ps[j].dist) {\r\n                        dist_ps.splice(j+1, 0, {\"dist\": dist, \"p\": ps[i]});\r\n                        break;\r\n                    }\r\n                    //邻近集中的最小距离\r\n                    if(j==0) {\r\n                        dist_ps.splice(0, 0, {\"dist\": dist, \"p\": ps[i]})\r\n                    }\r\n                }\r\n                (dist_ps.length > k) && dist_ps.pop(); \r\n            }\r\n        }\r\n        //格式化\r\n        let nps = []\r\n        for(let i=0; i<dist_ps.length; i++) {\r\n            nps.push(dist_ps[i].p);\r\n        }\r\n        return nps;\r\n    }\r\n\r\n}\r\n\r\n\r\n//网格邻近搜索\r\nclass GridNNS extends LinearNNS {\r\n\r\n    /*----------------------------------------\r\n    @class: GridNNS \r\n    @desc: 网格邻近搜索，基于 LinearNNS 算法进行优化。\r\n    @algo:\r\n        算法的基本思路是将目标数据(ps)的向量空间划分成网格，网格中的单元格尺寸为\"dn\", 单元格维度取决于\r\n        目标数据维度。通过将目标数据(ps)映射到网格空间中的位置矢量，来存储目标数据对象。在这种映射下，\r\n        位置间距小于单元格对角线长度(最大距离)的对象会存储在相同的单元格(或邻近的单元格)，在进行邻近搜索时，\r\n        将目标对象(tp)映射到网格空间坐标，并直接读取该单元格(或半径R内邻近单元格)中存储的对象。得到一个近似邻近集，\r\n        再对这个近似解进行精确搜索。以减少 LinearNNS 算法中的无效计算。\r\n        GridNNS 算法有以下特征:\r\n            * \"dn\" 参数对算法的影响: \r\n                \"dn\"参数越小，算法所需的存储空间越大，\"dn\"参数越大，算法的计算量越接近 LinearNNS 算法。\r\n                当 dn 大于等于目标数据边界大小的情况下，退化成 LinearNNS 算法。\r\n            * 动态数据: \r\n                相对于 LinearNNS 算法，该算法是一个具有内部状态的算法，因此在 \"ps\" 变动的场景下，需要通过 \"build\" 方法更新内部状态。\r\n            * 有限空间: \r\n                该算法适用于数据集聚集在一个有限空间下，当数据集中离散点过多，会导致更多的存储空间开销。\r\n            * 数据集分量范围限制:\r\n                对于数据集的 dsr(数据集分量范围) 不能为负数，因为在将数据的向量坐标映射到存储容器索引时，存储容器的索引范围是 [0, N+)，因此数据集中的\r\n                向量分量不能为负数。但是可以通过对数据集进行整体平移来解决该限制。这是由于在采用欧式距离计算的情况下，该邻近搜索算法具有\"平移不变性\"，\r\n                即对数据集整体平移一个向量(v)，给定目标向量(同时进行平移操作)的邻近集不变。\r\n            * 边界条件: \r\n                当目标数据在 dsr(数据集分量范围) 外时，算法需要对该情况进行特殊处理。 \r\n    @property:\r\n        * dn(int|>0): 网格单元大小\r\n        * dsr(list:[min, max]): 数据集分量范围，其长度等于数据集向量维度。每个单元代表数据集对应的分量范围。\r\n        * dst(Vector): 数据集非负平移量，用于解决\"数据集分量范围限制\"，基于 dsr 构建。在存储数据到 grid 容器时，需要对目标数据进行平移操作。\r\n        * size(arr:number|>0): 要划分成网格的原始空间尺寸。\r\n        * grid(GridNNS.GridContainer): 网格数据存储容器，为算法提供数据结构支撑。\r\n    @method:\r\n        * GridContainer(static): 网格数据存储容器构造器\r\n    @exp: \r\n        let GNNS = new GridNNS(ps, function(particle){return particle.p;}, 150).build();\r\n        let GNNS = new GridNNS(ps, function(particle){return particle.p;}, 150, [0, canvas.width, 0, canvas.height]).build();\r\n    ----------------------------------------*/\r\n    constructor(ps, vect, dn=100, dsr=null) {\r\n        super(ps, vect);\r\n        //网格单元大小\r\n        this.dn = dn;\r\n        //数据集分量范围\r\n        this.dsr = dsr;\r\n        //数据集非负平移量\r\n        this.dst = null;\r\n        //网格容器尺寸(像素坐标)\r\n        this.size = null;\r\n        //网格数据存储容器(算法数据结构)\r\n        // this.grid = GridNNS.GridContainer(this.dn, this.size);\r\n        this.grid = null;\r\n    }\r\n\r\n    //网格数据存储容器构造器\r\n    static GridContainer(dn, size) {\r\n\r\n        //网格数据存储容器\r\n        class GridContainer {\r\n\r\n            /*----------------------------------------\r\n            @class: GridContainer \r\n            @desc: 网格数据存储容器，为 \"GridNNS\" 算法提供数据结构支撑。\r\n            @algo:\r\n                * 数据结构设计:\r\n                该数据容器通过一维数组(实际存储结构)来模拟高维数组(逻辑存储结构)。\r\n                内部采用一个映射算法(index), 将高维数组坐标映射到实际存储结构的一维数组索引。\r\n                之所以采用\"坐标映射索引\"而不是\"数组下标索引\"的原因在于，\"数组下标索引\"无法适配\r\n                高维数据的场景，对于二维数组来说，需要通过 \"arr[y][x]\" 这种硬编码的方式进行数据\r\n                的访问，但是当维数变化时，该方式就不适用了，比如三维数组(arr[z][y][x])。\r\n                * 坐标映射算法设计:\r\n                设 \r\n                    ds = [x, y, z, ...] 为高维数组(逻辑存储结构)的尺寸，\r\n                    p  = [x, y, z, ...] 为高维数组上数据的坐标向量\r\n                则 index(dim) 坐标映射索引函数的递归结构如下:\r\n                    index(1) -> p[x]\r\n                    index(2) -> (ds[x] * p[y]) + index(1) \r\n                             -> (ds[x] * p[y]) + p[x]\r\n                    index(3) -> (ds[x] * ds[y] * p[z]) + index(2) \r\n                             -> (ds[x] * ds[y] * p[z]) + (ds[x] * p[y]) + p[x]\r\n                    ...\r\n                由上述归纳可得:\r\n                    index(n) -> (1 * ds[x] * ... * ds[n-1]) * p[n-1] + index(n-1)\r\n                FIN\r\n            @property: \r\n                * dn(int|>0): 网格单元大小\r\n                * size(arr:number|>0): 要划分成网格的原始空间尺寸。\r\n                * dsize(arr:int|>0): 网格空间尺寸\r\n                * length(int|>=0): 存储容器长度\r\n                * _data(arr): 存储容器(一维数组)\r\n                * _cache_ds(arr): 用于根据向量位置坐标计算存储容器索引的计算缓存\r\n                * _cache_gns(arr): 用于缓存网格邻域坐标集\r\n            @method: \r\n                * toGrid: 将数据集向量映射到网格空间坐标\r\n                * index: 坐标映射算法\r\n                * gns: 根据维数和邻域半径计算网格空间的邻域坐标集\r\n                * set: 存储数据\r\n                * get: 获取数据\r\n            @exp: \r\n            ----------------------------------------*/\r\n            constructor(dn, size) {\r\n                //网格单元大小\r\n                this.dn = dn;\r\n                //原始空间尺寸(像素坐标)\r\n                this.size = size;\r\n                //网格空间尺寸(网格坐标)\r\n                this.dsize = [];\r\n                //存储容器长度\r\n                this.length = 1;\r\n                //计算存储容器尺寸\r\n                for(let i=this.size.length; i--; ) {\r\n                    let di = Math.ceil(this.size[i]/this.dn) + 1;\r\n                    this.length *= di; this.dsize[i] = di;\r\n                }\r\n                //构建存储容器(一维数组容器，映射到虚拟高维数组)\r\n                this._data = new Array(this.length);\r\n                //计算缓存: 维度-尺寸系数\r\n                this._cache_ds = null;\r\n                //计算缓存: 网格邻域坐标集(r=1)\r\n                this._cache_gns = this.gns(this.dsize.length, 1);\r\n            }\r\n\r\n            /*----------------------------------------\r\n            @func: 将数据集向量映射到网格空间坐标\r\n            @params: \r\n                * vector(Vector): 数据集向量\r\n            @return(Vector): 对应的网格空间坐标 \r\n            ----------------------------------------*/\r\n            toGrid(vector) {\r\n                let v = [];\r\n                for(let i=0, n=vector.dim(); i<n; i++) {\r\n                    v[i] = Math.ceil(vector.v[i]/this.dn);\r\n                }\r\n                return new Vector(...v);\r\n            }\r\n\r\n            /*----------------------------------------\r\n            @func: 坐标映射算法 \r\n            @desc: 计算网格空间坐标(逻辑存储结构)对应存储容器的索引(实际存储结构)\r\n            @params: \r\n                * vector(Vector): 网格空间坐标向量\r\n            @return(int): 存储容器索引 \r\n            ----------------------------------------*/\r\n            index(vector) {\r\n                /* \r\n                //递归实现 \r\n                //n(维数) | ds(dsize) | p(坐标向量)\r\n                let _index = function(n, ds, p) {\r\n                    if(n==1) {\r\n                        return p[0];\r\n                    } else {\r\n                        let k = 1;\r\n                        for(let i=0; i<n-1; i++) { k*=ds[i]; }\r\n                        return (k * p[n-1]) + _index(n-1, ds, p);\r\n                    }\r\n                } \r\n                */\r\n                //计算缓存优化: 维度-尺寸系数\r\n                if(!this._cache_ds) {\r\n                    this._cache_ds = [1];\r\n                    for(let i=0, n=this.dsize.length-1, k=1; i<n; i++) {\r\n                        k *= this.dsize[i]\r\n                        this._cache_ds.push(k);\r\n                    }\r\n                }\r\n                //计算索引\r\n                let i = 0;\r\n                for(let k=vector.dim(); k--; ) {\r\n                    i += (this._cache_ds[k] * vector.v[k])\r\n                }\r\n                return i;\r\n            }\r\n\r\n            /*----------------------------------------\r\n            @func: 计算网格邻域坐标集\r\n            @desc: 根据\"维数\"和\"邻域半径\"计算网格空间的邻域坐标集\r\n            @algp:\r\n                网格邻域坐标集生成算法如下:\r\n                * dim(1): \r\n                    [\r\n                        [-1], [0], [1]\r\n                    ]\r\n                * dim(2):\r\n                    [\r\n                        [-1, -1], [-1, 0], [-1, 1],\r\n                        [ 0, -1], [ 0, 0], [ 0, 1],\r\n                        [ 1, -1], [ 1, 0], [ 1, 1], \r\n                    ]\r\n                由上述归纳可知: \r\n                    dim(n) = (dim(1) x dim(1)) ^ (n-1)\r\n                其中 x 为笛卡尔积运算，\r\n                即\r\n                    以 dim(1) 为基，与其自身进行 n 次笛卡尔积运算。\r\n                设 r 为邻域半径，则基的定义如下\r\n                    base = [-r, -r+1, -r+2, ..., 0, 1, 2, r]\r\n                则有 \r\n                    dim(n) = (base x base) ^ (n-1)\r\n                FIN\r\n            @params: \r\n                * dim(int|>0): 网格坐标维数\r\n                * r(int|>=1): 邻域半径\r\n            @return(list:Vector): 网格邻域坐标集\r\n            ----------------------------------------*/\r\n            gns(dim, r=1) {\r\n                //笛卡尔积\r\n                let cartesian_product = function(a, b) {\r\n                    let ps = [];\r\n                    for(let i=0, endi=a.length; i<endi; i++) {\r\n                        for(let k=0, endk=b.length; k<endk; k++) {\r\n                            ps.push([...a[i], ...b[k]]);\r\n                        }\r\n                    }\r\n                    return ps;\r\n                }\r\n                //生成基坐标\r\n                let base = [];\r\n                for(let i=-r; i<=r; i++) { base.push([i]); }\r\n                //生成网格邻域集\r\n                let _gns = base;\r\n                for(let i=0; i<dim-1; i++) { _gns = cartesian_product(_gns, base) }\r\n                return _gns;\r\n            }\r\n\r\n            /*----------------------------------------\r\n            @func: 存储数据\r\n            @desc: 在原始坐标向量(p)映射的网格坐标位置存储值(val)\r\n            @params: \r\n                * p(Vector): 原始坐标向量\r\n                * val(obj): 数据值\r\n            @return(bool): 操作状态 \r\n            ----------------------------------------*/\r\n            set(p, val) {\r\n                let i = this.index(this.toGrid(p));\r\n                if(i<0 || i>this.length) { return false; }\r\n                if(this._data[i]) {\r\n                    this._data[i].push(val);\r\n                } else {\r\n                    this._data[i] = [val];\r\n                }\r\n                return true;\r\n            }\r\n\r\n            /*----------------------------------------\r\n            @func: 获取数据\r\n            @desc: 获取原始坐标向量(p)映射的网格坐标位置的邻域半径(r)内的数据对象\r\n            @params: \r\n                * p(Vector): 原始坐标向量\r\n                * r(int|>=0): 邻域半径 \r\n            @return(list:obj): 数据对象列表 \r\n            ----------------------------------------*/\r\n            get(p, r=0) {\r\n                //网格中心坐标\r\n                let po = this.toGrid(p);\r\n                //返回网格中心坐标位置的数据\r\n                if(r <= 0) { \r\n                    return this._data[this.index(po)] || []; \r\n                }\r\n                //生成网格邻域坐标集\r\n                let _gns = r==1 ? this._cache_gns : this.gns(p.dim(), r);\r\n                //遍历网格邻域坐标集获取数据对象\r\n                let data = [];\r\n                for(let k=0, n=_gns.length; k<n; k++) {\r\n                    let i = this.index(new Vector(..._gns[k]).add(po));\r\n                    data = [...data, ...(this._data[i] || [])]\r\n                }\r\n                return data;\r\n            }\r\n        }\r\n        return new GridContainer(dn, size);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 构建算法的数据结构\r\n    @desc: 将数据集存储到网格容器中\r\n    ----------------------------------------*/\r\n    build(ps=null) {\r\n        //数据集\r\n        this.ps = ps || this.ps;\r\n        //计算数据集分量范围\r\n        if(this.dsr==null) {\r\n            //计算边界向量(由数据集向量分量范围构建)\r\n            let max = this.vect(this.ps[0]).clone(), min = max.clone();\r\n            for(let i=1, n=this.ps.length; i<n; i++) {\r\n                let p = this.vect(this.ps[i]);\r\n                for(let k=0, end=p.v.length; k<end; k++) {\r\n                    if(max.v[k] < p.v[k]) { max.v[k] = p.v[k]; }\r\n                    if(min.v[k] > p.v[k]) { min.v[k] = p.v[k]; }\r\n                }\r\n            }\r\n            this.dsr = [];\r\n            for(let i=0; i<min.v.length; i++) {\r\n                this.dsr[i] = [min.v[i], max.v[i]];\r\n            }\r\n        }\r\n        //计算数据集网格容器尺寸(this.size)与数据集非负平移量(this.dst)\r\n        this.size = [], this.dst = [];\r\n        for(let i=0, n=this.dsr.length; i<n; i++) {\r\n            this.size[i] = this.dsr[i][1] - this.dsr[i][0];\r\n            this.dst[i] = this.dsr[i][0] < 0 ? -this.dsr[i][0] : 0;\r\n        }\r\n        this.dst = new Vector(...this.dst);\r\n        //构建网格数据存储容器\r\n        this.grid = GridNNS.GridContainer(this.dn, this.size);\r\n        //将数据集存储到网格容器中\r\n        for(let i=0, n=this.ps.length; i<n; i++) {\r\n            this.grid.set(this.vect(this.ps[i]).clone().add(this.dst), this.ps[i]);\r\n        }\r\n        return this;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: dist邻近集\r\n    ----------------------------------------*/\r\n    near(tp, dist) {\r\n        //计算网格邻域半径\r\n        let R = Math.ceil(dist/this.dn);\r\n        //计算网格近似邻近集\r\n        let gnps = this.grid.get(this.vect(tp).clone().add(this.dst), R);\r\n        //计算临近集\r\n        return super.near(tp, dist, gnps);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: k邻近集\r\n    @algo: 当数据集离散程度较大时，在极端情况下，该算法的计算效率要低于 \"LinearNNS.k_near\"。\r\n    @TODO: 计算优化，网格坐标系环形单元格坐标计算算法\r\n    ----------------------------------------*/\r\n    k_near(tp, k) {\r\n        //计算最大网格半径\r\n        let max_R = Math.max(...this.grid.dsize), R = 1;\r\n        //计算网格近似邻近集\r\n        let gnps = [];\r\n        while(gnps.length<k && R<=max_R) {\r\n            gnps = this.grid.get(this.vect(tp).clone().add(this.dst), R++)\r\n        }\r\n        gnps = this.grid.get(this.vect(tp).clone().add(this.dst), Math.min(R+1, max_R));\r\n        //计算临近集\r\n        return super.k_near(tp, k, gnps);\r\n    }\r\n}\r\n\r\n\r\n//KD树-邻近搜索\r\nclass KDTreeNNS extends NearestNeighborSearch {\r\n\r\n}\r\n\r\n\r\nmodule.exports.NearestNeighborSearch = NearestNeighborSearch;\r\nmodule.exports.LinearNNS = LinearNNS;\r\nmodule.exports.GridNNS = GridNNS;\r\nmodule.exports.KDTreeNNS = KDTreeNNS;\n\n//# sourceURL=webpack://vision/./src/algo/NNS.js?");
-
-/***/ }),
-
-/***/ "./src/algo/OSS.js":
-/*!*************************!*\
-  !*** ./src/algo/OSS.js ***!
-  \*************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("/****************************************\r\n * Name: optimum solution solver | 最优解通用求解器\r\n * Date: 2022-07-11\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 给定一个目标函数，计算该函数的数值最优解\r\n * Version: 0.1\r\n****************************************/\r\n\r\nconst Vector = (__webpack_require__(/*! ../vector/vector */ \"./src/vector/vector.js\").Vector);\r\nconst Particle = (__webpack_require__(/*! ../vector/particle */ \"./src/vector/particle.js\").Particle);\r\n\r\n/***************************************  \r\n算法思路:\r\n给定一个目标函数f(x), 其中x是定义域为R*n的向量。现在构造一个求解器s(solver), solver有一个临近坐标集，\r\n这个集合是其每次迭代后的可能位置。solver在每次迭代时从中选取f(x)的最优解进行移动，直到停机(当临近集中\r\n的所有值都不是最优时停机)。\r\n通过上述算法构建的solver求解的可能是局部最优解。为了应对这种情况，可能通过构建一个求解器集群来避免。\r\n通过随机生成solver的初始位置，让N个solver均匀分布在定义域上。但这N个solver停机时，从中选择一个\r\n最优解作为全局最优解。\r\n****************************************/\r\n\r\n//局部最优解求解器\r\nclass Solver extends Particle {\r\n\r\n    /*----------------------------------------\r\n    @func: 局部最优值求解器\r\n    @desc: 通过迭代来求解指定域下目标函数的局部最优解\r\n    @params: \r\n        * tfunc(function): 目标函数\r\n        * ps(Vector): 起始位置\r\n        * val_type(str): 最优解类型(min || max)\r\n    ----------------------------------------*/\r\n    constructor(tfunc, ps, val_type=\"min\") {\r\n        super();\r\n        //目标函数\r\n        this.tfunc = tfunc;\r\n        //求解域(定义域的子域)\r\n        this.dod = [];\r\n        //最优值类型\r\n        this.val_type = val_type;\r\n        //局部最优解坐标\r\n        this.p = ps;\r\n        //最优值\r\n        this.val = (this.val_type == \"min\" ? Infinity : -Infinity);\r\n        //速度集(临近坐标集)\r\n        this.vs = [];\r\n        //停机状态\r\n        this._END = false;\r\n    }\r\n\r\n    action() {\r\n        if(!this._END) {\r\n            let _END = true;\r\n            for(let i=0, end=this.vs.length; i<end; i++) {\r\n                //计算目标函数值\r\n                let _pv = Vector.add(this.p, this.vs[i]);\r\n                let _val = this.tfunc(_pv);\r\n                //移动到最优解坐标\r\n                if((this.val_type==\"min\" && _val <= this.val) || (this.val_type==\"max\" && val >= this.val)) {\r\n                    this.val = _val; this.p = _pv;\r\n                    _END = false;\r\n                }\r\n                //停机(超过求解域)\r\n                if(!_pv.in(this.dod)) { _END = true; }\r\n            }\r\n            this._END = _END;\r\n        }\r\n        return this.p;\r\n    }\r\n\r\n    end() { return this._END; }\r\n}\r\n\r\n\r\n//求解器集群\r\nclass OptimumSolutionSolvers {\r\n\r\n    /*----------------------------------------\r\n    @func: 求解器集群\r\n    @desc: 通过在求解域上均匀分布的求解器来求解全局最优值\r\n    @property: \r\n        * n(number): 求解器数量\r\n        * count(number): 迭代计数器, 用于控制迭代次数\r\n        * tfunc(function): 目标函数\r\n        * dod(list:number): 求解域 -> [[0, width], [0, height]]\r\n        * vs(list:Vector): 求解器速度集, 默认采用8个临近点\r\n        * vsd(number): 默认速度集的步长\r\n        * val_type(str): 最优解类型(min || max)\r\n        * os_val(number): 最优解值\r\n        * os_p(Vector): 最优解坐标\r\n    @return(type): \r\n    @exp: \r\n    ----------------------------------------*/\r\n    constructor() {\r\n        //求解器数量\r\n        this.n = 30;\r\n        //求解器集群\r\n        this.solvers = [];\r\n        //迭代次数\r\n        this.count = Infinity;\r\n        //目标函数\r\n        this.tfunc = null;\r\n        //求解域\r\n        this.dod = [];\r\n        //求解器速度集\r\n        this.vs = null;\r\n        //求解器速度集步长\r\n        this.vsd = 1;\r\n        //最优值类型\r\n        this.val_type = \"min\";\r\n        //最优值\r\n        this.os_val = null;\r\n        //最优值坐标\r\n        this.os_p = null;\r\n        //停机状态\r\n        this._END = false;\r\n    }\r\n\r\n    //初始化求解器\r\n    init() {\r\n        //最优解初始值\r\n        this.os_val = (this.val_type == \"min\" ? Infinity : -Infinity);\r\n        //构建速度集\r\n        if(this.vs == null) {\r\n            this.vs = [\r\n                new Vector(-1, -1).norm(this.vsd), new Vector(0, -1).norm(this.vsd), new Vector(1, -1).norm(this.vsd),\r\n                new Vector(-1, 0).norm(this.vsd),                                    new Vector(1, 0).norm(this.vsd),\r\n                new Vector(-1, 1).norm(this.vsd),  new Vector(0, 1).norm(this.vsd),  new Vector(1, 1).norm(this.vsd),\r\n            ]\r\n        }\r\n        //构建求解器\r\n        for(let i=0; i<this.n; i++) {\r\n            let _solver = new Solver(this.tfunc, Vector.random(this.dod), this.val_type);\r\n            _solver.dod = this.dod; _solver.vs = this.vs;\r\n            this.solvers.push(_solver);\r\n        }\r\n    }\r\n    \r\n    //迭代\r\n    next() {\r\n        if(this._END || this.count<0) {\r\n            this._END = true;\r\n            return this.os_p;\r\n        }\r\n        let _END = true;\r\n        for(let i=0, end=this.solvers.length; i<end; i++) {\r\n            this.solvers[i].action();\r\n            _END = _END & this.solvers[i].end();\r\n            if((this.val_type==\"min\" && this.solvers[i].val <= this.os_val) || (this.val_type==\"max\" && this.solvers[i].val >= this.os_val)) {\r\n                this.os_val = this.solvers[i].val; this.os_p = this.solvers[i].p;\r\n            }\r\n        }\r\n        this._END = _END;\r\n        this.count--;\r\n        return this.os_p;\r\n    }\r\n\r\n    //停机状态\r\n    end() { return this._END; }\r\n}\r\n\r\n\r\nmodule.exports.OptimumSolutionSolvers = OptimumSolutionSolvers;\n\n//# sourceURL=webpack://vision/./src/algo/OSS.js?");
-
-/***/ }),
-
-/***/ "./src/canvas/canvas.js":
-/*!******************************!*\
-  !*** ./src/canvas/canvas.js ***!
-  \******************************/
-/***/ ((module) => {
-
-eval("/****************************************\r\n * Name: HTML5 Canvas 对象\r\n * Date: 2022-07-05\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 对canvas接口进行二次封装\r\n * Version: 0.1\r\n****************************************/\r\n\r\nclass Canvas {\r\n\r\n    /*----------------------------------------\r\n    @func: Canvas对象\r\n    @params: \r\n        * canvas_id(str): canvas标签的id\r\n        * width(int): 画布宽度\r\n        * height(int): 画布高度\r\n        * BGC(str): 画布的背景颜色\r\n    @return(obj): canvas对象\r\n    @exp: \r\n        const canvas = new Canvas(\"vision_canvas\", 3840, 2160);\r\n    ----------------------------------------*/\r\n    constructor(canvas_id, width, height, BGC='rgb(50, 50, 50)') {\r\n        //获取canvas标签\r\n        this.canvas = document.getElementById(canvas_id);\r\n        //设置canvas尺寸\r\n        this._width = this.canvas.width = width || window.screen.width;\r\n        this._height = this.canvas.height = height || window.screen.height;\r\n        //中心点坐标\r\n        this._cx = parseInt(this._width / 2);\r\n        this._cy = parseInt(this._height / 2);\r\n        //获取绘图上下文(2D)\r\n        this.ctx = this.canvas.getContext(\"2d\");\r\n        //默认背景色\r\n        this.BGC = BGC;\r\n        //point样式\r\n        this.POINT = {\r\n            //大小(半径)\r\n            \"R\": 2,\r\n            //颜色\r\n            \"C\": \"#FFFFFF\"\r\n        }\r\n        this.refresh();\r\n    }\r\n\r\n    //设置canvas尺寸\r\n    get width() { return this._width; }\r\n    set width(w) { this._width = this.canvas.width = w; this._cx = parseInt(this._width / 2); this.refresh(); }\r\n    get height() { return this._height; }\r\n    set height(h) { this._height = this.canvas.height = h; this._cy = parseInt(this._height / 2); this.refresh(); }\r\n    get cx() { return this._cx; }\r\n    get cy() { return this._cy; }\r\n\r\n    //设置颜色(strokeStyle && fillStyle)\r\n    set colorStyle(color) {\r\n        this.ctx.strokeStyle = this.ctx.fillStyle = color;\r\n    }\r\n\r\n    //重置画布尺寸\r\n    resize(width, height) {\r\n        this.width = parseInt(width) || window.screen.width;\r\n        this.height = parseInt(height) || window.screen.height;\r\n    }\r\n\r\n    //刷新画布\r\n    refresh(color){\r\n        this.ctx.fillStyle = color || this.BGC;\r\n        this.ctx.fillRect(0, 0, this._width, this._height);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 绘制点(point)\r\n    @desc: 绘制坐标为(x, y)的点\r\n    @params: \r\n        * x: x坐标参数\r\n        * y: y坐标参数\r\n        * color: 颜色\r\n        * r: 半径\r\n    @exp:\r\n        * point(100, 100)\r\n        * point(Vector(100, 100)) \r\n        * point({\"x\":100, \"y\":100}) \r\n    ----------------------------------------*/\r\n    point(x, y, color=null, r=null) {\r\n        if(typeof arguments[0] != \"number\") {\r\n            x = arguments[0].x; y = arguments[0].y;\r\n        }\r\n        this.ctx.strokeStyle = this.ctx.fillStyle = (color || this.POINT.C);\r\n        this.ctx.beginPath();\r\n        this.ctx.arc(x, y, r || this.POINT.R, 0, 2*Math.PI);\r\n        this.ctx.stroke(); \r\n        this.POINT.R > 1 && this.ctx.fill();\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 绘制线段(line)\r\n    @desc: 绘制一条从起始点(xs, ys)到终止点(xe, ye)的线段\r\n    @params: \r\n        * (xs, ys): 起始点坐标\r\n        * (xe, ye): 终止点坐标\r\n    @exp:\r\n        * line(100, 100, 300, 300)\r\n        * line(Vector(100, 100), Vector(300, 300)) \r\n    ----------------------------------------*/\r\n    line(xs, ys, xe, ye) {\r\n        if(typeof arguments[0] != \"number\") {\r\n            xs = arguments[0].x; ys = arguments[0].y;\r\n            xe = arguments[1].x; ye = arguments[1].y;\r\n        }\r\n        this.ctx.beginPath();\r\n        this.ctx.moveTo(xs, ys);\r\n        this.ctx.lineTo(xe, ye);   \r\n        this.ctx.stroke(); \r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 绘制线集\r\n    @desc: 根据顶点集绘制线集\r\n    @params: \r\n        * ps: 顶点集 -> [[x1, y1], [x2, y2], ..., [xn, yn]] || [v1, v2, v3, ..., vn]\r\n        * color(str || Color(颜色对象)): 线段颜色样式 \r\n        * close: 是否闭合\r\n    @exp:\r\n        * lines([[100, 100], [300, 300]])\r\n        * lines([Vector(100, 100), Vector(300, 300)]) \r\n    ----------------------------------------*/\r\n    lines(ps, color='rgb(255, 255, 255)', close=false) {\r\n        //判断点集元素类型\r\n        let isVector = (ps[0].x != undefined);\r\n        //判断是否是颜色对象\r\n        let isColor = (color.color != undefined);\r\n        //绘制线段\r\n        for(let i=0, n=ps.length, end=(close ? n : n-1); i<end; i++) {\r\n            this.ctx.beginPath();\r\n            this.ctx.strokeStyle = (isColor ? color.color() : color);\r\n            if(isVector) {\r\n                this.ctx.moveTo(ps[i].x, ps[i].y); this.ctx.lineTo(ps[(i+1)%n].x, ps[(i+1)%n].y);\r\n            } else {\r\n                this.ctx.moveTo(ps[i][0], ps[i][1]); this.ctx.lineTo(ps[(i+1)%n][0], ps[(i+1)%n][1]);\r\n            }\r\n            this.ctx.stroke();\r\n        }\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 绘制圆\r\n    @desc: 绘制圆心坐标为(x, y), 半径为r的圆\r\n    @params: \r\n        * (x, y): 圆心坐标\r\n        * r: 半径\r\n        * color: 颜色\r\n    @exp:\r\n        * circle(100, 100, 5) \r\n    ----------------------------------------*/\r\n    circle(x, y, r, color=null) {\r\n        if(color){ this.ctx.strokeStyle = this.ctx.fillStyle = color};\r\n        this.ctx.beginPath();\r\n        this.ctx.arc(x, y, r, 0, 2*Math.PI);\r\n        this.ctx.stroke(); \r\n        color && this.ctx.fill();\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 绘制矩形\r\n    @desc: 绘制中心坐标为(x, y), x轴半径为rx, y轴半径为ry的矩形\r\n    @params: \r\n        * (x, y): 中心坐标\r\n        * rx: x轴半径为rx\r\n        * ry: y轴半径为rx\r\n    @exp:\r\n        * rect(100, 100, 50, 100) \r\n        * rect(100, 100, 50, 50) \r\n    ----------------------------------------*/\r\n    rect(x, y, rx, ry) {\r\n        this.ctx.beginPath();\r\n        this.ctx.rect(x-rx, y-ry, rx*2, ry*2);\r\n        this.ctx.stroke();\r\n    }\r\n}\r\n\r\n\r\nmodule.exports.Canvas = Canvas;\n\n//# sourceURL=webpack://vision/./src/canvas/canvas.js?");
-
-/***/ }),
-
-/***/ "./src/canvas/color.js":
-/*!*****************************!*\
-  !*** ./src/canvas/color.js ***!
-  \*****************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("/****************************************\r\n * Name: color | 颜色\r\n * Date: 2022-07-18\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 颜色容器\r\n * Version: 0.1\r\n****************************************/\r\n\r\n\r\nconst Vector = (__webpack_require__(/*! ../vector/vector.js */ \"./src/vector/vector.js\").Vector);\r\n\r\n\r\n//颜色向量\r\nclass ColorVector extends Vector {\r\n\r\n    /*----------------------------------------\r\n    @class: 颜色向量(Vector)\r\n    @desc: \r\n        用向量来描述颜色，一个颜色表达式可以看作RGB空间中的一个向量，之所以采用\r\n        向量的形式来描述颜色在于，可以通过这种方式替换粒子中的位置向量，\r\n        来描述颜色向量在颜色空间中的移动，从而构建颜色渐变器。\r\n    @property: \r\n        * r/g/b(get/set): 颜色的RGB值分量\r\n        * a(get/set): alpht通道分量\r\n    @method: \r\n        * color(): 返回颜色表达式 -> 'rgb(r, g, b)'\r\n        * clone(): 复制颜色向量\r\n    @exp:\r\n        * new ColorVector(100, 200, 300).color() -> 'rgb(100, 200, 300)';\r\n    ----------------------------------------*/\r\n    constructor(r=0, g=0, b=0, a=1) {\r\n        super();\r\n        //颜色分量\r\n        this.v = a==1 ? [r, g, b] : [r, g, b, a];\r\n    }\r\n\r\n    get r(){ return this.v[0]; }\r\n    get g(){ return this.v[1]; }\r\n    get b(){ return this.v[2]; }\r\n    get a(){ return this.v[3]; }\r\n    set r(val){ this.v[0] = val; }\r\n    set g(val){ this.v[1] = val; }\r\n    set b(val){ this.v[2] = val; }\r\n    set a(val){ this.v[3] = val; }\r\n\r\n    color(tolist=false) {\r\n        if(this.v.length<=3) {\r\n            return tolist ? [this.v[0], this.v[1], this.v[2]] : `rgb(${this.v[0]}, ${this.v[1]}, ${this.v[2]})`;\r\n        } else {\r\n            return tolist ? [this.v[0], this.v[1], this.v[2], this.v[3]] : `rgb(${this.v[0]}, ${this.v[1]}, ${this.v[2]})`;\r\n        }\r\n    }\r\n    val(tolist=false) { return this.color(tolist); }\r\n\r\n    clone() {\r\n        return new ColorVector(...this.v);\r\n    }\r\n}\r\n\r\n\r\n//颜色渐变器\r\nclass ColorGradient {\r\n\r\n    /*----------------------------------------\r\n    @class: 线性颜色渐变器\r\n    @desc: 一种迭代器，用于产生渐变色。\r\n    @property: \r\n        * scv(ColorVector): 起始颜色向量\r\n        * ecv(ColorVector): 终止颜色向量\r\n        * cv(ColorVector): 当前颜色向量\r\n        * n(number): 渐变次数，用于计算每次迭代时的颜色增量\r\n        * _count(number): 内部计数器，用于记录当前迭代次数\r\n        * _dcv(ColorVector): 每次迭代的颜色增量\r\n    @method: \r\n        * color(): 返回颜色表达式 -> 'rgb(r, g, b)'\r\n    @exp: \r\n        new ColorGradient([100, 200, 200], [50, 50, 50], 100);\r\n    ----------------------------------------*/\r\n    constructor(start_color, end_color, n) {\r\n        //起始颜色向量\r\n        this.scv = new ColorVector(...start_color);\r\n        //终止颜色向量\r\n        this.ecv = new ColorVector(...end_color);\r\n        //当前颜色\r\n        this.cv = this.scv.clone();\r\n        //渐变次数\r\n        this.n = n; \r\n        //计数器\r\n        this._count = n;\r\n        //计算颜色增量\r\n        this._dcv = Vector.sub(this.ecv, this.scv).norm(Vector.dist(this.ecv, this.scv)/n);\r\n    }\r\n\r\n    color(tolist=false) {\r\n        let color_val = this.cv.color(tolist);\r\n        if(this._count > 0) { this.cv.add(this._dcv); }\r\n        this._count--;\r\n        return color_val;\r\n    } \r\n    val(tolist=false) { return this.color(tolist); }\r\n\r\n    isEnd() {\r\n        return !(this._count > 0);\r\n    }\r\n\r\n}\r\n\r\n\r\nmodule.exports.ColorVector = ColorVector;\r\nmodule.exports.ColorGradient = ColorGradient;\r\n\r\n\r\n\n\n//# sourceURL=webpack://vision/./src/canvas/color.js?");
-
-/***/ }),
-
-/***/ "./src/utils/iterator.js":
-/*!*******************************!*\
-  !*** ./src/utils/iterator.js ***!
-  \*******************************/
-/***/ ((module) => {
-
-eval("/****************************************\r\n * Name: 迭代器\r\n * Date: 2022-07-26\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 实现迭代器对象\r\n * Version: 0.1\r\n****************************************/\r\n\r\n//迭代器(基类)\r\nclass Iterator {\r\n\r\n    /*----------------------------------------\r\n    @class: 迭代器(基类)\r\n    @desc: 通过val接口实现值的迭代\r\n    @property: \r\n        * _val(any): 迭代器的值\r\n    @method: \r\n        * val(): 迭代逻辑实现, 每次调用返回迭代后的值 -> _val\r\n        * end(): 停机状态, 判断迭代器是否停机(迭代结束)\r\n        * tolist(): 迭代并输出值的变化过程 -> [_val(0), _val(1), _val(2) ... _val(n)]\r\n    @exp:\r\n    ----------------------------------------*/\r\n    constructor(val) {\r\n        //值\r\n        this._val = val;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 值迭代逻辑接口\r\n    @desc: 实现迭代逻辑,并返回迭代的值\r\n    @return(any): this._val\r\n    ----------------------------------------*/\r\n    val() {\r\n        return this._val;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 停机状态\r\n    @desc: 判断迭代器是否迭代结束\r\n    @return(bool) \r\n    ----------------------------------------*/\r\n    end() {\r\n        return false;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 数组转换器\r\n    @desc: 进行迭代，并输出值的变换过程\r\n    @params:\r\n        * n(number): 迭代次数，用于处理不会停机的迭代器\r\n    @return(list:any): [_val(0), _val(1), _val(2) ... _val(n)]\r\n    ----------------------------------------*/\r\n    tolist(n=500) {\r\n        let vals = [];\r\n        for(let i=0; i<n; i++) { \r\n            vals.push(this.val());\r\n            if(this.end()) { break; }\r\n        }\r\n        return vals\r\n    }\r\n}\r\n\r\n\r\n//范围迭代器\r\nclass Range extends Iterator {\r\n\r\n    /*----------------------------------------\r\n    @class: 范围迭代器\r\n    @desc: 一种值线性变化的迭代器\r\n    @property: \r\n        * _start(number): 起始值\r\n        * _end(number): 终止值\r\n        * _step(number): 步长(速率)\r\n    @exp: \r\n        * new Range(1, 3) -> [1, 2, 3]\r\n        * Range.S(0, 4, 2) -> [0, 2, 4]\r\n        * Range.N(0, 5, 4) -> [0, 1.25, 2.5, 3.75, 5]\r\n    ----------------------------------------*/\r\n    constructor(start, end, step=1) {\r\n        super(start);\r\n        //起始值\r\n        this._start = start;\r\n        //终止值\r\n        this._end = end;\r\n        //步长\r\n        this._step = start<end ? Math.abs(step) : -Math.abs(step);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 构建器\r\n    @desc: 根据\"步长\"构建迭代器\r\n    @params: \r\n        * step(number): 步长大小(速率)\r\n    @return(Range) \r\n    ----------------------------------------*/\r\n    static S(start, end, step=1) {\r\n        return new Range(start, end, step);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 构建器\r\n    @desc: 根据\"迭代次数\"构建迭代器\r\n    @params: \r\n        * n(number): 迭代次数\r\n    @return(Range) \r\n    ----------------------------------------*/\r\n    static N(start, end, n) {\r\n        return new Range(start, end, (end-start)/n);\r\n    }\r\n\r\n    //值迭代逻辑\r\n    val() {\r\n        let val = this._val;\r\n        if(!this.end()) {\r\n            this._val += this._step;\r\n        } else {\r\n            this._val = this._end;\r\n        }\r\n        return val;\r\n    }\r\n\r\n    //停机状态\r\n    end() {\r\n        return (this._step>0) ? (this._val>this._end) : (this._val<this._end);\r\n    }\r\n\r\n    //复制\r\n    clone() {\r\n        return new Range(this._start, this._end, this._step);\r\n    }\r\n\r\n}\r\n\r\n\r\n//函数迭代器\r\nclass FuncIterator extends Iterator {\r\n\r\n    /*----------------------------------------\r\n    @class: 函数迭代器\r\n    @desc: 指定定义域范围(dod)和函数(fx)迭代生成对应的值域\r\n    @property: \r\n        * fx(function): 目标函数\r\n        * dod(Range|list): 定义域\r\n    @exp: \r\n        * new FuncIterator((x)=>{return x*x;}, Range.S(0, 3)) -> [0, 1, 4, 9]\r\n        * new FuncIterator((x)=>{return x*x;}, [0, 3])\r\n    ----------------------------------------*/\r\n    constructor(fx, dod) {\r\n        super();\r\n        //函数表达式\r\n        this.fx = fx;\r\n        //定义域(Range)\r\n        this.dod = dod.val ? dod : Range.S(...dod);\r\n    }\r\n    \r\n    val(toPoint=false) {\r\n        let x = this.dod.val();\r\n        return toPoint ? [x, this.fx(x)] : this.fx(x);\r\n    }\r\n\r\n    end() {\r\n        return this.dod.end();\r\n    }\r\n}\r\n\r\n\r\nmodule.exports.Iterator = Iterator;\r\nmodule.exports.Range = Range;\r\nmodule.exports.FuncIterator = FuncIterator;\n\n//# sourceURL=webpack://vision/./src/utils/iterator.js?");
-
-/***/ }),
-
-/***/ "./src/utils/random.js":
-/*!*****************************!*\
-  !*** ./src/utils/random.js ***!
-  \*****************************/
-/***/ ((module) => {
-
-eval("/****************************************\r\n * Name: random\r\n * Date: 2022-08-01\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: \r\n * Version: 0.1\r\n****************************************/\r\n\r\n\r\n//随机选择器\r\nclass RandomSelector {\r\n\r\n    /*----------------------------------------\r\n    @class: RandomSelector(随机选择器)\r\n    @desc: 给定选项集，根据权重生成概率，随机选择一个选项。\r\n    @property: \r\n        * _ops(list:obj): 选项集\r\n    @method: \r\n        * _probability: 根据选项集中选项的权重计算概率\r\n        * select: 随机从选项集中选择一个选项\r\n    @exp:\r\n        * let rs = new RandomSelector([[\"a\", 1], [\"b\", 1], [\"c\", 3], [\"d\", 1]])\r\n    ----------------------------------------*/\r\n    constructor(options) {\r\n        //选项集\r\n        this._ops = this._probability(options);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 计算概率\r\n    @desc: 基于权重计算概率 -> p[i] = wt[i] / sum(wt)\r\n    @params: \r\n        * options(list:list): [[op(选项, any), wt(权重, number:>0)]...]\r\n    @return(opt(list:obj)): [{\"op\": 选项, \"p\": 概率, \"ps/pe\": 概率范围}] \r\n    ----------------------------------------*/\r\n    _probability(options) {\r\n        //计算总权重\r\n        let swt = 0;\r\n        for(let i=0, n=options.length; i<n; i++) {\r\n            swt += options[i][1] || 0;\r\n        }\r\n        //计算每个选项的概率\r\n        let _ops = [], _ps = 0;\r\n        for(let i=0, n=options.length; i<n; i++) {\r\n            let p = (options[i][1] || 0) / swt;\r\n            _ops.push({\r\n                //选项\r\n                \"op\": options[i][0],\r\n                //概率\r\n                \"p\": p,\r\n                //概率范围\r\n                \"ps\": _ps, \"pe\": _ps + p\r\n            });\r\n            _ps += p;\r\n        }\r\n        return _ops;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 随机选择\r\n    @desc: 从选项集中随机选择一个选项\r\n    @return(any) \r\n    ----------------------------------------*/\r\n    select() {\r\n        let r = Math.random();\r\n        for(let i=0, n=this._ops.length; i<n; i++) {\r\n            if(r > this._ops[i].ps && r <= this._ops[i].pe) {\r\n                return this._ops[i].op;\r\n            }\r\n        }\r\n    }\r\n\r\n}\r\n\r\n\r\n\r\nmodule.exports.RandomSelector = RandomSelector;\r\n\n\n//# sourceURL=webpack://vision/./src/utils/random.js?");
-
-/***/ }),
-
-/***/ "./src/utils/tools.js":
-/*!****************************!*\
-  !*** ./src/utils/tools.js ***!
-  \****************************/
-/***/ ((module) => {
-
-eval("/****************************************\r\n * Name: tool | 工具\r\n * Date: \r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 常用工具代码\r\n * Version: 0.1\r\n****************************************/\r\n\r\n\r\nclass Tools {\r\n\r\n    /*----------------------------------------\r\n    @func: regular polygon | 正多边形生成器\r\n    @desc: 并非严格意义上的正多边形，而是一种\"近似\"正多边形。\r\n    @params: \r\n        * n(number(N+, n>=3)): 边数\r\n        * r(number(r>0)): 半径\r\n        * po(list): 中心坐标\r\n        * rad(number): 起始弧度\r\n    @return(list)\r\n    @exp:\r\n        * Tools.regular_polygon(5, 100, [canvas.cx, canvas.cy]);\r\n    ----------------------------------------*/\r\n    static regular_polygon(n, r, po, rad=0) {\r\n        po = po || [0, 0];\r\n        let d_rad = (2*Math.PI)/n;\r\n        let ps = [];\r\n        for(let i=0; i<n; i++) {\r\n            ps.push([r*Math.cos(rad)+po[0], r*Math.sin(rad)+po[1]]);\r\n            rad += d_rad;\r\n        }\r\n        return ps;\r\n    }\r\n    static RP(n, r, po, rad=0) {\r\n        return Tools.regular_polygon(n, r, po, rad);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 角度<>弧度 转换器\r\n    @desc: 在角度与弧度之间转换\r\n    @return(number)\r\n    @exp:\r\n        * Tools.ATR(45) -> Math.PI/4\r\n        * Tools.ATR(Math.PI) -> 45\r\n    ----------------------------------------*/\r\n    static ATR(angle) {\r\n        return (Math.PI/180)*angle;\r\n    }\r\n    static RTA(rad) {\r\n        return (180/Math.PI)*rad;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 生成随机数\r\n    @params: \r\n        * start/end: 生成范围\r\n    @return(number)\r\n    @exp: \r\n        Tools.random(-5, 5)\r\n    ----------------------------------------*/\r\n    static random(start, end) {\r\n        return (end-start)*Math.random()+start;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: (list)随机选择器\r\n    @desc: 从数组中随机选择一个元素\r\n    @params: \r\n        * ops(list): 选项集\r\n    @return(any)\r\n    @exp: \r\n        Tools.rslist([\"a\", \"b\", \"c\"])\r\n    ----------------------------------------*/\r\n    static rslist(ops) {\r\n        return ops[parseInt((ops.length)*Math.random())];\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: RGB(list) -> RGB(str)\r\n    @desc: 将RGB数组装换成RGB字符串\r\n    @params: \r\n        * color(list): 颜色数组\r\n    @exp: \r\n        Tools.RGB([255, 255, 255]) -> \"rgb(255, 255, 255, 1)\";\r\n    ----------------------------------------*/\r\n    static RGB(color) {\r\n        return `rgb(${color[0]||0}, ${color[1]||0}, ${color[2]||0}, ${color[3]||1})`;\r\n    }\r\n\r\n\r\n}\r\n\r\n\r\n\r\nmodule.exports.Tools = Tools;\r\n\n\n//# sourceURL=webpack://vision/./src/utils/tools.js?");
-
-/***/ }),
-
-/***/ "./src/vector/area.js":
-/*!****************************!*\
-  !*** ./src/vector/area.js ***!
-  \****************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("/****************************************\r\n * Name: 区域\r\n * Date: 2022-07-13\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 描述一个封闭区域，并给定一个点是否在区域内的判定算法(in)\r\n * Version: 0.1\r\n * Update:\r\n *     [2022-07-14]: 增加区域反转功能, 将method(in)的判定反转 \r\n****************************************/\r\n\r\nconst Vector = (__webpack_require__(/*! ./vector.js */ \"./src/vector/vector.js\").Vector);\r\n\r\n\r\n//基类\r\nclass BaseArea {\r\n\r\n    /*----------------------------------------\r\n    @func: 判断一个给定坐标是否在区域内\r\n    @params:\r\n        * p(Vector||list): 坐标 -> Vector(x, y) || [x, y]\r\n    @return(bool) \r\n    ----------------------------------------*/\r\n    in(p) {\r\n        return true;\r\n    }\r\n}\r\n\r\n\r\n//顶点集区域\r\nclass Area extends BaseArea {\r\n\r\n    /*----------------------------------------\r\n    @func: 顶点集区域\r\n    @desc: 通过一系列顶点坐标描述一个封闭区域\r\n    @property: \r\n        * vps(list:Vector): 构成区域的顶点集\r\n        * offset(number): 判定算法(in)的计算误差\r\n        * reverse(bool): 区域反转标记, 将method(in)的判定反转\r\n    ----------------------------------------*/\r\n    constructor(vpoints, reverse=false) {\r\n        super();\r\n        //顶点集\r\n        this.vps = vpoints;\r\n        //计算误差\r\n        this.offset = (Math.PI/180)*5;\r\n        //区域反转标记\r\n        this.reverse = reverse;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 点是否在区域内的判定算法\r\n    @algorithm: \r\n        求解目标点(p)与区域的顶点集(vps)构成的凸多边形的内角和(rads),\r\n        当 rads == Math.PI*2 时，p在区域内部，反之不在。\r\n    @Waring: 该判定算法仅支持凸多边形\r\n    @params: \r\n        * p(Vector||list): 目标点\r\n    ----------------------------------------*/\r\n    in(p) {\r\n        p = p.v ? p : new Vector(...p);\r\n        //计算内角和\r\n        let rads = 0, n = this.vps.length;\r\n        for(let i=0; i<n; i++) {\r\n            let _rad = Math.abs(Vector.rad(Vector.sub(this.vps[i%n], p), Vector.sub(this.vps[(i+1)%n], p)))\r\n            rads += (_rad>Math.PI ? 2*Math.PI-_rad : _rad);\r\n        }\r\n        return this.reverse ^ (rads > Math.PI*2-this.offset) && (rads < Math.PI*2+this.offset) \r\n    }\r\n}\r\n\r\n\r\n//矩形区域\r\nclass RectArea extends BaseArea {\r\n\r\n    /*----------------------------------------\r\n    @func: 矩形区域\r\n    @desc: 通过分量范围来描述一个矩形区域(任意维)\r\n    @property: \r\n        * borders(list:list): 分量范围 \r\n    @exp:\r\n        new ReactArea([[100, 300], [100, 300]]) -> 中心点为(200, 200), 边长为100的矩形区域\r\n    ----------------------------------------*/\r\n    constructor(borders, reverse=false) {\r\n        super();\r\n        //矩形边界范围\r\n        this.borders = borders;\r\n        //区域反转标记\r\n        this.reverse = reverse;\r\n    }\r\n\r\n    in(p) {\r\n        p = p.v ? p : new Vector(...p);\r\n        for(let i=0, n=this.borders.length; i<n; i++) {\r\n            if((p.v[i] < this.borders[i][0]) || (p.v[i] > this.borders[i][1])) {\r\n                return this.reverse ^ false;\r\n            }\r\n        }\r\n        return this.reverse ^ true;\r\n    }\r\n}\r\n\r\n\r\n//圆形区域\r\nclass CircleArea extends BaseArea {\r\n\r\n    /*----------------------------------------\r\n    @func: 圆形区域\r\n    @desc: 描述一个圆形区域(任意维)\r\n    @property: \r\n        * po(Vector): 中心坐标\r\n        * r(number): 半径 \r\n    ----------------------------------------*/\r\n    constructor(po, r, reverse=false) {\r\n        super();\r\n        //中心坐标\r\n        this.po = po;\r\n        //半径\r\n        this.r = r;\r\n        //区域反转标记\r\n        this.reverse = reverse;\r\n    }\r\n\r\n    in(p) {\r\n        p = p.v ? p : new Vector(...p);\r\n        return this.reverse ^ (p.dist(this.po) < this.r);\r\n    }\r\n}\r\n\r\n\r\nmodule.exports.BaseArea = BaseArea;\r\nmodule.exports.Area = Area;\r\nmodule.exports.RectArea = RectArea;\r\nmodule.exports.CircleArea = CircleArea;\r\n\n\n//# sourceURL=webpack://vision/./src/vector/area.js?");
-
-/***/ }),
-
-/***/ "./src/vector/border.js":
-/*!******************************!*\
-  !*** ./src/vector/border.js ***!
-  \******************************/
-/***/ ((module) => {
-
-eval("/****************************************\r\n * Name: 边界\r\n * Date: 2022-07-11\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 对到达边界的粒子进行处理\r\n * Version: 0.1\r\n * Update:\r\n *     2022-07-27: 对limit()添加\"r\"(质心到边界的距离)参数，以支持在考虑粒子具有形状属性的情况下的限制作用\r\n****************************************/\r\n\r\n//边界限制器(基类)\r\nclass Border {\r\n\r\n    /*----------------------------------------\r\n    @func: 越界处理函数\r\n    @desc: 当目标发生越界时，通过该函数进行处理。\r\n    @params:\r\n        * p_obj(Particle): 目标粒子\r\n        * r(number): 形状半径\r\n    ----------------------------------------*/\r\n    limit(p_obj, r=0) {\r\n        return p_obj;\r\n    } \r\n}\r\n\r\n\r\n//矩形反射边界\r\nclass RectReflectBorder extends Border {\r\n\r\n    /*----------------------------------------\r\n    @func: 矩形反射边界\r\n    @desc: 当目标越界时，其垂直与反射面的速度分量将被反转，产生反射效果。\r\n    @property: \r\n        * borders(list): 边界范围 \r\n        * on_line(bool): 当该参数为true时，越界时会重置目标位置到边界线上\r\n    ----------------------------------------*/\r\n    constructor(borders, on_line=true) {\r\n        super();\r\n        //分量限制范围\r\n        this.borders = borders || [];\r\n        //边界线模式\r\n        this.on_line = on_line;\r\n    }\r\n\r\n    limit(p_obj, r=0) {\r\n        for(let i=0; i<this.borders.length; i++) {\r\n            if(p_obj.p.v[i]-r <= this.borders[i][0]) {\r\n                this.on_line ? p_obj.p.v[i] = this.borders[i][0]+r : null;\r\n                p_obj.v.v[i] = -p_obj.v.v[i];\r\n            }\r\n            if(p_obj.p.v[i]+r >= this.borders[i][1]) {\r\n                this.on_line ? p_obj.p.v[i] = this.borders[i][1]-r : null;\r\n                p_obj.v.v[i] = -p_obj.v.v[i];\r\n            }\r\n        }\r\n        return p_obj;\r\n    }\r\n}\r\n\r\n\r\n//矩形循环边界\r\nclass RectLoopBorder extends Border {\r\n\r\n    /*----------------------------------------\r\n    @func: 矩形循环边界\r\n    @desc: 当目标发生越界时，目标移动到当前边界的相对边界处。\r\n    @property: \r\n        * borders(list): 边界范围 \r\n    @exp:\r\n        RectLoopBorder([[0, 500], [0, 500]]);\r\n    ----------------------------------------*/\r\n    constructor(borders) {\r\n        super();\r\n        //分量限制范围\r\n        this.borders = borders || [];\r\n    }\r\n\r\n    limit(p_obj, r=0) {\r\n        for(let i=0; i<this.borders.length; i++) {\r\n            if(p_obj.p.v[i]-r <= this.borders[i][0]) {\r\n                p_obj.p.v[i] = this.borders[i][1]-r;\r\n            } else if(p_obj.p.v[i]+r >= this.borders[i][1]) {\r\n                p_obj.p.v[i] = this.borders[i][0]+r;\r\n            }\r\n        }\r\n        return p_obj;\r\n    }\r\n}\r\n\r\n\r\n//环形反射边界\r\nclass RingReflectBorder extends Border {\r\n\r\n    /*----------------------------------------\r\n    @class: 环形反射边界\r\n    @desc: 圆形边界，目标越界时进行速度反射\r\n    @property: \r\n        * po(Vector): 边界圆心坐标\r\n        * r(number,>0): 边界半径\r\n    ----------------------------------------*/\r\n    constructor(po, r) {\r\n        super();\r\n        //边界圆心坐标\r\n        this.po = po;\r\n        //边界半径\r\n        this.r = r;\r\n    }\r\n\r\n    limit(p_obj, r=0) {\r\n        if(this.po.dist(p_obj.p)+r > this.r) {\r\n            //反射面法向量\r\n            let rv = Vector.sub(this.po, p_obj.p).normalization();\r\n            //修正位置坐标\r\n            p_obj.p = Vector.add(this.po, rv.clone().mult(-(this.r-r)));\r\n            //反射速度向量\r\n            p_obj.v = Vector.sub(p_obj.v, rv.clone().mult(rv.dot(p_obj.v)*2))\r\n        }\r\n        return p_obj;\r\n    }\r\n}\r\n\r\n\r\n//环形循环边界\r\nclass RingLoopBorder extends Border {\r\n\r\n    /*----------------------------------------\r\n    @class: 环形循环边界\r\n    @desc: 圆形边界，目标越界时将其移动到目标与圆心坐标的对角位置\r\n    @property: \r\n        * po(Vector): 边界圆心坐标\r\n        * r(number,>0): 边界半径\r\n    ----------------------------------------*/\r\n    constructor(po, r) {\r\n        super();\r\n        //边界圆心坐标\r\n        this.po = po;\r\n        //边界半径\r\n        this.r = r;\r\n    }\r\n\r\n    limit(p_obj, r=0) {\r\n        if(this.po.dist(p_obj.p)+r > this.r) {\r\n            //反射面法向量\r\n            let rv = Vector.sub(this.po, p_obj.p).normalization();\r\n            //修正位置坐标(当前相对与圆心的对角位置)\r\n            p_obj.p = Vector.add(this.po, rv.clone().mult((this.r-r)));\r\n        }\r\n        return p_obj;\r\n    }\r\n}\r\n\r\n\r\n\r\nmodule.exports.Border = Border;\r\nmodule.exports.RectReflectBorder = RectReflectBorder;\r\nmodule.exports.RectLoopBorder = RectLoopBorder;\r\nmodule.exports.RingReflectBorder = RingReflectBorder;\r\nmodule.exports.RingLoopBorder = RingLoopBorder;\r\n\r\n\n\n//# sourceURL=webpack://vision/./src/vector/border.js?");
-
-/***/ }),
-
-/***/ "./src/vector/coor.js":
-/*!****************************!*\
-  !*** ./src/vector/coor.js ***!
-  \****************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("/****************************************\r\n * Name: Coordinate System | 坐标系\r\n * Date: 2022-08-01\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 构建坐标系, 对向量进行坐标变换\r\n * Version: 0.2\r\n****************************************/\r\n\r\nconst Vector = (__webpack_require__(/*! ./vector.js */ \"./src/vector/vector.js\").Vector);\r\n\r\n/****************************************  \r\n(PCS)屏幕像素坐标系(Canvas画布坐标)\r\n\r\n  o(0, 0) ----------> (+x)\r\n  |\r\n  | \r\n  |\r\n  V\r\n (+y)\r\n\r\n * o(0, 0): 坐标原点位于屏幕左上角\r\n * +x: x轴正方向水平向右\r\n * +y: y轴正方向垂直向下\r\n * scale: 标度为正整数(1), 代表一个像素\r\n****************************************/\r\n\r\n\r\n//坐标系(基类)\r\nclass CoordinateSystem {\r\n\r\n    /*----------------------------------------\r\n    @func: MCS(主坐标系) -> CS(当前坐标系)\r\n    @desc: 从主坐标系转换到当前坐标系\r\n    @params:\r\n        * vector(Vector): 目标向量\r\n    @return(Vector)\r\n    ----------------------------------------*/\r\n    to(vector) {\r\n        return vector;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: CS -> MCS\r\n    @desc: 从当前坐标系转换到主坐标系\r\n    @params:\r\n        * vector(Vector): 目标向量\r\n    @return(Vector)\r\n    ----------------------------------------*/\r\n    from(vector) {\r\n        return vector;\r\n    }\r\n}\r\n\r\n\r\n//实数坐标系\r\nclass RCS extends CoordinateSystem {\r\n\r\n    /*----------------------------------------\r\n    @class: 实数坐标系\r\n    @desc: 将屏幕像素坐标系映射到实数域中进行计算\r\n    @property: \r\n        * _co(Vector): 屏幕像素坐标系原点坐标\r\n        * _scale(number & R+ & >0): 标度比例，一个像素对应的值 \r\n    @method: \r\n        * to: PCS(屏幕像素坐标系) -> CS(当前坐标系)\r\n        * from: CS(当前坐标系) -> PCS(屏幕像素坐标系)\r\n        * zoom: 对坐标系标度进行缩放\r\n        * move: 对屏幕像素坐标系原点坐标(co)进行平移\r\n    @exp: \r\n        let rcs = new RCS(Vector.v(canvas.cx, canvas.cy), 0.5);\r\n    ----------------------------------------*/\r\n    constructor(co, scale=1) {\r\n        super();\r\n        //屏幕像素坐标系原点坐标\r\n        this._co = co;\r\n        //标度\r\n        this._scale = scale;\r\n    }\r\n    \r\n    get scale() { return this._scale; }\r\n    set scale(val) {\r\n        if(val <= 0) { throw Error(`scale(${val}) must be in (0, Inf)`); }\r\n        this._scale = val;\r\n    }\r\n    get co() { return this._co.clone(); }\r\n\r\n    /*----------------------------------------\r\n    @func: PCS(屏幕像素坐标系) -> CS(当前坐标系)\r\n    ----------------------------------------*/\r\n    to(vector) {\r\n        let x = ((vector.v ? vector.x : vector[0]) - this._co.x) * this._scale;\r\n        let y = (-1)*((vector.v ? vector.y : vector[1]) - this._co.y) * this._scale;\r\n        return vector.v ? Vector.v(x, y) : [x, y];\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: CS(当前坐标系) -> PCS(屏幕像素坐标系)\r\n    ----------------------------------------*/\r\n    from(vector) {\r\n        let x = ((vector.v ? vector.x : vector[0]) / this._scale) + this._co.x;\r\n        let y = ((-1)*(vector.v ? vector.y : vector[1]) / this._scale) + this._co.y;\r\n        return vector.v ? Vector.v(x, y) : [x, y];\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 缩放\r\n    @desc: \r\n        对坐标系标度进行缩放\r\n        当 \"zr>0\" 时，进行 \"放大\"，标度变小\r\n        当 \"zr<0\" 时，进行 \"缩小\"， 标度变大。\r\n    @params: \r\n        * zr(number): 缩放值\r\n    @return(this) \r\n    @exp: \r\n        * 放大2倍: coor.zoom(2)\r\n        * 缩写2倍: coor.zoom(-2)\r\n    ----------------------------------------*/\r\n    zoom(zr) {\r\n        zr > 0 ? this.scale /= Math.abs(zr) : this.scale *=  Math.abs(zr)\r\n        return this;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 平移\r\n    @desc: 对屏幕像素坐标系原点坐标(pco)进行平移\r\n    @params: \r\n        * vector(Vector): 平移坐标\r\n    @return(this) \r\n    @exp: \r\n        向右平移100个像素: coor.move(Vector.v(-100, 0));\r\n    ----------------------------------------*/\r\n    move(vector) {\r\n        this._co.add(vector.v ? vector : Vector.v(...vector));\r\n        return this;\r\n    }\r\n}\r\n\r\n\r\n//网格坐标系\r\nclass Grid extends CoordinateSystem {\r\n\r\n    /*----------------------------------------\r\n    @class: Grid(网格坐标系)\r\n    @desc: 将屏幕像素坐标系映射到网格坐标系\r\n    @property: \r\n        * co(vector): 坐标原点\r\n        * dx/dy(int>=1): 网格单元尺寸\r\n        * RY(bool): y轴反转标记 -> true(向上) | false(向下)\r\n    @exp: \r\n        let grid = new Grid(new Vector(canvas.cx, canvas.cy), 10, 10, true);\r\n    ----------------------------------------*/\r\n    constructor(co, dx=1, dy=1, RY=false) {\r\n        super();\r\n        //坐标原点\r\n        this.co = co;\r\n        //网格单元尺寸\r\n        this._dx = dx;\r\n        this._dy = dy;\r\n        //反转Y轴\r\n        this._RY = RY ? -1 : 1;\r\n    }\r\n\r\n    get dx() { return this._dx; }\r\n    set dx(val) {\r\n        if(val < 1) { throw Error(`dx(${val}) must be in [1, Inf)`); }\r\n        this._dx = Math.round(val);\r\n    }\r\n    \r\n    get dy() { return this._dy; }\r\n    set dy(val) {\r\n        if(val < 1) { throw Error(`dy(${val}) must be in [1, Inf)`); }\r\n        this._dy = Math.round(val);\r\n    }\r\n\r\n    get RY() { return (this._RY == -1); }\r\n    set RY(val) {\r\n        this._RY = val ? -1 : 1;\r\n    }\r\n    \r\n    /*----------------------------------------\r\n    @func: PCS -> Grid\r\n    @desc: 单元格内的坐标会映射到同一点\r\n    ----------------------------------------*/\r\n    to(vector) {\r\n        let x = Math.round(((vector.v ? vector.v[0] : vector[0]) - this.co.x) / this.dx);\r\n        let y = Math.round(((vector.v ? vector.y : vector[1]) - this.co.y) / this.dy) * this._RY;\r\n        return vector.v ? Vector.v(x, y) : [x, y];\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: Grid -> PCS\r\n    ----------------------------------------*/\r\n    from(vector) {\r\n        let x = this.dx * (vector.v ? vector.x : vector[0]) + this.co.x;\r\n        let y = this.dy * (vector.v ? vector.y : vector[1]) * this._RY + this.co.y;\r\n        return vector.v ? Vector.v(x, y) : [x, y];\r\n    }\r\n\r\n}\r\n\r\n\r\n//极坐标系\r\nclass PolarCS extends CoordinateSystem {\r\n\r\n    /*----------------------------------------\r\n    @class: 极坐标系\r\n    @desc: 将屏幕像素坐标系映射到极坐标系\r\n    @property: \r\n        * co(vector): 坐标原点\r\n    @exp: \r\n        let coor = new PolarCS(new Vector(canvas.cx, canvas.cy));\r\n    ----------------------------------------*/\r\n    constructor(co) {\r\n        super();\r\n        //坐标原点\r\n        this.co = co;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: PCS -> PolarCS\r\n    @params: \r\n        * vector(Vector | Arr): [dist, rad]\r\n    ----------------------------------------*/\r\n    to(vector) {\r\n        let v = (vector.v ? vector : new Vector(...vector)).sub(this.co);\r\n        let dist = v.dist(), rad = v.rad();\r\n        return vector.v ? Vector.v(dist, rad) : [dist, rad];\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: PolarCS -> PCS\r\n    ----------------------------------------*/\r\n    from(vector) {\r\n        let dist = (vector.v ? vector.x : vector[0]);\r\n        let rad = (vector.v ? vector.y : vector[1]);\r\n        let x = dist * Math.sin(rad) + this.co.x;\r\n        let y = dist * Math.cos(rad) + this.co.y;\r\n        return vector.v ? Vector.v(x, y) : [x, y];\r\n    }\r\n\r\n}\r\n\r\n\r\n\r\nmodule.exports.CoordinateSystem = CoordinateSystem;\r\nmodule.exports.RCS = RCS;\r\nmodule.exports.Grid = Grid;\r\nmodule.exports.PolarCS = PolarCS;\n\n//# sourceURL=webpack://vision/./src/vector/coor.js?");
-
-/***/ }),
-
-/***/ "./src/vector/field.js":
-/*!*****************************!*\
-  !*** ./src/vector/field.js ***!
-  \*****************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("/****************************************\r\n * Name: Field | 矢量场\r\n * Date: 2022-07-13\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 在给定区域内影响粒子行为\r\n * Version: 0.1\r\n****************************************/\r\n\r\nconst Vector = (__webpack_require__(/*! ./vector.js */ \"./src/vector/vector.js\").Vector);\r\nconst Area = __webpack_require__(/*! ./area.js */ \"./src/vector/area.js\");\r\n\r\n\r\n//矢量场(基类)\r\nclass Field {\r\n\r\n    /*----------------------------------------\r\n    @func: 矢量力场\r\n    @desc: 影响场范围内的粒子行为(对粒子进行力的作用)\r\n    @property: \r\n        * area(BaseArea): 场作用范围\r\n    ----------------------------------------*/\r\n    constructor(area) {\r\n        //场作用范围\r\n        this.area = area || new Area.BaseArea();\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 场作用力函数\r\n    @desc: 描述场对粒子的作用力\r\n    @params: \r\n        * fp(ForceParticle): 受力粒子\r\n    ----------------------------------------*/\r\n    force(fp) {}\r\n}\r\n\r\n\r\n//引力场\r\nclass Gravity extends Field {\r\n\r\n    //引力常数(6.67e-11|0.0000000000667)\r\n    static G = 0.01;\r\n\r\n    /*----------------------------------------\r\n    @func: 引力场\r\n    @desc: 模拟引力效果\r\n    @property: \r\n        * gp(Vector): 引力场中心质点坐标\r\n        * mass(number): 场心指点质量大小\r\n        * G(number): 引力常数, 当(G<0)时，表现为斥力\r\n        * area(Area): 引力场作用范围(默认为无限大)\r\n    ----------------------------------------*/\r\n    constructor(gp, mass=1) {\r\n        super();\r\n        //引力场中心坐标\r\n        this.gp = gp || new Vector(0, 0);\r\n        //场心质量\r\n        this.mass = mass;\r\n        //引力常数\r\n        this.G = Gravity.G;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 引力作用\r\n    @desc: F = G * (m*M) / r^2\r\n    ----------------------------------------*/\r\n    force(fp) {\r\n        if(this.area.in(fp.p)) {\r\n            let r = this.gp.dist(fp.p);\r\n            let g = Vector.sub(this.gp, fp.p).norm(this.G * (this.mass * fp.mass) / r*r);\r\n            fp.force(g);\r\n        }\r\n    }\r\n\r\n    //计算两个粒子间的引力\r\n    static gravity(fp1, fp2) {\r\n        let r = Vector.dist(fp1.p, fp2.p);\r\n        let g = Gravity.G * (fp1.mass * fp2.mass) / r*r;\r\n        fp1.force(Vector.sub(fp2.p, fp1.p).norm(g));\r\n        fp2.force(Vector.sub(fp1.p, fp2.p).norm(g));\r\n    }\r\n}\r\n\r\n\r\n//匀加速场\r\nclass AccelerateField extends Field {\r\n\r\n    /*----------------------------------------\r\n    @class: 匀加速场\r\n    @desc: 对场内粒子施加固定力的作用\r\n    @property: \r\n        * A(vector): 加速度\r\n        * area(Area): 场作用范围\r\n    ----------------------------------------*/\r\n    constructor(A, area) {\r\n        super(area);\r\n        //加速度\r\n        this.A = A;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 引力作用\r\n    @desc: F = A\r\n    ----------------------------------------*/\r\n    force(fp) {\r\n        fp.force(this.A);\r\n    }\r\n}\r\n\r\n\r\n//减速场\r\nclass DecelerateField extends Field {\r\n            \r\n    /*----------------------------------------\r\n    @class: 减速场\r\n    @desc: 对场内粒子施加减速作用\r\n    @property: \r\n        * _D(number): 减速系数\r\n        * area(Area): 场作用范围\r\n    ----------------------------------------*/\r\n    constructor(D, area) {\r\n        super(area);\r\n        //减速系数\r\n        this._D = -Math.abs(D || 0.015);\r\n    }\r\n\r\n    get D() { return this._D; }\r\n    set D(val) { this._D = -Math.abs(val); }\r\n    \r\n    /*----------------------------------------\r\n    @func: 减速作用\r\n    @desc: F = D * v\r\n    ----------------------------------------*/\r\n    force(fp) {\r\n        if(this.area.in(fp.p)) {\r\n            fp.force(fp.v.clone().norm(this.D * fp.v.norm() * fp.mass));\r\n        }\r\n    }\r\n\r\n}\r\n\r\n\r\n//偏转场\r\nclass DeflectField extends Field {\r\n\r\n    /*----------------------------------------\r\n    @class: 偏转场\r\n    @desc: 对场内粒子的速度产生偏转作用\r\n    @property: \r\n        * W(number): 偏转角速度(弧度), W>0(顺时针旋转) \r\n        * area(Area): 场作用范围\r\n    @exp: \r\n    ----------------------------------------*/\r\n    constructor(W, area) {\r\n        super(area);\r\n        //偏转角速度\r\n        this.W = W || 0.017;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 偏转作用\r\n    @desc: v_val(线速度) = r(半径) * w(角速度)\r\n    ----------------------------------------*/\r\n    force(fp) {\r\n        if(this.area.in(fp.p)) {\r\n            fp.force(Vector.sub(fp.v.clone().rotate(this.W), fp.v));\r\n        }\r\n    }\r\n}\r\n\r\n\r\n\r\nmodule.exports.Field = Field;\r\nmodule.exports.Gravity = Gravity;\r\nmodule.exports.AccelerateField = AccelerateField;\r\nmodule.exports.DecelerateField = DecelerateField;\r\nmodule.exports.DeflectField = DeflectField;\n\n//# sourceURL=webpack://vision/./src/vector/field.js?");
-
-/***/ }),
-
-/***/ "./src/vector/matrix.js":
-/*!******************************!*\
-  !*** ./src/vector/matrix.js ***!
-  \******************************/
-/***/ (() => {
-
-eval("\n\n//# sourceURL=webpack://vision/./src/vector/matrix.js?");
-
-/***/ }),
-
-/***/ "./src/vector/particle.js":
-/*!********************************!*\
-  !*** ./src/vector/particle.js ***!
-  \********************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("/****************************************\r\n * Name: 粒子系统/运动系统\r\n * Date: 2022-07-10\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 基于向量模拟抽象粒子的运动\r\n * Version: 0.1\r\n * Update:\r\n    * (2023-03-06, Ais): ParticleSystem(粒子系统)结构优化 \r\n****************************************/\r\n\r\n\r\nconst Vector = (__webpack_require__(/*! ./vector.js */ \"./src/vector/vector.js\").Vector);\r\n\r\n\r\n//粒子(基类)\r\nclass Particle {\r\n\r\n    /*----------------------------------------\r\n    @class: Particle | 粒子\r\n    @desc: 基于向量模拟抽象粒子的运动\r\n    @property: \r\n        * position(Vector): 位置矢量\r\n        * velocity(Vector): 速度矢量\r\n    @method:\r\n        * action: 描述粒子运动模式\r\n        * isEnd: 粒子停机状态\r\n    @exp: \r\n        let p = new Particle(new Vector(100, 100), new Vector(2, 3));\r\n    ----------------------------------------*/\r\n    constructor(position, velocity) {\r\n        //位置矢量\r\n        this.p = position || new Vector(0, 0);\r\n        //速度矢量\r\n        this.v = velocity || new Vector(0, 0);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 运动模式\r\n    @desc: 描述粒子的运动模式\r\n    @return(Vector): this.p -> 粒子的当前位置 \r\n    ----------------------------------------*/\r\n    action() {\r\n        return this.p.add(this.v);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 停机状态\r\n    @desc: 描述粒子的停机状态\r\n    @return(bool)\r\n    ----------------------------------------*/\r\n    isEnd() {\r\n        return false;\r\n    }\r\n}\r\n\r\n\r\n//粒子系统(基类)\r\nclass ParticleSystem {\r\n\r\n    /*----------------------------------------\r\n    @class: ParticleSystem | 粒子系统\r\n    @desc: 粒子集群容器，描述粒子的集群行为\r\n    @property: \r\n        * ps(list:Particle): 粒子容器\r\n        * particle_builder(callable): 粒子生成器\r\n        * action_middlewares(obj:list:callable): action中间件(Hooks)\r\n        * max_pn(int, (0, N+)): 最大粒子数\r\n        * gen_pn(int, (0, N+)): 迭代过程粒子生成数\r\n        * GENR(bool): 粒子生成开关, 用于在迭代过程中生成新的粒子\r\n        * DSTR(bool): 粒子销毁开关, 当容器中的粒子进入停机状态时，从容器中移除该粒子\r\n    @method:\r\n        * build: 对粒子系统进行初始化\r\n        * particle_action: 粒子运动与生命周期管理\r\n        * action(): 粒子集群运动\r\n    @exp: \r\n        let pcs = new ParticleSystem().init();\r\n    ----------------------------------------*/\r\n    constructor(particle_builder, {max_pn=500, gen_pn=1, GENR=false, DSTR=true}={}) {\r\n        //粒子容器\r\n        this.ps = [];\r\n        //粒子生成器\r\n        this.particle_builder = particle_builder;\r\n        //action中间件(Hook)\r\n        this.action_middlewares = {\r\n            \"before\": [],\r\n            \"after\": [],\r\n        }\r\n        //最大粒子数\r\n        this.max_pn = max_pn;\r\n        //迭代过程粒子生成数\r\n        this.gen_pn = gen_pn;\r\n        //粒子生成开关\r\n        this.GENR = GENR;\r\n        //粒子销毁开关\r\n        this.DSTR = DSTR;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 初始化\r\n    @desc: 对粒子系统进行初始化\r\n    @return(this) \r\n    ----------------------------------------*/\r\n    build(pn=0) {\r\n        this.ps = [];\r\n        for(let i=(pn < this.max_pn ? pn : this.max_pn); i--; ) {\r\n            this.ps.push(this.particle_builder());\r\n        }\r\n        return this;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 粒子运动与生命周期管理\r\n    @desc: 更新粒子容器中的粒子运动状态，并进行生命周期的管理\r\n    ----------------------------------------*/\r\n    particle_action() {\r\n        //粒子运动\r\n        let _ps = [];\r\n        for(let i=0, n=this.ps.length; i<n; i++) {\r\n            //判断粒子的停机状态\r\n            if(!this.ps[i].isEnd()) {\r\n                //调用粒子的行为模式方法\r\n                this.ps[i].action(); _ps.push(this.ps[i]);\r\n            } else {\r\n                //根据\"粒子销毁开关\"判断是否销毁停机粒子\r\n                (!this.DSTR) && _ps.push(this.ps[i]);\r\n            }\r\n        }\r\n        //生成新的粒子\r\n        if(this.GENR) {\r\n            let diff_pn = this.max_pn - _ps.length;\r\n            for(let i=(diff_pn>=this.gen_pn ? this.gen_pn : diff_pn); i>0; i--) {\r\n                _ps.push(this.particle_builder())\r\n            }\r\n        }\r\n        //更新粒子容器\r\n        this.ps = _ps;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 粒子集群运动(迭代过程)\r\n    @desc: 描述粒子集群的行为模式\r\n    ----------------------------------------*/\r\n    action() {\r\n        //action中间件挂载点(before)\r\n        for(let i=0, n=this.action_middlewares.before.length; i<n; i++) {\r\n            this.action_middlewares.before[i](this.ps);\r\n        }\r\n        //粒子运动与生命周期管理\r\n        this.particle_action();\r\n        //action中间件挂载点(after)\r\n        for(let i=0, n=this.action_middlewares.after.length; i<n; i++) {\r\n            this.action_middlewares.after[i](this.ps);\r\n        }\r\n    }\r\n\r\n}\r\n\r\n\r\n//作用力粒子\r\nclass ForceParticle extends Particle {\r\n\r\n    /*----------------------------------------\r\n    @func: 可受力粒子\r\n    @property: \r\n        * ps(Vector): 起始位置\r\n        * pe(Vector): 终止位置\r\n        * v_rate(number): 速率(this.v.norm())\r\n    ----------------------------------------*/\r\n    constructor(position, velocity, acceleration, mass) {\r\n        super();\r\n        //位置矢量\r\n        this.p = position || new Vector(0, 0);\r\n        //速度矢量\r\n        this.v = velocity || new Vector(0, 0);\r\n        //加速度\r\n        this.acc = acceleration || new Vector(0, 0);\r\n        //质量\r\n        this.mass = mass || 1;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 受力(积累效应)\r\n    @desc: 通过受力来改变粒子的加速度\r\n    @params: \r\n        * f(Vector): 作用力\r\n    ----------------------------------------*/\r\n    force(f) {\r\n        this.acc.add(f.clone().mult(1/this.mass));\r\n    }\r\n\r\n    action() {\r\n        this.p.add(this.v.add(this.acc));\r\n        this.acc = new Vector(0, 0);\r\n        return this.p;\r\n    }\r\n}\r\n\r\n\r\n//线性运动粒子\r\nclass LinearMotorParticle extends Particle {\r\n\r\n    /*----------------------------------------\r\n    @func: 线性运动\r\n    @desc: 描述直线运动模式的粒子\r\n    @property: \r\n        * ps(Vector): 起始位置\r\n        * pe(Vector): 终止位置\r\n        * v_rate(number): 速率(this.v.norm())\r\n    ----------------------------------------*/\r\n    constructor(ps, pe, v_rate=1) {\r\n        super();\r\n        //起始位置\r\n        this._ps = ps;\r\n        //终止位置\r\n        this._pe = pe;\r\n        //当前位置\r\n        this.p = this._ps.clone();\r\n        //速度\r\n        this.v = Vector.sub(this._pe, this._ps).norm(Math.abs(v_rate));\r\n        /*  \r\n        运动模式:\r\n            * [line]: 移动到pe后停机\r\n            * [loop]: 移动到pe后回到ps\r\n            * [back]: 移动到pe后，ps与pe互换\r\n        */\r\n        this.mode = \"line\";\r\n        //终止距离误差倍率(用于终点距离的判断: end_dist <= this.v.norm() * this.end_dist_rate)\r\n        this.end_dist_rate = 1.2;\r\n    }\r\n    \r\n    get ps() { return this._ps.clone(); }\r\n    get pe() { return this._pe.clone(); }\r\n    \r\n    //设置终止位置(并重新计算速度方向)\r\n    set pe(vector) {\r\n        this._pe = vector.clone();\r\n        this.v = Vector.sub(this._pe, this.p).norm(this.v.norm());\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 设置速率\r\n    @desc: \r\n        * v_rate: 速度矢量的模长, 每次迭代移动的像素大小\r\n        * v_count: 经过多少次迭代后移动到pe\r\n    @params: \r\n        * val(number): 速率\r\n    @exp: \r\n        p.v_rate = 5;\r\n        p.v_count = 300;\r\n    ----------------------------------------*/\r\n    set v_rate(val) { this.v.norm(val); }\r\n    set v_count(val) { this.v.norm(Vector.dist(this._pe, this._ps) / val); }\r\n\r\n    /*----------------------------------------\r\n    @func: 停机状态\r\n    @desc: 描述粒子在什么条件下停机(停止运动)\r\n    @return(bool): 状态\r\n    ----------------------------------------*/\r\n    isEnd() {\r\n        return this.p.dist(this._pe) <= this.v.norm() * this.end_dist_rate;\r\n    }\r\n\r\n    //运动模式\r\n    action() {\r\n        if(!this.isEnd()) {\r\n            this.p.add(this.v);\r\n        } else {\r\n            switch(this.mode){\r\n                case \"loop\": {\r\n                    this.p = this._ps.clone();\r\n                    break;\r\n                }\r\n                case \"back\": {\r\n                    this.p = this._pe.clone();\r\n                    this._pe = this._ps.clone();\r\n                    this._ps = this.p.clone();\r\n                    this.v.mult(-1);\r\n                    break;\r\n                }\r\n                default: {\r\n                    this.p = this._pe.clone();\r\n                }\r\n            }\r\n        }\r\n        return this.p;\r\n    }\r\n}\r\n\r\n\r\n//环形运动系统\r\nclass CircularMotorParticle extends Particle {\r\n\r\n    /*----------------------------------------\r\n    @func: 环形运动\r\n    @desc: 描述圆形运动模式的粒子\r\n    @property: \r\n        * o(Vector): 圆心位置\r\n        * r(number): 旋转半径\r\n        * v_rad(number): 旋转速率(弧度)\r\n        * rad(number): 起始弧度\r\n    ----------------------------------------*/\r\n    constructor(o, r, v_rad, rad=0) {\r\n        super();\r\n        //圆心位置\r\n        this.o = o || new Vector(0, 0);\r\n        //旋转半径\r\n        this.r = r || 1;\r\n        //速率\r\n        this.v_rad = v_rad || (Math.PI/180);\r\n        //当前弧度(-2*PI, 2*PI)\r\n        this.rad = rad;\r\n        //当前坐标(以this.o为原点)\r\n        this.po = new Vector(this.r*Math.sin(this.rad), this.r*Math.cos(this.rad));\r\n        //当前坐标(以(0, 0)为原点)\r\n        this.p = Vector.add(this.po, this.o);\r\n    }\r\n\r\n    //运动模式\r\n    action() {\r\n        this._p = this.p.clone();\r\n        this.rad += this.v_rad;\r\n        if(this.rad >= 2 * Math.PI) { this.rad -= 2 * Math.PI; } \r\n        if(this.rad <= -2 * Math.PI) { this.rad += 2 * Math.PI; } \r\n        this.po.x = this.r * Math.sin(this.rad);\r\n        this.po.y = this.r * Math.cos(this.rad);\r\n        this.p = Vector.add(this.po, this.o);\r\n        this.v = this.p.clone().sub(this._p);\r\n        return this.p;\r\n    }\r\n\r\n}\r\n\r\n\r\n//随机游走器\r\nclass RandomWalkerParticle extends Particle {\r\n    \r\n    /*----------------------------------------\r\n    @func: 随机游走\r\n    @desc: 给定一组速度向量集，每次随机选择一个速度进行移动\r\n    @property: \r\n        * ps(Vector): 初始位置\r\n        * rvs(list): 随机速度向量集 -> [Vector(速度向量), wt(权重)]\r\n    ----------------------------------------*/\r\n    constructor(ps, rvs) {\r\n        super();\r\n        //初始位置\r\n        this.p = ps;\r\n        //随机速度向量集\r\n        this._rvs = this._probability(rvs);\r\n    }\r\n\r\n    //计算概率(基于权重): p[i] = wt[i] / sum(wt)\r\n    _probability(rvs) {\r\n        //计算总权重\r\n        let swt = 0;\r\n        for(let i=0, end=rvs.length; i<end; i++) {\r\n            swt += rvs[i][1];\r\n        }\r\n        //计算每个速度矢量的概率\r\n        let _rvs = [], _ps = 0;\r\n        for(let i=0, end=rvs.length; i<end; i++) {\r\n            let p = (rvs[i][1] || 0) / swt;\r\n            _rvs.push({\r\n                //速度\r\n                \"v\": rvs[i][0] || new Vector(0, 0),\r\n                //概率\r\n                \"p\": p,\r\n                //概率范围\r\n                \"ps\": _ps, \"pe\": _ps + p\r\n            });\r\n            _ps += p;\r\n        }\r\n        return _rvs;\r\n    }\r\n\r\n    //随机选择速度\r\n    rv_select() {\r\n        let r = Math.random();\r\n        for(let i=0, end=this._rvs.length; i<end; i++) {\r\n            if(r > this._rvs[i].ps && r <= this._rvs[i].pe) {\r\n                return this._rvs[i].v;\r\n            }\r\n        }\r\n    }\r\n\r\n    //运动模式\r\n    action() {\r\n        //选择随机速度\r\n        this.v = this.rv_select();\r\n        return this.p.add(this.v);\r\n    }\r\n}\r\n\r\n\r\n\r\nmodule.exports.Particle = Particle;\r\nmodule.exports.ParticleSystem = ParticleSystem;\r\nmodule.exports.ForceParticle = ForceParticle;\r\nmodule.exports.LinearMotorParticle = LinearMotorParticle;\r\nmodule.exports.CircularMotorParticle = CircularMotorParticle;\r\nmodule.exports.RandomWalkerParticle = RandomWalkerParticle;\n\n//# sourceURL=webpack://vision/./src/vector/particle.js?");
-
-/***/ }),
-
-/***/ "./src/vector/tracker.js":
-/*!*******************************!*\
-  !*** ./src/vector/tracker.js ***!
-  \*******************************/
-/***/ ((module) => {
-
-eval("/****************************************\r\n * Name: 轨迹追踪器\r\n * Date: 2022-07-15\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 追踪记录目标粒子的移动轨迹\r\n * Version: 0.1\r\n****************************************/\r\n\r\nclass TrailTracker {\r\n\r\n    /*----------------------------------------\r\n    @func: 轨迹追踪器\r\n    @desc: 隐式地追踪记录目标粒子的移动轨迹\r\n    @property: \r\n        * tp(Particle): 目标粒子\r\n        * tn(number): 轨迹长度\r\n        * trail(list:Vector): 轨迹向量容器\r\n    @method:\r\n        * _bind(): 绑定追踪的粒子对象\r\n    ----------------------------------------*/\r\n    constructor(tp, tn=10) {\r\n        //目标粒子\r\n        this.tp = tp;\r\n        //轨迹长度\r\n        this.tn = tn;\r\n        //轨迹\r\n        this.trail = [];\r\n        //绑定目标对象\r\n        this._bind();\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 绑定追踪的粒子对象\r\n    @desc: 通过hook目标对象的action()方法来实现隐式的轨迹追踪效果\r\n    ----------------------------------------*/\r\n    _bind() {\r\n        this.trail = [this.tp.p.clone()];\r\n        //hook目标对象的action方法\r\n        let _this = this;\r\n        this.tp._tracker_hook_action = this.tp.action;\r\n        this.tp.action = function() {\r\n            let p = this._tracker_hook_action(...arguments);\r\n            (_this.trail.length >= _this.tn) && _this.trail.shift();\r\n            _this.trail.push(p.clone());\r\n            return p;\r\n        }\r\n    }\r\n}\r\n\r\n\r\nconst trail_tracker_middlewares = function(tn) {\r\n    \r\n}\r\n\r\n\r\nmodule.exports.TrailTracker = TrailTracker;\n\n//# sourceURL=webpack://vision/./src/vector/tracker.js?");
-
-/***/ }),
-
-/***/ "./src/vector/vector.js":
-/*!******************************!*\
-  !*** ./src/vector/vector.js ***!
-  \******************************/
-/***/ ((module) => {
-
-eval("/****************************************\r\n * Name: Vector | 向量系统\r\n * Date: 2022-06-20\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: Vision框架核心组件\r\n * Version: 0.1\r\n * Update:\r\n    * (2023-01-30, Ais): 暴露 this._v 属性，提高计算性能。\r\n****************************************/\r\n\r\nclass Vector {\r\n\r\n    /*----------------------------------------\r\n    @func: Vector构建器\r\n    @desc: 通过函数参数作为向量分量构建向量，默认构建(0, 0)的二维向量\r\n    @return(Vector): obj(Vector)\r\n    @exp: \r\n        let v = new Vector(1, 2, 3) -> v(1, 2, 3)\r\n    ----------------------------------------*/\r\n    constructor(...v) {\r\n        //向量分量\r\n        this.v = v.length > 0 ? [...v] : [0, 0];\r\n    }\r\n\r\n    //static builder\r\n    static V(...v) {\r\n        return new Vector(...v);\r\n    }\r\n    static v(...v) {\r\n        return new Vector(...v);\r\n    }\r\n\r\n    //builder -> v(1, 1, 1, ...)\r\n    static ones(dim=2) {\r\n        return new Vector(...Array(dim).fill(1))\r\n    }\r\n\r\n    //builder -> v(0, 0, 0, ...)\r\n    static zeros(dim=2) {\r\n        return new Vector(...Array(dim).fill(0))\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: builder -> 生成随机向量\r\n    @desc: 生成指定范围内的随机向量\r\n    @params: \r\n        * range(list): 向量分量范围, 其长度决定了向量的维度\r\n        * isint(false): 分量值类型 true(int) | false(float)\r\n    @return(Vector): Vector(obj)\r\n    @exp: \r\n        Vector.random([[1, 3], [1, 3]]) -> v(1.13, 2.54)\r\n        Vector.random([[1, 3], [1, 3]], true) -> v(1, 2)\r\n        Vector.random([[1, 3], [1, 3], [4, 7]]) -> v(2.13, 0.54, 5.56)\r\n    ----------------------------------------*/\r\n    static random(range=[], isint=false) {\r\n        let v = [], r = 0;\r\n        for(let i=0, end=range.length; i<end; i++){\r\n            r = Math.random() * (range[i][1] - range[i][0]) + range[i][0];\r\n            isint ? v.push(parseInt(r)) : v.push(r);\r\n        }\r\n        return new Vector(...v);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: builder -> 生成随机二维向量\r\n    @desc: 生成一个圆范围内的随机向量\r\n    @params: \r\n        * sR/eR(number:>0): 向量模长范围\r\n    @return(Vector)\r\n    @exp: \r\n        Vector.rcv(300) -> 向量模长为300, 方向随机\r\n        Vector.rcv(100, 300) -> 向量模长范围为(100, 300), 方向随机\r\n    ----------------------------------------*/\r\n    static rcv(sR, eR=null) {\r\n        let rad = Math.random() * (Math.PI * 2);\r\n        let r = (eR == null ? Math.random()*sR : Math.random()*(eR-sR)+sR);\r\n        return new Vector(Math.cos(rad)*r, Math.sin(rad)*r);\r\n    }\r\n\r\n    //分量接口\r\n    get x(){ return this.v[0]; }\r\n    get y(){ return this.v[1]; }\r\n    get z(){ return this.v[2]; }\r\n    set x(val){ this.v[0] = val; }\r\n    set y(val){ this.v[1] = val; }\r\n    set z(val){ this.v[2] = val; }\r\n\r\n    /*----------------------------------------\r\n    @func: 加法\r\n    @desc: 向量的对应分量相加\r\n    @params: \r\n        * vector(Vector): 操作数\r\n    @return(Vector): this\r\n    @exp: \r\n        1. 维数相同的情况\r\n        let v1 = new Vector(1, 2, 3);\r\n        let v2 = new Vector(4, 5, 6);\r\n        v1.add(v2) -> v(5, 7, 9) -> v1\r\n        2. 维数不同的情况\r\n        let v1 = new Vector(1, 2, 3);\r\n        * v1.add(new Vector(1, 2, 3, 4, 5)) -> v(2, 4, 6) -> v1\r\n        * v1.add(new Vector(1, 2)) -> v(2, 4, 3) -> v1\r\n    ----------------------------------------*/\r\n    add(vector){\r\n        let v = vector.v;\r\n        for(let i=0, end=this.v.length; i<end; i++) {\r\n            this.v[i] += (v[i] || 0);\r\n        }\r\n        return this;\r\n    }\r\n    static add(...vector) {\r\n        let v = Vector.zeros(vector[0].dim());\r\n        for(let i=0, end=vector.length; i<end; i++) {\r\n            v.dim()<vector[i].dim() && v.dim(vector[i].dim())\r\n            v.add(vector[i]);\r\n        }\r\n        return v;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 标量乘法\r\n    @desc: 数k乘以向量的每个分量\r\n    @params: \r\n        * k(int/float): 操作数\r\n    @return(Vector): this \r\n    @exp: \r\n        let v1 = new Vector(1, 2, 3);\r\n        v1.mult(2) -> v(2, 4, 6) -> v1\r\n    ----------------------------------------*/\r\n    mult(k) {\r\n        for(let i=0, end=this.v.length; i<end; i++) {\r\n            this.v[i] *= k;\r\n        }\r\n        return this;\r\n    }\r\n    static mult(vector, k) {\r\n        return vector.clone().mult(k);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 减法\r\n    @desc: 加法的一种特殊情况\r\n    @params: \r\n        * vector(Vector): 操作数\r\n    @return(Vector): this \r\n    ----------------------------------------*/\r\n    sub(vector){\r\n        //向量方法实现\r\n        // return this.add(vector.clone().mult(-1));\r\n        //计算优化实现\r\n        let v = vector.v;\r\n        for(let i=0, end=this.v.length; i<end; i++) {\r\n            this.v[i] -= (v[i] || 0);\r\n        }\r\n        return this;\r\n    }\r\n    static sub(...vector) {\r\n        let v = vector[0].clone();\r\n        for(let i=1, end=vector.length; i<end; i++) {\r\n            v.sub(vector[i]);\r\n        }\r\n        return v;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: dot product | 标量积(点积)\r\n    @desc: v1·v2 -> sum(v1[i]*v2[i]) -> |v1|*|v2|*cos(rad)\r\n    @params: \r\n        * vector(Vector): 操作数\r\n    @return(float)\r\n    ----------------------------------------*/\r\n    dot(vector) {\r\n        let t = 0, v = vector.v;\r\n        for(let i=0, end=this.v.length; i<end; i++) {\r\n            t += this.v[i] * (v[i] || 0);\r\n        }\r\n        return t;\r\n    }\r\n    inner(vector) {\r\n        return this.dot(vector);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: Linear Combination | 线性组合\r\n    @desc: lc = v1*w[1] + v2*w[2] + ... + vn*w[n]\r\n    @params: \r\n        * vectors(list:Vector): 向量组\r\n        * w(list:number): 权\r\n    @condition: vectors[i].dim() == w.length\r\n    @return(Vector)\r\n    @ exp:\r\n        LC([\r\n            new Vector(1, 1),\r\n            new Vector(2, 2),\r\n            new Vector(3, 3),\r\n        ], [6, 3, 2]) -> Vector(18, 18)\r\n    ----------------------------------------*/\r\n    static LC(vectors, w) {\r\n        let v = Vector.zeros(vectors[0].dim());\r\n        for(let i=0, n=vectors.length; i<n; i++) {\r\n            v.add(vectors[i].clone().mult(w[i]));\r\n        }\r\n        return v;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: Linear Mapping | 线性映射\r\n    @desc: 对向量进行线性变换，有以下两种实现方式\r\n        * 行向量: 设 vi 为 m[i] 构成的行向量,\r\n        则 LM(m) -> o.add(v.dot(vi)), 即 v 与 vi 的点积之和\r\n        * 列向量: 设 vk 为 m[i][k=(1, 2, 3...)] 的列向量\r\n        则 LM(m) -> LC(vk, v), 即以 v 的分量为权，对m的列向量的线性组合\r\n    @params: \r\n        * m(list:list): 矩阵(数组形式)\r\n    @return(Vector)\r\n    ----------------------------------------*/\r\n    LM(m) {\r\n        let _v = [];\r\n        for(let i=0, endi=m.length; i<endi; i++) {\r\n            //[Vector]: _v.push(this.dot(new Vector(...m[i])));\r\n            let _vi = 0;\r\n            for(let k=0, endk=m[i].length; k<endk; k++) {\r\n                _vi += m[i][k] * (this.v[k] || 0);\r\n            }\r\n            _v.push(_vi);\r\n        }\r\n        this.v = _v;\r\n        return this;\r\n    }\r\n    static LM(vector, m) {\r\n        return vector.clone().map(m);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 线性插值\r\n    @desc: v(t) = (1-t)*v1 + t*v2 -> v1 + t*(v2-v1)\r\n    @params: \r\n        * vector(Vector): 目标向量\r\n        * t(float): 0<=t<=1 \r\n    @return(Vector)\r\n    ----------------------------------------*/\r\n    lerp(vector, t) {\r\n        return (t>0 && t<1) ? vector.clone().sub(this).mult(t).add(this) : (t<=0 ? this.clone() : vector.clone());\r\n    }\r\n    static lerp(v_from, v_to, t) {\r\n        return v_from.lerp(v_to, t);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 二维向量的旋转变换\r\n    @desc: 对向量(dim=2)进行旋转(线性变换)\r\n    @params: \r\n        * rad(number): 旋转角度\r\n        * angle(bool): rad参数格式 -> true(弧度) | false(角度)\r\n    @return(Vector)\r\n    @exp:\r\n        * v.rotate(Math.PI/4)\r\n        * v.rotate(45, true)\r\n    ----------------------------------------*/\r\n    rotate(rad, angle=false) {\r\n        /* \r\n        [Vector]:\r\n        this.v = this.LM([\r\n            [Math.cos(rad), -Math.sin(rad)],\r\n            [Math.sin(rad), Math.cos(rad)],\r\n        ])\r\n        */\r\n        rad = angle ? (Math.PI/180*rad) : rad;\r\n        let cos_rad = Math.cos(rad), sin_rad = Math.sin(rad);\r\n        let x = this.v[0] * cos_rad - this.v[1] * sin_rad;\r\n        let y = this.v[0] * sin_rad + this.v[1] * cos_rad;\r\n        this.v[0] = x, this.v[1] = y;\r\n        return this;\r\n    }\r\n    static rotate(vector, rad) {\r\n        return vector.clone().rotate(rad);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 维度(分量数)(get/set)\r\n    @desc: get/set\r\n    @params: \r\n        * n(int): 新的维度\r\n    @return(int): 向量的维度(分量数)\r\n        * v.dim() -> int\r\n        * v.dim(3) -> this\r\n    @exp:\r\n        let v = new Vector([1, 1, 2, 7])\r\n        v.dim() -> 4\r\n        v.dim(3) -> v(1, 1, 2) -> v\r\n        v.dim(5) -> v(1, 1, 2, 7, 0) -> v\r\n    ----------------------------------------*/\r\n    dim(n=null) {\r\n        if(n!=null) {\r\n            let v = [], _n = parseInt(n);\r\n            for(let i=0; i<_n; i++) {\r\n                v[i] = this.v[i] || 0;\r\n            }\r\n            this.v = v;\r\n            return this;\r\n        } else {\r\n            return this.v.length;\r\n        }\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 模(get/set)\r\n    @desc: 向量的模长\r\n    @params: \r\n        * n(int/float): 设置的模长\r\n    @return(float): 向量的模长\r\n        * v.norm() -> float\r\n        * v.norm(3) -> this\r\n    ----------------------------------------*/\r\n    norm(n=null) {\r\n        //计算模长\r\n        let t = 0;\r\n        for(let i=0, end=this.v.length; i<end; i++) {\r\n            t += this.v[i] * this.v[i];\r\n        }\r\n        let v_norm = Math.sqrt(t);\r\n        //设置模长\r\n        (n!=null) && (v_norm != 0) && this.mult(n/v_norm);\r\n        return (n==null) ? v_norm : this;\r\n    }\r\n\r\n    //单位化\r\n    normalization() {\r\n        let _norm = this.norm();\r\n        (_norm != 0) && this.mult(1/_norm);\r\n        return this;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 限制器\r\n    @desc: 限制向量的模长, 当模长超过边界值的时候，设置模长为邻近的边界值\r\n    @params: \r\n        * max(int/float): 最大值边界\r\n        * min(int/float): 最小值边界\r\n    @return(Vector): this\r\n    @exp:\r\n        v.limit(5) -> (0 < v.norm() <5)\r\n        v.limit(2, 5) -> (2 < v.norm() <=5)\r\n    ----------------------------------------*/\r\n    limit(max, min=null) {\r\n        let _max, _min, _norm = this.norm();\r\n        if(min == null){_min=0, _max=Math.abs(max);} else {_min=Math.abs(max), _max=Math.abs(min);}\r\n        (_norm>=_min && _norm<=_max) ? null : this.norm(_norm>_max ? _max : _min);\r\n        return this;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 克隆/复制\r\n    @desc: 复制向量\r\n    @return(Vector)\r\n    ----------------------------------------*/\r\n    clone() {\r\n        return new Vector(...this.v);\r\n    }\r\n    copy() {\r\n        return this.clone();\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 计算欧式距离\r\n    @desc: 计算两个向量之间的欧式距离(坐标视角)\r\n    @params: \r\n        * vector(Vector): 目标向量\r\n    @return(float): 距离\r\n    @exp: \r\n        v1.dist(v2) -> v1与v2的距离\r\n        v1.dist() -> v1到原点的距离(v.norm())\r\n    ----------------------------------------*/\r\n    dist(vector=null) {\r\n        //向量法实现\r\n        // return this.clone().sub(vector).norm();\r\n        //计算优化\r\n        if(vector == null) {\r\n            return this.norm();\r\n        } else {\r\n            let t = 0, v = vector.v;\r\n            for(let i=0, end=this.v.length; i<end; i++) {\r\n                t += (this.v[i] - v[i]) * (this.v[i] - v[i]);\r\n            }\r\n            return Math.sqrt(t);\r\n        }\r\n    }\r\n    static dist(v1, v2) {\r\n        return v1.dist(v2);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 计算弧度(dim()==2)\r\n    @desc: 计算两个向量之间的弧度差(极坐标视角)\r\n    @params: \r\n        * vector(Vector): 目标向量\r\n    @return(float): 弧度差\r\n    @exp: \r\n        v1.rad(v2) -> v1与v2的弧度差\r\n        v1.rad() -> v1与x轴正方向的弧度差\r\n    ----------------------------------------*/\r\n    rad(vector=null) {\r\n        let x = this.v[0], y = this.v[1];\r\n        let rad = Math.atan(y/x);\r\n        rad = (x>=0) ? (y >= 0 ? rad : Math.PI*2 + rad) : (Math.PI + rad);\r\n        return  vector ? rad - vector.rad() : rad;\r\n    }\r\n    static rad(v1, v2) {\r\n        return v1.rad(v2);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 整数化\r\n    @desc: 将分量转换成整数\r\n    ----------------------------------------*/\r\n    toint() {\r\n        for(let i=0, end=this.v.length; i<end; i++) { this.v[i] = parseInt(this.v[i]);}\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 向量分量范围判断\r\n    @desc: 判断向量的分量是否在指定范围\r\n    @params: \r\n        * range(list): 分量范围\r\n    @return(bool): 判定结果 \r\n    @exp: \r\n        new Vector(1, 2).in([[1, 5], [1, 5]]) -> true\r\n        new Vector(1, 2).in([[1, 5], [0, 1]]) -> false\r\n    ----------------------------------------*/\r\n    in(range=[]) {\r\n        for(let i=0, end=range.length; i<end; i++) {\r\n            if(!(this.v[i] >= range[i][0] && this.v[i] <= range[i][1])) {\r\n                return false;\r\n            }\r\n        }\r\n        return true;\r\n    }\r\n    static in(vector, range) {\r\n        return vector.in(range);\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 从坐标数组中构建向量\r\n    @desc: [[x1, y1], [x2, y2], ..., [xn, yn]] -> [v1, v2, ..., vn]\r\n    @params: \r\n        * ps(list:list): 坐标点的数组形式\r\n    @return(list:Vector): 坐标点的向量形式 \r\n    @exp: \r\n        Vector.vpoints([[100, 100], [200, 200]]) -> [Vector(100, 100), Vector(200, 200)]\r\n    ----------------------------------------*/\r\n    static vpoints(ps) {\r\n        let vps = [];\r\n        for(let i=0, n=ps.length; i<n; i++) {\r\n            vps.push(new Vector(...ps[i]));\r\n        }\r\n        return vps;\r\n    }\r\n\r\n}\r\n\r\n\r\nmodule.exports.Vector = Vector;\r\n\r\n\n\n//# sourceURL=webpack://vision/./src/vector/vector.js?");
-
-/***/ }),
-
-/***/ "./src/views/capturer.js":
-/*!*******************************!*\
-  !*** ./src/views/capturer.js ***!
-  \*******************************/
-/***/ ((module) => {
-
-eval("/****************************************\r\n * Name: capturer | 截图器\r\n * Date: 2022-09-06\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 截取Canvas图像后导出\r\n * Version: 0.1\r\n****************************************/\r\n\r\n\r\n//截图器\r\nclass Capturer {\r\n\r\n    /*----------------------------------------\r\n    @class: 截图器\r\n    @desc: 捕获canvas图像\r\n    @property: \r\n        * canvasObj(Canvas): canvas对象\r\n        * fileTitle(str): 导出文件标题\r\n        * fn(number:>0): 导出文件计数器\r\n        * _capture_keyCode(ascii-number): 截图按键值\r\n    @method: \r\n        * capture: 截图，获取canvas画布图像\r\n        * capturing: 绑定截图到指定按键\r\n    @exp: \r\n        let captuer = new vision.capturer.Capturer(canvas).capturing();\r\n    ----------------------------------------*/\r\n    constructor(canvasObj, fileTitle) {\r\n        //canvas对象\r\n        this.canvasObj = canvasObj;\r\n        //导出文件标题\r\n        this.fileTitle = fileTitle || document.getElementsByTagName(\"title\")[0].innerText.replace(/\\s+/g, \"\");\r\n        //导出文件计数器\r\n        this.fn = 0;\r\n        //截图按键值\r\n        this._capture_keyCode = 'Q'.charCodeAt();\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 获取/设置 截图按键\r\n    ----------------------------------------*/\r\n    get captureKey() { return String.fromCharCode(this._capture_keyCode); }\r\n    set captureKey(key) { this._capture_keyCode = key.charCodeAt(); return this; }\r\n\r\n    /*----------------------------------------\r\n    @func: 截图\r\n    @desc: 导出当前canvas二进制数据\r\n    @params: \r\n        * fileName(str): 导出文件名(可选)\r\n    ----------------------------------------*/\r\n    capture(fileName) {\r\n        //构建文件名\r\n        fileName = fileName || `${this.fileTitle}_${this.fn++}`;\r\n        //导出canvas二进制数据\r\n        this.canvasObj.canvas.toBlob((blob) => {\r\n            let temp_node = document.createElement('a');\r\n            temp_node.style.display = 'none';\r\n            temp_node.id = fileName;\r\n            temp_node.href = window.URL.createObjectURL(blob);\r\n            temp_node.download = `${fileName}.png`; \r\n            temp_node.click();\r\n        })\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 监听截图事件\r\n    @desc: 将截图函数绑定到按键事件上\r\n    ----------------------------------------*/\r\n    capturing() {\r\n        let _this = this;\r\n        //绑定按键监听截图事件\r\n        window.addEventListener(\"keydown\", function(event) {\r\n            if(event.keyCode == _this._capture_keyCode) {\r\n                _this.capture();\r\n            }\r\n        }); \r\n        return this;\r\n    }\r\n}\r\n\r\n\r\nmodule.exports.Capturer = Capturer;\n\n//# sourceURL=webpack://vision/./src/views/capturer.js?");
-
-/***/ }),
-
-/***/ "./src/views/randerer.js":
-/*!*******************************!*\
-  !*** ./src/views/randerer.js ***!
-  \*******************************/
-/***/ ((module) => {
-
-eval("/****************************************\r\n * Name: randerer | 渲染器\r\n * Date: 2022-09-06\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 渲染器模块\r\n * Version: 0.1\r\n****************************************/\r\n\r\n//渲染器基类\r\nclass Randerer {\r\n\r\n    /*----------------------------------------\r\n    @class: 渲染器基类\r\n    @desc: 渲染器，实现行为逻辑和图像绘制的调度。\r\n    @property: \r\n        * _ft(number:>0): 帧时间轴，时钟\r\n        * fps(number:>0): 帧数(Frames Per Second)\r\n    @method: \r\n        * rander: 渲染接口\r\n    ----------------------------------------*/\r\n    constructor(fps=60) {\r\n        //帧时间轴\r\n        this._ft = 0;\r\n        //帧数(Frames Per Second)\r\n        this.fps = fps;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 帧时间轴访问器\r\n    @desc: this._ft用于在类内部实现帧的计数, 对外只读\r\n    ----------------------------------------*/\r\n    get ft() { return this._ft; }\r\n\r\n    /*----------------------------------------\r\n    @func: 渲染接口\r\n    ----------------------------------------*/\r\n    rander() { \r\n        this._ft++; \r\n    }\r\n}\r\n\r\n\r\n//间隔渲染器\r\nclass IntervalRanderer extends Randerer {\r\n\r\n    /*----------------------------------------\r\n    @class: 间隔渲染器\r\n    @desc: 标准渲染器，通过 setInterval 函数实现渲染功能\r\n    @property: \r\n        * _stop_ft(number:>0): 渲染器停机时间点\r\n        * _timer(obj): setInterval函数返回对象，用于在停机时停止渲染器\r\n        * rander_func(func): 渲染函数\r\n    @method: \r\n        * rander: 渲染接口\r\n        * stop: 设置停机时间点\r\n    @exp: \r\n        const randerer = new vision.randerer.IntervalRanderer().rander(() => {\r\n            canvas.refresh();\r\n        });\r\n    ----------------------------------------*/\r\n    constructor(fps=60) {\r\n        super(fps);\r\n        //停止时间点\r\n        this._stop_ftp = Infinity;\r\n        //间隔执行器\r\n        this._timer = null;\r\n        //渲染函数\r\n        this.rander_func = null;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 渲染接口\r\n    @desc: 通过 setInterval 间隔执行 rander_func 实现渲染功能\r\n    @params: \r\n        * rander_func(func): 渲染函数，\r\n        函数形参 => function() || function(ft), ft为帧时间轴，可选参数\r\n    ----------------------------------------*/\r\n    rander(rander_func) {\r\n        this.rander_func = rander_func;\r\n        //构建间隔执行器\r\n        this._timer = setInterval(()=>{\r\n            if(this._ft < this._stop_ftp) {\r\n                //渲染\r\n                this.rander_func(this._ft++);\r\n             } else {\r\n                //停机\r\n                clearInterval(this._timer);\r\n             } \r\n         }, Math.ceil(1000/this.fps));\r\n         return this;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 设置停机时间点\r\n    ----------------------------------------*/\r\n    stop(t) {\r\n        this._stop_ftp = t; return this;\r\n    }\r\n}\r\n\r\n\r\n//单帧渲染器\r\nclass SingleFrameRanderer extends Randerer {\r\n\r\n    /*----------------------------------------\r\n    @class: 单帧渲染器/手动渲染器\r\n    @desc: 通过绑定按键来控制渲染行为\r\n    @property: \r\n        * act_ft_n(number:>0): 每次触发渲染时，行为函数的调用次数\r\n        * _rander_keyCode(int): 渲染按键值，控制由什么按键进行渲染\r\n        * act_func(func): 行为函数\r\n        * draw_func(func): 绘制函数\r\n    @method: \r\n        * method: func\r\n    @exp: \r\n        const randerer = new vision.randerer.SingleFrameRanderer().rander(\r\n            (ft) => {\r\n                pcs.action();\r\n            },\r\n            (ft) => {\r\n                canvas.refresh();\r\n            }\r\n        );\r\n    ----------------------------------------*/\r\n    constructor(act_ft_n=1) {\r\n        super(1);\r\n        //行为函数调用次数\r\n        this.act_ft_n = act_ft_n;\r\n        //渲染按键值\r\n        this._rander_keyCode = ' '.charCodeAt();\r\n        //行为函数\r\n        this.act_func = null;\r\n        //绘制函数\r\n        this.draw_func = null;\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 获取/设置 渲染按键\r\n    ----------------------------------------*/\r\n    get randerKey() { return String.fromCharCode(this._rander_keyCode); }\r\n    set randerKey(key) { this._rander_keyCode = key.charCodeAt(); }\r\n       \r\n    /*----------------------------------------\r\n    @func: 渲染接口\r\n    @desc: 通过在 window 对象上绑定 keydown 事件来触发渲染\r\n    @params: \r\n        * act_func(func): 行为函数\r\n        * draw_func(func): 绘制函数\r\n    ----------------------------------------*/\r\n    rander(act_func, draw_func) {\r\n        this.act_func = act_func, this.draw_func = draw_func;\r\n        let _this = this;\r\n        //绑定键盘事件\r\n        window.addEventListener(\"keydown\", function(event) {\r\n            if(event.keyCode == _this._rander_keyCode) {\r\n                //行为函数调用\r\n                for(let i=0; i<_this.act_ft_n; i++) {\r\n                    _this.act_func(_this._ft++);\r\n                }\r\n                //绘制函数调用\r\n                _this.draw_func && _this.draw_func(_this._ft);\r\n            }\r\n        }); \r\n        return this;\r\n    }\r\n\r\n}\r\n\r\n\r\n//场景流渲染器\r\nclass SceneFlowRanderer extends Randerer {\r\n\r\n    /*----------------------------------------\r\n    @class: 场景流渲染器\r\n    @desc: 指定 场景函数(scene_func) 和 帧时间点(ftp), 帧时间到达后按照 场景流(scene_flow) 进行场景函数的切换\r\n    @property: \r\n        * key(type): value\r\n    @method: \r\n        * method: func\r\n    @exp: \r\n    ----------------------------------------*/\r\n    constructor(fps=60) {\r\n        super(60);\r\n    }\r\n}\r\n\r\n\r\n// module.exports.Randerer = Randerer;\r\nmodule.exports.IntervalRanderer = IntervalRanderer;\r\nmodule.exports.SingleFrameRanderer = SingleFrameRanderer;\n\n//# sourceURL=webpack://vision/./src/views/randerer.js?");
-
-/***/ }),
-
-/***/ "./src/views/views.js":
-/*!****************************!*\
-  !*** ./src/views/views.js ***!
-  \****************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("/****************************************\r\n * Name: view | 视图绘制\r\n * Date: 2022-08-01\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 常用绘制方法封装\r\n * Version: 0.1\r\n****************************************/\r\n\r\n\r\nconst color = __webpack_require__(/*! ../canvas/color */ \"./src/canvas/color.js\");\r\nconst Vector = (__webpack_require__(/*! ../vector/vector */ \"./src/vector/vector.js\").Vector);\r\n\r\n\r\nclass Views {\r\n\r\n    //canvas对象\r\n    canvas = null;\r\n\r\n    /*----------------------------------------\r\n    @func: 节点连接器\r\n    @desc: 绘制点距范围在给定区间内的粒子之间的连线\r\n    @params:\r\n        * ps(list:Particle): 节点粒子\r\n        * dr(list:number): 可绘制的点距范围\r\n        * line_color(list|ColorGradient): 连线的颜色\r\n    ----------------------------------------*/\r\n    static nodelink(ps, dr=[0, 100], line_color=[255, 255, 255]) {\r\n        //粒子点距范围\r\n        let pdr = (typeof dr === \"number\") ? [0, dr] : dr;\r\n        let d = pdr[1] - pdr[0];\r\n        //颜色向量|颜色渐变器\r\n        let cv = line_color.color ? line_color : new color.ColorVector(...line_color);\r\n        //绘制\r\n        for(let i=0, n=ps.length; i<n; i++) {\r\n            let c = cv.color(true);\r\n            for(let k=i; k<n; k++) {\r\n                //计算点距\r\n                let pd = ps[i].p.dist(ps[k].p);\r\n                if(pd >= pdr[0] && pd <= pdr[1]) {\r\n                    Views.canvas.ctx.strokeStyle = `rgb(${c[0]}, ${c[1]}, ${c[2]}, ${1-pd/d})`;\r\n                    Views.canvas.line(ps[i].p, ps[k].p);\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 绘制网格\r\n    @params: \r\n        * co(Vector): 网格中心坐标\r\n        * dx(number,>0): 网格单元长度\r\n        * dy(number,>0): 网格单元高度\r\n        * xR(list:int): x轴坐标范围\r\n        * yR(list:int): y轴坐标范围\r\n        * color(list:int): 线段颜色\r\n        * center(bool): 网格坐标是否居中 -> true(中心坐标位于线段交界点) | false(中心坐标位于网格单元中心)\r\n    @exp: \r\n        Views.grid({co: grid.co, dx: grid.dx, dy: grid.dy});\r\n    ----------------------------------------*/\r\n    static grid({co, dx, dy, xR, yR, color=[255, 255, 255], center=true}) {\r\n        //中心坐标\r\n        co = co || new Vector(Views.canvas.cx, Views.canvas.cy);\r\n        //网格单元尺寸\r\n        dy = dy || dx;\r\n        //x轴范围\r\n        xR = xR || [-parseInt(Views.canvas.cx/dx)-1, parseInt(Views.canvas.cx/dx)+1];\r\n        let xs = xR[0]*dx+co.x, xe = xR[1]*dx+co.x;\r\n        //y轴范围\r\n        yR = yR || [-parseInt(Views.canvas.cy/dy)-1, parseInt(Views.canvas.cy/dy)+1];\r\n        let ys = yR[0]*dy+co.y, ye = yR[1]*dy+co.y;\r\n        //居中偏移量\r\n        let cdx = (center ? 0 : dx/2), cdy = (center ? 0 : dy/2); \r\n        //设置颜色\r\n        Views.canvas.ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]||0.25})`\r\n        //绘制x轴平行线\r\n        for(let x=xR[0], n=xR[1]; x<=n; x++) {\r\n            let _x = x*dx+co.x+cdx;\r\n            Views.canvas.line(_x, ys, _x, ye);\r\n        }\r\n        //绘制y轴平行线\r\n        for(let y=yR[0], n=yR[1]; y<=n; y++) {\r\n            let _y = y*dy+co.y+cdy;\r\n            Views.canvas.line(xs, _y, xe, _y);\r\n        }\r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 光线\r\n    @params:\r\n        * ps(list:Vector): 线的点集\r\n        * Lfx(function): 亮度衰减函数(Lfx应满足在[1, n]区间单调递减)\r\n        * n(int:>0): 光线的层数\r\n        * d(number:>0): 每次光线的宽度\r\n        * cs(list): 起始颜色\r\n        * ce(list): 终止颜色\r\n    ----------------------------------------*/\r\n    static lightLine(ps, {Lfx, n=10, d=3, cs=[255, 255, 255], ce=[0, 0, 0]} = {}) {\r\n        //亮度衰减函数\r\n        Lfx = Lfx || ((x) => {return 1/(x+0.0001);});\r\n        //Lfx函数在[1, n]区间的最值, 用于进行后续归一化处理\r\n        let max = Lfx(1), min = Lfx(n);\r\n        //绘制光线\r\n        Views.canvas.ctx.lineCap = \"round\";\r\n        for(let i=n; i>0; i--) {\r\n            //计算亮度\r\n            let lr = (Lfx(i) - min) / (max - min);\r\n            let lc = [(cs[0]-ce[0])*lr+ce[0], (cs[1]-ce[1])*lr+ce[1], (cs[2]-ce[2])*lr+ce[2]];\r\n            //绘制光线层\r\n            Views.canvas.ctx.lineWidth = i * d;\r\n            Views.canvas.lines(ps, new color.ColorGradient(lc, ce, ps.length));\r\n        }  \r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 光环\r\n    @params: \r\n        * x, y, r(number): 圆心坐标与半径\r\n        * Lfx(function): 亮度衰减函数(Lfx应满足在[1, n]区间单调递减)\r\n        * n(int:>0): 光线的层数\r\n        * cs(list): 起始颜色\r\n        * ce(list): 终止颜色\r\n        * point(bool): true->绘制成光点样式\r\n    ----------------------------------------*/\r\n    static lightRing(x, y, r, {Lfx, n=50, cs=[255, 255, 255], ce=[0, 0, 0], point=false}={}) {\r\n        //亮度衰减函数\r\n        Lfx = Lfx || ((x) => {return 1/(x+0.0001);});\r\n        //Lfx函数在[1, n]区间的最值, 用于进行后续归一化处理\r\n        let max = Lfx(1), min = Lfx(n);\r\n        //计算环宽\r\n        let dR = r / n;\r\n        //绘制\r\n        for(let i=n; i>0; i--) {\r\n            //计算亮度\r\n            let lr = (Lfx(point ? i : n-i) - min) / (max - min);\r\n            let lc = [(cs[0]-ce[0])*lr+ce[0], (cs[1]-ce[1])*lr+ce[1], (cs[2]-ce[2])*lr+ce[2]];\r\n            //绘制光环\r\n            Views.canvas.colorStyle = `rgb(${lc[0]}, ${lc[1]}, ${lc[2]})`;\r\n            Views.canvas.circle(x, y, dR*i);\r\n            Views.canvas.ctx.fill();\r\n        }  \r\n    }\r\n\r\n    /*----------------------------------------\r\n    @func: 绘制轨迹\r\n    @desc: \r\n        解决“循环边界”下的轨迹绘制异常，通过将完整轨迹按照阈值进行分段绘制。\r\n    @params: \r\n        * trail(list:Vector): 轨迹向量列表\r\n        * split_x(number): x轴分量分段阈值\r\n        * split_y(number): y轴分量分段阈值\r\n        * color: 轨迹颜色(支持渐变对象)\r\n    @exp: \r\n        trail(pcs.ps[i].tracker.trail, {\"color\": new vision.color.ColorGradient([50, 50, 50], [255, 255, 255], pcs.ps[i].tracker.trail.length)});\r\n    ----------------------------------------*/\r\n    static trail(trail, {split_x=100, split_y=100, color='rgb(255, 255, 255)'}={}) {\r\n        let split_trail = [[]];\r\n        //按照分量分段阈值对轨迹进行分段\r\n        for(let i=0, n=trail.length-1; i<n; i++) {\r\n            split_trail[split_trail.length-1].push(trail[i])\r\n            if(Math.abs(trail[i].x-trail[i+1].x)>split_x | Math.abs(trail[i].y-trail[i+1].y)>split_y) {\r\n                split_trail.push([]);\r\n            }\r\n        }\r\n        for(let i=0, n=split_trail.length; i<n; i++) {\r\n            if(split_trail[i].length <= 1) { continue; }\r\n            Views.canvas.lines(split_trail[i], color)\r\n        }\r\n    }\r\n}\r\n\r\n\r\nmodule.exports.Views = Views;\r\n\r\n\n\n//# sourceURL=webpack://vision/./src/views/views.js?");
-
-/***/ }),
-
-/***/ "./src/viewtools/point_capturer.js":
-/*!*****************************************!*\
-  !*** ./src/viewtools/point_capturer.js ***!
-  \*****************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-eval("/****************************************\r\n * Name: point_capturer\r\n * Date: 2022-07-12\r\n * Author: Ais\r\n * Project: Vision\r\n * Desc: 捕获鼠标点击坐标\r\n * Version: 0.1\r\n****************************************/\r\n\r\nconst Vector = (__webpack_require__(/*! ../vector/vector */ \"./src/vector/vector.js\").Vector);\r\n\r\n\r\nclass PointCapturer {\r\n\r\n    /*----------------------------------------\r\n    @name: 坐标捕获器\r\n    @desc: 捕获鼠标点击的坐标点\r\n    @property: \r\n        * canvas(Canvas): 绘制容器\r\n        * points(list): 坐标点容器，存储捕获的坐标点\r\n        * p(Vector): 当前鼠标坐标\r\n        * style(obj): 坐标点的绘制样式\r\n        * is_vector(bool): 坐标点的存储类型 -> true(Vector(x, y)) || false([x, y])\r\n        * is_disp(bool): 是否绘制捕获的坐标点\r\n        * is_line(bool): 是否将坐标连线\r\n        * is_close(bool): 当is_line=true, 是否绘制闭合线\r\n    @return(type): \r\n    @exp: \r\n    ----------------------------------------*/\r\n    constructor(canvas) {\r\n        //canvas容器\r\n        this.canvas = canvas;\r\n        //坐标点容器\r\n        this.points = [];\r\n        //当前坐标\r\n        this.p = new Vector(0, 0);\r\n        //坐标点样式\r\n        this.style = {\r\n            //半径\r\n            r: 3,\r\n            //颜色\r\n            c: 'rgb(255, 255, 255)'\r\n        }\r\n        //坐标点类型\r\n        this.is_vector = true;\r\n        //是否绘制坐标点\r\n        this.is_disp = false;\r\n        //是否连线\r\n        this.is_line = false;\r\n        //连线是否闭合\r\n        this.is_close = false\r\n    }\r\n\r\n    //捕获\r\n    capture(element_id) {\r\n        let _this = this;\r\n        document.getElementById(element_id).addEventListener(\"mousemove\", function(event) {\r\n            _this.p = new Vector(event.clientX, event.clientY);\r\n        });\r\n        document.getElementById(element_id).addEventListener(\"mousedown\", function(event) {\r\n            //添加坐标点\r\n            if(event.button == 0) {\r\n                let x = event.clientX, y = event.clientY;\r\n                _this.points.push(_this.is_vector ? new Vector(x, y) : [x, y]);\r\n                _this.is_disp && _this.disp();\r\n            //清空坐标点\r\n            } else if(event.button == 2) {\r\n                _this.points = [];\r\n                _this.is_disp && _this.canvas.refresh();\r\n            }\r\n        });\r\n    }\r\n\r\n    //绘制\r\n    disp() {\r\n        this.canvas.refresh();\r\n        //绘制当前坐标点\r\n        this.canvas.colorStyle = this.style.c;\r\n        this.canvas.circle(this.p.x, this.p.y, this.style.r);\r\n        this.canvas.ctx.fill();\r\n        //绘制捕获的坐标点\r\n        for(let i=0, end=this.points.length; i<end; i++) {\r\n            this.canvas.colorStyle = this.style.c;\r\n            if(this.is_vector) {\r\n                this.canvas.circle(this.points[i].x, this.points[i].y, this.style.r);\r\n            } else {\r\n                this.canvas.circle(this.points[i][0], this.points[i][1], this.style.r);\r\n            }\r\n            this.canvas.ctx.fill();\r\n        }\r\n        if(this.is_line) {\r\n            this.canvas.ctx.strokeStyle = this.style.c;\r\n            this.canvas.lines(this.points, this.is_close);\r\n        }\r\n    }\r\n\r\n    //导出\r\n    export(to_str=false) {\r\n        let _points = this.points;\r\n        if(this.is_vector) {\r\n            _points = [];\r\n            for(let i=0, end=this.points.length; i<end; i++) {\r\n                _points.push([this.points[i].x, this.points[i].y]);\r\n            }\r\n        } \r\n        return to_str==false ? _points : JSON.stringify(_points);\r\n    }\r\n}\r\n\r\n\r\nmodule.exports.PointCapturer = PointCapturer;\n\n//# sourceURL=webpack://vision/./src/viewtools/point_capturer.js?");
-
-/***/ })
-
-/******/ 	});
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/ 	
-/******/ 	// The require function
-/******/ 	function __webpack_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-/******/ 		}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-/******/ 		};
-/******/ 	
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
-/******/ 	
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-/******/ 	}
-/******/ 	
-/************************************************************************/
-/******/ 	
-/******/ 	// startup
-/******/ 	// Load entry module and return exports
-/******/ 	// This entry module can't be inlined because the eval devtool is used.
-/******/ 	var __webpack_exports__ = __webpack_require__("./build/index.js");
-/******/ 	vision = __webpack_exports__;
-/******/ 	
-/******/ })()
-;
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.vision = {}));
+})(this, (function (exports) { 'use strict';
+
+    /**
+     * @module
+     * @desc     向量系统(Vision框架核心组件)
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-06-20
+     * @version  0.1.0
+     * @since    (2023-01-30, Ais): 暴露 this._v 属性，提高计算性能。
+    */
+
+
+    let Vector$1 = class Vector {
+
+        /**
+         * @classdesc 向量类: 提供向量计算支持
+         * 
+         * @property { number[] } v - 向量分量容器(内部存储结构)
+         * @property { get/set } x - 向量x轴分量(this.v[0])
+         * @property { get/set } y - 向量y轴分量(this.v[1])
+         * @property { get/set } z - 向量z轴分量(this.v[2])
+         * 
+         * @param {...number} v - 向量分量
+         * 
+         * @example 
+         * let v = new Vector(1, 2, 3);  //vector(1, 2, 3)
+         */
+        constructor(...v) {
+            this.v = v.length > 0 ? [...v] : [0, 0];
+        }
+
+        //分量接口
+        get x(){ return this.v[0]; }
+        get y(){ return this.v[1]; }
+        get z(){ return this.v[2]; }
+        set x(val){ this.v[0] = val; }
+        set y(val){ this.v[1] = val; }
+        set z(val){ this.v[2] = val; }
+
+        /**
+         * Vector静态构建器
+         * 
+         * @param {...number} v - 向量分量 
+         * @returns { Vector } 向量
+         * @example 
+         * let v = new Vector.v(1, 2);  //vector(1, 2)
+         * let v = new Vector.V(1, 2);  //vector(1, 2)
+         */
+        static v(...v) {
+            return new Vector(...v);
+        }
+        static V(...v) {
+            return new Vector(...v);
+        }
+
+        /**
+         * 构建分量全为 *1* 的向量
+         * 
+         * @param { number } [dim=2] 向量维度 
+         * @returns { Vector } 向量
+         * @example let v = new Vector.ones(3);  //vector(1, 1, 1);
+         */
+        static ones(dim=2) {
+            return new Vector(...Array(dim).fill(1))
+        }
+
+        /**
+         * 构建分量全为 *0* 的向量
+         * 
+         * @param { number } [dim=2] 向量维度 
+         * @returns { Vector } 向量
+         * @example let v = new Vector.zeros(3);  //vector(0, 0, 0);
+         */
+        static zeros(dim=2) {
+            return new Vector(...Array(dim).fill(0))
+        }
+
+        /**
+         * 生成指定范围内的随机向量
+         * 
+         * @param { Array[] } range - 向量分量范围，v.dim == range.length
+         * @param { boolean } isint - 分量值类型 true(int) | false(float)
+         * @returns { Vector } 向量
+         * @example 
+         * Vector.random([[1, 3], [1, 3]]);          //vector(1.13, 2.54)
+         * Vector.random([[1, 3], [1, 3]], true);    //vector(1, 2)
+         * Vector.random([[1, 3], [1, 3], [4, 7]]);  //vector(2.13, 0.54, 5.56)
+         */
+        static random(range=[], isint=false) {
+            let v = [], r = 0;
+            for(let i=0, end=range.length; i<end; i++){
+                r = Math.random() * (range[i][1] - range[i][0]) + range[i][0];
+                isint ? v.push(parseInt(r)) : v.push(r);
+            }
+            return new Vector(...v);
+        }
+
+        /**
+         * 生成一个圆范围内的随机二维向量: 模长范围在[sR, eR]，方向随机
+         * 
+         * @param { number } sR - 向量模长起始值(sR>0) 
+         * @param { number } eR - 向量模长终止值(eR>0)
+         * @returns { Vector } 向量
+         * @example
+         * Vector.rcv(300);       //向量模长为300, 方向随机
+         * Vector.rcv(100, 300);  //向量模长范围为(100, 300), 方向随机
+         */
+        static rcv(sR, eR=null) {
+            let rad = Math.random() * (Math.PI * 2);
+            let r = (eR == null ? Math.random()*sR : Math.random()*(eR-sR)+sR);
+            return new Vector(Math.cos(rad)*r, Math.sin(rad)*r);
+        }
+
+        /**
+         * 向量加法: 向量的对应分量相加  
+         * 当操作数维数小于当前向量维数: 空缺分量默认值作为 *0* 处理  
+         * 当操作数维数大于当前向量维数: 操作数分量将截取到当前向量维数进行计算
+         * 
+         * @param { Vector } vector - 操作数 
+         * @returns { Vector } this
+         * @example
+         * //维数相同的情况
+         * let v1 = new Vector(1, 2, 3);
+         * let v2 = new Vector(4, 5, 6);
+         * v1.add(v2);  // v1 -> vector(5, 7, 9)  
+         * 
+         * //维数不同的情况
+         * let v1 = new Vector(1, 2, 3);
+         * v1.add(new Vector(1, 2, 3, 4, 5));  // v1 -> vector(2, 4, 6)
+         * v1.add(new Vector(1, 2));           // v1 -> vector(2, 4, 3)
+         */
+        add(vector){
+            for(let i=0, end=this.v.length; i<end; i++) {
+                this.v[i] += (vector.v[i] || 0);
+            }
+            return this;
+        }
+        static add(...vector) {
+            let v = Vector.zeros(vector[0].dim());
+            for(let i=0, end=vector.length; i<end; i++) {
+                v.dim()<vector[i].dim() && v.dim(vector[i].dim());
+                v.add(vector[i]);
+            }
+            return v;
+        }
+
+        /**
+         * 标量乘法: 数k乘以向量的每个分量
+         * 
+         * @param { number } k - 操作数 
+         * @returns { Vector } this
+         * @example
+         * let v1 = new Vector(1, 2, 3); 
+         * v1.mult(2);  //vector(2, 4, 6)
+         */
+        mult(k) {
+            for(let i=0, end=this.v.length; i<end; i++) {
+                this.v[i] *= k;
+            }
+            return this;
+        }
+        static mult(vector, k) {
+            return vector.clone().mult(k);
+        }
+
+        /**
+         * 向量减法: 可以视作向量加法的特殊情况 v1.add(v2.mult(-1))
+         * 
+         * @param { Vector } vector - 操作数
+         * @returns { Vector } this
+         * @example
+         * let v1 = new Vector(1, 2, 3);
+         * let v2 = new Vector(4, 5, 6);
+         * v1.sub(v2);  //vector(-3, -3, -3)
+         */
+        sub(vector){
+            //向量方法实现
+            // return this.add(vector.clone().mult(-1));
+            //计算优化实现
+            for(let i=0, end=this.v.length; i<end; i++) {
+                this.v[i] -= (vector.v[i] || 0);
+            }
+            return this;
+        }
+        static sub(...vector) {
+            let v = vector[0].clone();
+            for(let i=1, end=vector.length; i<end; i++) {
+                v.sub(vector[i]);
+            }
+            return v;
+        }
+
+        /**
+         * 标量积(点积):   
+         * v1·v2 -> sum(v1[i]*v2[i]) -> |v1|*|v2|*cos(rad)
+         * 
+         * @param { Vector } vector - 操作数 
+         * @returns { number } 标量积
+         * @example new Vector(1, 1).dot(new Vector(1, 1));  //2
+         */
+        dot(vector) {
+            let t = 0;
+            for(let i=0, end=this.v.length; i<end; i++) {
+                t += this.v[i] * (vector.v[i] || 0);
+            }
+            return t;
+        }
+        /** 标量积(点积) */
+        inner(vector) {
+            return this.dot(vector);
+        }
+
+        /**
+         * 线性组合(Linear Combination):  
+         * lc = v1*w[1] + v2*w[2] + ... + vn*w[n]  
+         * condition: vectors[i].dim() == w.length
+         * 
+         * @param { Vector[] } vectors - 向量组 
+         * @param { number[] } w - 权
+         * @returns { Vector } 向量
+         * @example
+         * LC([
+         *     new Vector(1, 1),
+         *     new Vector(2, 2),
+         *     new Vector(3, 3),
+         * ], [6, 3, 2]);  //vector(18, 18)
+         */
+        static LC(vectors, w) {
+            let v = Vector.zeros(vectors[0].dim());
+            for(let i=0, n=vectors.length; i<n; i++) {
+                v.add(vectors[i].clone().mult(w[i]));
+            }
+            return v;
+        }
+
+        /**
+         * 线性映射(Linear Mapping):   
+         * 对向量进行线性变换，有以下两种实现方式:  
+         *   * 行向量: 设 vi 为 m[i] 构成的行向量，则 LM(m) -> o.add(v.dot(vi)), 即 v 与 vi 的点积之和
+         *   * 列向量: 设 vk 为 m[i][k=(1, 2, 3...)] 的列向量，则 LM(m) -> LC(vk, v), 即以 v 的分量为权，对m的列向量的线性组合
+         * 
+         * @param { Array[] } m - 映射矩阵(数组形式)
+         * @returns { Vector } 映射后的向量
+         */
+        LM(m) {
+            let _v = [];
+            for(let i=0, endi=m.length; i<endi; i++) {
+                //[Vector]: _v.push(this.dot(new Vector(...m[i])));
+                let _vi = 0;
+                for(let k=0, endk=m[i].length; k<endk; k++) {
+                    _vi += m[i][k] * (this.v[k] || 0);
+                }
+                _v.push(_vi);
+            }
+            this.v = _v;
+            return this;
+        }
+        static LM(vector, m) {
+            return vector.clone().map(m);
+        }
+
+        /**
+         * 线性插值:  
+         * v(t) = (1-t)*v1 + t*v2 -> v1 + t*(v2-v1)
+         * 
+         * @param { Vector } vector - 目标向量 
+         * @param { number } t - [0, 1] 
+         * @returns { Vector } 向量
+         */
+        lerp(vector, t) {
+            return (t>0 && t<1) ? vector.clone().sub(this).mult(t).add(this) : (t<=0 ? this.clone() : vector.clone());
+        }
+        static lerp(v_from, v_to, t) {
+            return v_from.lerp(v_to, t);
+        }
+
+        /**
+         * 二维向量的旋转变换: 对向量(dim=2)进行旋转(线性变换)
+         * 
+         * @param { number } rad - 旋转角度 
+         * @param { boolean } angle - rad参数格式 -> true(弧度)|false(角度)
+         * @returns { Vector } this
+         * @example
+         * v.rotate(Math.PI/4); 
+         * v.rotate(45, true);
+         */
+        rotate(rad, angle=false) {
+            /* 
+            [Vector]:
+            this.v = this.LM([
+                [Math.cos(rad), -Math.sin(rad)],
+                [Math.sin(rad), Math.cos(rad)],
+            ])
+            */
+            rad = angle ? (Math.PI/180*rad) : rad;
+            let cos_rad = Math.cos(rad), sin_rad = Math.sin(rad);
+            let x = this.v[0] * cos_rad - this.v[1] * sin_rad;
+            let y = this.v[0] * sin_rad + this.v[1] * cos_rad;
+            this.v[0] = x, this.v[1] = y;
+            return this;
+        }
+        static rotate(vector, rad) {
+            return vector.clone().rotate(rad);
+        }
+
+        /**
+         * 维度(分量数)(get/set)
+         * 
+         * @param { number } [n=null] 设置的向量维度(int & n>0)
+         * @returns { number | Vector } 当前的向量维度，v.dim() -> int | v.dim(3) -> this
+         * @example
+         * let v = new Vector([1, 3, 5, 7]);
+         * v.dim();   //4
+         * v.dim(3);  //vector(1, 3, 5)
+         * v.dim(5);  //vector(1, 3, 5, 7, 0);
+         */
+        dim(n=null) {
+            if(n!=null) {
+                let v = [], _n = parseInt(n);
+                for(let i=0; i<_n; i++) {
+                    v[i] = this.v[i] || 0;
+                }
+                this.v = v;
+                return this;
+            } else {
+                return this.v.length;
+            }
+        }
+
+        /**
+         * 模长(get/set)
+         * 
+         * @param { number } n - 设置的模长
+         * @returns { number | Vector } 当前的向量模长，v.norm() -> float | v.norm(3) -> this
+         * @example 
+         * let v = new Vector(3, 4);
+         * v.norm();   //5
+         * v.norm(1);  //设置向量的模长为1
+         */
+        norm(n=null) {
+            //计算模长
+            let t = 0;
+            for(let i=0, end=this.v.length; i<end; i++) {
+                t += this.v[i] * this.v[i];
+            }
+            let v_norm = Math.sqrt(t);
+            //设置模长
+            (n!=null) && (v_norm != 0) && this.mult(n/v_norm);
+            return (n==null) ? v_norm : this;
+        }
+
+        /**
+         * 单位化: v.norm(1)
+         * 
+         * @returns { Vector } this
+         */
+        normalization() {
+            let _norm = this.norm();
+            (_norm != 0) && this.mult(1/_norm);
+            return this;
+        }
+
+        /**
+         * 模长限制器: 当向量模长超过范围边界值时，设置模长为邻近的边界值
+         * 
+         * @param { number } max - 最大值边界
+         * @param { number } min - 最小值边界
+         * @returns { Vector } this
+         * @example 
+         * v.limit(5);     //(0 < v.norm() <5)
+         * v.limit(2, 5);  //(2 < v.norm() <=5)
+         */
+        limit(max, min=null) {
+            let _max, _min, _norm = this.norm();
+            if(min == null){_min=0, _max=Math.abs(max);} else {_min=Math.abs(max), _max=Math.abs(min);}
+            (_norm>=_min && _norm<=_max) ? null : this.norm(_norm>_max ? _max : _min);
+            return this;
+        }
+
+        /**
+         * 复制向量
+         * 
+         * @returns { Vector } 复制的向量
+         */
+        clone() {
+            return new Vector(...this.v);
+        }
+        /**
+         * 复制向量
+         * 
+         * @returns { Vector } 复制的向量
+         */
+        copy() {
+            return this.clone();
+        }
+
+        /**
+         * 计算两个向量之间的欧式距离(坐标视角)
+         * 
+         * @param { Vector } vector - 目标向量 
+         * @returns { number } 与目标向量的欧式距离
+         * @example
+         * v1.dist(v2);  //v1与v2的欧式距离
+         * v1.dist();    //v1到原点的距离(v.norm())
+         */
+        dist(vector=null) {
+            //向量法实现
+            // return this.clone().sub(vector).norm();
+            //计算优化
+            if(vector == null) {
+                return this.norm();
+            } else {
+                let t = 0, v = vector.v;
+                for(let i=0, end=this.v.length; i<end; i++) {
+                    t += (this.v[i] - v[i]) * (this.v[i] - v[i]);
+                }
+                return Math.sqrt(t);
+            }
+        }
+        static dist(v1, v2) {
+            return v1.dist(v2);
+        }
+
+        /**
+         * 计算两个向量之间的弧度差(极坐标视角)
+         * 
+         * @param { Vector } vector - 目标向量 
+         * @returns { number } 弧度差
+         * @example
+         * v1.rad(v2);  //v1与v2的弧度差
+         * v1.rad();    //v1与x轴正方向的弧度差
+         */
+        rad(vector=null) {
+            let x = this.v[0], y = this.v[1];
+            let rad = Math.atan(y/x);
+            rad = (x>=0) ? (y >= 0 ? rad : Math.PI*2 + rad) : (Math.PI + rad);
+            return  vector ? rad - vector.rad() : rad;
+        }
+        static rad(v1, v2) {
+            return v1.rad(v2);
+        }
+
+        /**
+         * 整数化: 将分量转换成整数
+         * 
+         * @returns { Vector } this
+         * @example
+         * let v = new Vector(1.23, 2.45, 5.44);
+         * v.toint();  //vector(1, 2, 5)
+         */
+        toint() {
+            for(let i=0, end=this.v.length; i<end; i++) { this.v[i] = parseInt(this.v[i]);}
+        }
+
+        /**
+         * 判断向量的分量是否在指定范围
+         * 
+         * @param { Array[] } range - 分量范围
+         * @returns { boolean } 判定结果
+         * @example
+         * new Vector(1, 2).in([[1, 5], [1, 5]]);  //true
+         * new Vector(1, 2).in([[1, 5], [0, 1]]);  // false
+         */
+        in(range=[]) {
+            for(let i=0, end=range.length; i<end; i++) {
+                if(!(this.v[i] >= range[i][0] && this.v[i] <= range[i][1])) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        static in(vector, range) {
+            return vector.in(range);
+        }
+
+        /**
+         * 从坐标数组中构建向量:  
+         * [[x1, y1], [x2, y2], ..., [xn, yn]] -> [v1, v2, ..., vn]
+         * 
+         * @param { Array[] } ps - 坐标点的数组形式
+         * @returns { Vector[] } 坐标点的向量形式
+         * @example
+         * Vector.vpoints([[100, 100], [200, 200]]);  //-> [Vector(100, 100), Vector(200, 200)]
+         */
+        static vpoints(ps) {
+            let vps = [];
+            for(let i=0, n=ps.length; i<n; i++) {
+                vps.push(new Vector(...ps[i]));
+            }
+            return vps;
+        }
+
+    };
+
+    var vector = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        Vector: Vector$1
+    });
+
+    /**
+     * @module
+     * @desc     粒子类: 基于向量模拟抽象粒子的运动
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-07-10
+     * @version  0.1.0
+    */
+
+
+    //粒子(基类)
+    class Particle {
+
+        /**
+         * @classdesc 粒子基类: 基于向量模拟抽象粒子的运动
+         * 
+         * @property { Vector } p - 位置向量
+         * @property { Vector } v - 速度向量
+         * 
+         * @param { Vector } [position=vector(0, 0)] - 初始位置向量
+         * @param { Vector } [velocity=vector(0, 0)] - 初始速度向量
+         * 
+         * @example
+         * let p = new Particle(new Vector(100, 100), new Vector(2, 3));
+         */
+        constructor(position, velocity) {
+            this.p = position || new Vector$1(0, 0);
+            this.v = velocity || new Vector$1(0, 0);
+        }
+
+        /**
+         * 运动模式: 描述粒子的运动模式
+         * 
+         * @returns { Vector } 粒子的位置向量(this.p)
+         */
+        action() {
+            return this.p.add(this.v);
+        }
+
+        /**
+         * 停机状态: 描述粒子的停机状态
+         * 
+         * @returns { boolean } 停机状态
+         */
+        isEnd() {
+            return false;
+        }
+    }
+
+
+    //作用力粒子
+    class ForceParticle extends Particle {
+
+        /**
+         * @classdesc 作用力粒子: 可进行受力和进行相互作用
+         * 
+         * @property { Vector } p - 位置向量
+         * @property { Vector } v - 速度向量
+         * @property { Vector } acc - 加速度
+         * @property { number } mass - 质量
+         * 
+         * @param { Vector } [position=vector(0, 0)] - 初始位置向量
+         * @param { Vector } [velocity=vector(0, 0)] - 初始速度向量
+         * @param { Vector } [acceleration=vector(0, 0)] - 初始加速度 
+         * @param { number } [mass=1] - 质量
+         *  
+         */
+        constructor(position, velocity, acceleration, mass) {
+            super();
+            this.p = position || new Vector$1(0, 0);
+            this.v = velocity || new Vector$1(0, 0);
+            this.acc = acceleration || new Vector$1(0, 0);
+            this.mass = mass || 1;
+        }
+
+        /**
+         * 受力作用: 通过受力来改变粒子的加速度(积累效应)
+         * 
+         * @param { Vector } f - 作用力 
+         */
+        force(f) {
+            this.acc.add(f.clone().mult(1/this.mass));
+        }
+
+        /** @override */
+        action() {
+            this.p.add(this.v.add(this.acc));
+            this.acc = new Vector$1(0, 0);
+            return this.p;
+        }
+    }
+
+
+    //线性运动粒子
+    class LinearMotorParticle extends Particle {
+
+        /**
+         * @classdesc 线性运动: 描述直线运动模式的粒子
+         * 
+         * @property { Vector } p - 位置向量
+         * @property { Vector } v - 速度向量
+         * @property { Vector } ps - 初始位置向量
+         * @property { Vector } pe - 终止位置向量
+         * @property { Enum } [mode="line"] - 运动模式   
+         * {"line": 移动到pe后停机, "loop": 移动到pe后回到ps, "back":移动到pe后，ps与pe互换}
+         * @property { number } [end_dist_rate=1.2] - 终止距离误差倍率  
+         * 用于终点距离的判断: end_dist <= this.v.norm() * this.end_dist_rate  
+         * 
+         * @param { Vector } ps - 初始位置向量
+         * @param { Vector } pe - 终止位置向量
+         * @param { number } [v_rate=1] - 设置粒子运动速率
+         * 
+         * @example 
+         * let lmp = new vision.particle.LinearMotorParticle(
+         *     new Vector(200, 200), 
+         *     new Vector(1000, 200),
+         *     v_rate = 5
+         * );
+         */
+        constructor(ps, pe, v_rate=1) {
+            super();
+            this._ps = ps;
+            this._pe = pe;
+            this.p = this._ps.clone();
+            this.v = Vector$1.sub(this._pe, this._ps).norm(Math.abs(v_rate));
+            this.mode = "line";
+            this.end_dist_rate = 1.2;
+        }
+        
+        get ps() { return this._ps.clone(); }
+        get pe() { return this._pe.clone(); }
+        
+        //设置终止位置(并重新计算速度方向)
+        set pe(vector) {
+            this._pe = vector.clone();
+            this.v = Vector$1.sub(this._pe, this.p).norm(this.v.norm());
+        }
+
+        /** 
+         * 设置速率: 速度矢量的模长, 每次迭代移动的像素大小
+         * 
+         * @param { number } val - 速率(val>0)
+         * @example p.v_rate = 5;
+         */
+        set v_rate(val) { this.v.norm(val); }
+        /**
+         * 设置速率: 经过多少次迭代后移动到 **pe**
+         * 
+         * @param { number } val - 速率(val>0)
+         * @example p.v_count = 300;
+         */
+        set v_count(val) { this.v.norm(Vector$1.dist(this._pe, this._ps) / val); }
+
+        /** @override */
+        isEnd() {
+            return this.p.dist(this._pe) <= this.v.norm() * this.end_dist_rate;
+        }
+
+        /** @override */
+        action() {
+            if(!this.isEnd()) {
+                this.p.add(this.v);
+            } else {
+                switch(this.mode){
+                    case "loop": {
+                        this.p = this._ps.clone();
+                        break;
+                    }
+                    case "back": {
+                        this.p = this._pe.clone();
+                        this._pe = this._ps.clone();
+                        this._ps = this.p.clone();
+                        this.v.mult(-1);
+                        break;
+                    }
+                    default: {
+                        this.p = this._pe.clone();
+                    }
+                }
+            }
+            return this.p;
+        }
+    }
+
+
+    //环形运动系统
+    class CircularMotorParticle extends Particle {
+
+        /**
+         * 环形运动: 描述环形运动模式的粒子
+         * 
+         * @property { Vector } o - 圆心位置
+         * @property { number } r - 旋转半径
+         * @property { number } w - 角速度 
+         * @property { number } rad - 当前弧度
+         * @property { Vector } po - 当前坐标(以this.o为原点)
+         * @property { Vector } p - 当前坐标(以(0, 0)为原点)
+         * 
+         * @param { Vector } [o=vector(0, 0)] - 圆心位置
+         * @param { number } [r=1] - 旋转半径
+         * @param { number } [w=(Math.PI/180)] - 角速度 
+         * @param { number } [rad=0] - 初始弧度位置
+         * 
+         * @example 
+         * let cmp = new CircularMotorParticle(new Vector(1400, 300), 100, Math.PI/180);
+         */
+        constructor(o, r=1, w=(Math.PI/180), rad=0) {
+            super();
+            this.o = o || new Vector$1(0, 0);
+            this.r = r;
+            this.w = w;
+            this.rad = rad;
+            this.po = new Vector$1(this.r*Math.sin(this.rad), this.r*Math.cos(this.rad));
+            this.p = Vector$1.add(this.po, this.o);
+        }
+
+        /** @override */
+        action() {
+            this._p = this.p.clone();
+            this.rad += this.w;
+            if(this.rad >= 2 * Math.PI) { this.rad -= 2 * Math.PI; } 
+            if(this.rad <= -2 * Math.PI) { this.rad += 2 * Math.PI; } 
+            this.po.x = this.r * Math.sin(this.rad);
+            this.po.y = this.r * Math.cos(this.rad);
+            this.p = Vector$1.add(this.po, this.o);
+            this.v = this.p.clone().sub(this._p);
+            return this.p;
+        }
+
+    }
+
+
+    //随机游走器
+    class RandomWalkerParticle extends Particle {
+        
+        /*----------------------------------------
+        @func: 随机游走
+        @desc: 给定一组速度向量集，每次随机选择一个速度进行移动
+        @property: 
+            * ps(Vector): 初始位置
+            * rvs(list): 随机速度向量集 -> [Vector(速度向量), wt(权重)]
+        ----------------------------------------*/
+        /**
+         * 随机游走模式: 给定一组速度向量集，每次随机选择一个速度进行移动
+         * 
+         * @property { Vector } p - 位置向量
+         * @property { Object[] } _rvs - 随机速度向量集
+         * @property { Vector } _rvs.v - 速度向量
+         * @property { number } _rvs.p - 选择概率
+         * @property { number } _rvs.ps - 起始概率值
+         * @property { number } _rvs.pe - 终止概率值
+         * 
+         * @param { Vector } ps -  初始位置向量
+         * @param { Array[] } rvs - 随机速度向量集: [[Vector(速度向量), wt(权重)], ...]
+         * 
+         * @example
+         * let vd = 3;
+         * let rw = new RandomWalkerParticle(new Vector(canvas.cx, canvas.cy), [
+         *     [new Vector(-1, -1).mult(vd), 1/8],
+         *     [new Vector(0, -1).mult(vd), 1/8],
+         *     [new Vector(1, -1).mult(vd), 1/8],
+         *     [new Vector(-1, 0).mult(vd), 1/8],
+         *     [new Vector(1, 0).mult(vd), 1/8],
+         *     [new Vector(-1, 1).mult(vd), 1/8],
+         *     [new Vector(0, 1).mult(vd), 1/8],
+         *     [new Vector(1, 1).mult(vd), 1/8],
+         * ]);
+         */
+        constructor(ps, rvs) {
+            super();
+            this.p = ps;
+            this._rvs = this._probability(rvs);
+        }
+
+        /**
+         * 计算概率(基于权重): p[i] = wt[i] / sum(wt)
+         * 
+         * @param { Array[] } rvs - 随机速度向量集: [[Vector(速度向量), wt(权重)], ...]
+         * @returns { Object } 随机速度向量集: [{"v": "速度", "p": "概率", "ps/pe": "概率范围"}, ...]
+         */
+        _probability(rvs) {
+            //计算总权重
+            let swt = 0;
+            for(let i=0, end=rvs.length; i<end; i++) {
+                swt += rvs[i][1];
+            }
+            //计算每个速度矢量的概率
+            let _rvs = [], _ps = 0;
+            for(let i=0, end=rvs.length; i<end; i++) {
+                let p = (rvs[i][1] || 0) / swt;
+                _rvs.push({
+                    //速度
+                    "v": rvs[i][0] || new Vector$1(0, 0),
+                    //概率
+                    "p": p,
+                    //概率范围
+                    "ps": _ps, "pe": _ps + p
+                });
+                _ps += p;
+            }
+            return _rvs;
+        }
+
+        /**
+         * 从 *随机速度向量集* 中随机选择一个速度向量
+         * 
+         * @returns { Object } {"v": "速度", "p": "概率", "ps/pe": "概率范围"}
+         */
+        rv_select() {
+            let r = Math.random();
+            for(let i=0, end=this._rvs.length; i<end; i++) {
+                if(r > this._rvs[i].ps && r <= this._rvs[i].pe) {
+                    return this._rvs[i].v;
+                }
+            }
+        }
+
+        /** @override */
+        action() {
+            //选择随机速度
+            this.v = this.rv_select();
+            return this.p.add(this.v);
+        }
+    }
+
+    /**
+     * @module
+     * @desc     鸟群算法(boids: bird-oid object): 集群行为模拟
+     * @project  Vision
+     * @author   Ais
+     * @date     2023-03-19
+     * @version  0.1.0
+    */
+
+
+    /** 鸟群个体(基准模型:M0) */
+    class Boid extends Particle {
+
+        /** 
+         * 基础规则集 
+         * @memberof Boid
+         * @property { function } alignment  - 对齐行为: 个体的速度倾向于与感知野中其他个体的速度保持一致
+         * @property { function } separation - 分离行为: 个体有远离周围个体的趋势，防止相互碰撞
+         * @property { function } cohesion   - 靠近行为: 个体有向感知野中其他个体中心位置的移动趋势
+         * 
+         * @param { Boid } tp - 目标对象 
+         * @param { Boid[] } ns - tp的邻近集
+         * @returns { Vector } 行为规则产生的行为向量
+         * 
+        */
+        static RuleSet = {
+            alignment: (tp, ns) => {
+                let v_ali = new Vector$1(0, 0);
+                for(let i=0, n=ns.length; i<n; i++) { 
+                    v_ali.add(ns[i].v); 
+                }
+                return v_ali.mult(1/ns.length);
+            },
+            separation: (tp, ns) => {
+                let v_sep = new Vector$1(0, 0);
+                for(let i=0, n=ns.length; i<n; i++) { 
+                    let r = tp.p.dist(ns[i].p);
+                    v_sep.add(Vector$1.sub(tp.p, ns[i].p).norm(1/r*r)); 
+                }
+                return v_sep;
+            },
+            cohesion: (tp, ns) => {
+                //计算视野范围内对象的中心位置
+                let center = new Vector$1(0, 0);
+                for(let i=0, n=ns.length; i<n; i++) { 
+                    center.add(ns[i].p); 
+                }
+                center.mult(1/ns.length);
+                return Vector$1.sub(center, tp.p);
+            }
+        }
+
+        /**
+         * @classdesc 鸟群个体(基准模型)，集群行为模拟
+         * 
+         * @property { number } R - 感知(视野)范围: 用于计算邻近集。
+         * @property { Array } K - 种群特征值(权重数组): 用于与规则集产生的向量进行线性组合。
+         * @property { callable } visual_field - 视野场: 用于定义个体的感知野，默认采用半径R的环形视野。
+         * @property { callable[] } rules - 集群行为规则集
+         * @property { Vector } acc - 速度增量  
+         * 
+         * @param { Vector } p - 初始位置向量
+         * @param { Vector } v - 初始速度向量 
+         * @param { number } R - 感知(视野)范围
+         * @param { Array } K - 种群特征值
+         * 
+         * @example
+         * new vision.Boids.Boid(
+         *     Vector.random([[0, canvas.width], [0, canvas.height]]),
+         *     Vector.random([confs.vR, confs.vR]),
+         *     confs.view_rad,
+         *     confs.K,
+         * );
+         */
+        constructor(p, v, R, K) {
+            super(p, v);
+            this.R = R;
+            this.K = K;
+            this.visual_field = (tp, ns) => { return ns };
+            this.rules = [
+                Boid.RuleSet.alignment,
+                Boid.RuleSet.separation,
+                Boid.RuleSet.cohesion
+            ];
+            this.acc = new Vector$1(0, 0);
+        }
+
+        /**
+         * 规则集作用: 对个体进行规则集的作用，在 action 之前调用。
+         * @param { Boid[] } ns - 个体感知野范围内的邻近集 
+         */
+        rules_action(ns) {
+            if(ns.length == 0) { return }
+            ns = this.visual_field(this, ns);
+            let rule_vectors = [];
+            for(let i=0, n=this.rules.length; i<n; i++) {
+                rule_vectors[i] = this.rules[i](this, ns);
+            }
+            this.acc.add(Vector$1.LC(rule_vectors, this.K));
+        }
+
+        /** 行为迭代 */
+        action() {
+            this.p.add(this.v.add(this.acc));
+            this.acc = new Vector$1(0, 0);
+            return this.p;
+        }
+    }
+
+
+    /**
+     * 鸟群模型规则集作用中间件
+     * 作为粒子系统(ParticleSystem)的action中间件，用于 Boid.rules_action 的调用。
+     * 
+     * @param { NNS.NearestNeighborSearch } nns - 邻近搜索算法模块
+     * 
+     * @returns { function } ParticleSystem action 中间件
+     * 
+     * @example
+     * pcs.action_middlewares.before.push(
+     *     boids_middlewares(
+     *         new vision.NNS.GridNNS([], function(obj){ return obj.p }, 100)
+     *     )
+     * );
+     * 
+     */
+    const boids_middlewares = function(nns) {
+        //鸟群集群运动
+        return function boids_rules_middleware(ps) {
+            nns.build(ps);
+            for (let i = ps.length; i--;) {
+                ps[i].rules_action(nns.near(ps[i], ps[i].R));
+            }
+        }
+    };
+
+    var Boids = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        Boid: Boid,
+        boids_middlewares: boids_middlewares
+    });
+
+    /**
+     * @module
+     * @desc     L-System(L系统): 一种并行重写系统和一种形式语法
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-09-11
+     * @version  0.1.0
+    */
+
+
+    /** L系统 */
+    class LSystem {
+
+        /**
+         * @classdesc L系统: 一种并行重写系统和一种形式语法
+         * 
+         * @property { string } S - 系统起始状态(公理)
+         * @property { string } V - 符号表(终结符号&非终结符)
+         * @property { object } P - 生成式
+         * @property { object } ops - 符号->行为映射表
+         * 
+         * @param { string } S - 系统起始状态(公理)
+         * @param { string } V - 符号表(终结符号&非终结符)
+         * @param { object } P - 生成式
+         * @param { object } ops - 符号->行为映射表
+         * 
+         * @example
+         * ls = new LSystem({
+         *      "S": "A",
+         *      "V": ["A", "B", "[", "]"],
+         *      "P": {
+         *          "A": "B[A]A",
+         *          "B": "BB"
+         *      },
+         *      "ops": {
+         *          "A": (st) => {
+         *              canvas.line(st.p.clone(), st.p.add(st.v));
+         *          },
+         *          "B": (st) => {
+         *              canvas.line(st.p.clone(), st.p.add(st.v));
+         *          },
+         *          "[": (st) => {
+         *              st.stack.unshift([st.p.clone(), st.v.clone()]);
+         *              st.v.rotate(st.rad);
+         *          },
+         *          "]": (st) => {
+         *              let status = st.stack.shift();
+         *              st.p = status[0], st.v = status[1];
+         *              st.v.rotate(-st.rad);
+         *          }
+         *      }
+         *  });
+         * 
+         */
+        constructor({S="", V=[], P={}, ops={}} = {}) {
+            this.S = S;
+            this.V = V;
+            this.P = P;
+            this.ops = ops;
+        }
+
+        /**
+         * 迭代: 根据生成式生成下一代语句
+         * @param { string } s - 语句 
+         * @returns { string } 下一代语句
+         */
+        next(s=this.S) {
+            let _s = "";
+            for(let i=0, n=s.length; i<n; i++) {
+                _s += (s[i] in this.P ? this.P[s[i]] : s[i]);
+            }
+            return _s;
+        } 
+
+        /**
+         * 推导(重复迭代): 根据生成式从公理出发推导到第n代语句
+         * @param { number } n - 迭代代数(int & n>=0)
+         * @returns { string } 推导出的语句
+         */
+        gen(n=0) {
+            let s = this.S;
+            for(let i=0; i<n; i++) {
+                s = this.next(s);
+            }
+            return s;
+        }
+
+        /**
+         * 推导(迭代器): 以迭代器的形式进行推导，用于输出中间代语句
+         * @param { number } n - 迭代代数(int & n>=0)
+         * @returns { Iterator } 迭代器
+         * @example
+         * it = ls.iter(5);
+         * it.next().value;
+         */
+        *iter(n=0) {
+            let s = this.S;
+            for(let i=0; i<n; i++) {
+                s = this.next(s);
+                yield s;
+            }
+        }
+
+        /**
+         * 绘制/行动: 根据语句和ops进行绘制
+         * @param { string } s - 语句 
+         * @param { Object } status - 状态表
+         * @returns { Object } 状态表
+         * @example
+         * ls.act(ls.gen(5), {
+         *     "p": new Vector(canvas.cx, canvas.height),
+         *     "v": new Vector(0, -10),
+         *     "rad": Tools.ATR(45),
+         *     "stack": []
+         *  })
+         */
+        act(s, status) {
+            for(let i=0, n=s.length; i<n; i++) {
+                (s[i] in this.ops) && this.ops[s[i]](status);
+            }
+            return status;
+        }
+
+        /*----------------------------------------
+        @func: 绘制/行动(迭代器模式)
+        @exp: 
+            act_it = ls.act(ls.gen(3), {
+                "p": new Vector(canvas.cx, canvas.height),
+                "v": new Vector(0, -1),
+                "rad": Tools.ATR(25),
+                "stack": []
+            });
+            act_it.next();
+        ----------------------------------------*/
+
+        /**
+         * 绘制/行动(迭代器模式)
+         * @param { string } s - 语句 
+         * @param { Object } status - 状态表
+         * @returns { Iterator } 迭代器
+         * @example
+         * act_it = ls.act(ls.gen(3), {
+         *     "p": new Vector(canvas.cx, canvas.height),
+         *     "v": new Vector(0, -1),
+         *     "rad": Tools.ATR(25),
+         *     "stack": []
+         * });
+         * act_it.next();
+         */
+        *actIter(s, status) {
+            for(let i=0, n=s.length; i<n; i++) {
+                yield (s[i] in this.ops) && this.ops[s[i]](status);
+            }
+        }
+
+    }
+
+    /**
+     * @module
+     * @desc     曼德勃罗特集
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-12-06
+     * @version  0.1.0
+    */
+
+
+    /** 复数 */
+    class Complex {
+
+        /**
+         * @classdesc 复数: 实现复数计算
+         * 
+         * @property { number } r - 实部
+         * @property { number } i - 虚部
+         * 
+         * @param { number } r - 实部
+         * @param { number } i - 虚部
+         * 
+         * @example
+         * let c = new Complex(1, 1);
+         */
+        constructor(r, i) {
+            //实部
+            this.r = r;
+            //虚部
+            this.i = i;
+        }
+
+        /**
+         * 复数加法
+         * @param { Complex } 操作数 
+         * @returns { Complex } this
+         */
+        add(complex) {
+            this.r += complex.r;
+            this.i += complex.i;
+            return this;
+        }
+
+        /**
+         * 复数乘法: (a+bi)(c+di)=(ac-bd)+(bc+ad)i
+         * @param { Complex } 操作数 
+         * @returns { Complex } this
+         */
+        mult(complex) {
+            let a = this.r, b = this.i, c = complex.r, d = complex.i;
+            this.r = a * c - b * d;
+            this.i = b * c + a * d;
+            return this;
+        }
+
+        /**
+         * 计算模长
+         * @returns { number } 模长
+         */
+        norm() {
+            return Math.sqrt(this.r * this.r + this.i * this.i);
+        }
+
+    }
+
+
+    /**
+     * 曼德勃罗特集: Z(n+1) = Z(n) ^ 2 + C
+     * 
+     * 判断给定参数(C)经过有限次迭代是否收敛
+     * 
+     * @param { Complex } C - 复数参数 
+     * @param { number } n - 迭代次数(int&n>0)
+     * 
+     * @returns { Array } [是否属于该集合, 迭代次数]
+     * 
+     * @example
+     * Mandelbrot_Set(new Complex(0, 0)) -> [true, n]
+     */
+    const Mandelbrot_Set = function(C, n=500) {
+        let z = new Complex(0, 0);
+        for(let i=0; i<=n; i++) {
+            z = z.mult(z).add(C);
+            if(z.norm() > 2) {
+                return [false, i];
+            }
+        }
+        return [true, n]
+    };
+
+
+    /**
+     * 朱利亚集: Z(n+1) = Z(n) ^ 2 + C
+     * 
+     * 固定参数C, 判断Z0是否在有限次迭代后收敛
+     * 
+     * @param { Complex } Z0 - 初始迭代参数 
+     * @param { Complex } C - 固定复数参数
+     * @param { number } n - 迭代次数(int&n>0)
+     * 
+     * @returns { Array } [是否属于该集合, 迭代次数]
+     * 
+     * @example 
+     * Julia_Set(new Complex(0, 0), new Complex(-0.8, 0.156)) -> [true, n]
+     */
+    const Julia_Set = function(Z0, C, n=500) {
+        let z = Z0;
+        for(let i=0; i<=n; i++) {
+            z = z.mult(z).add(C);
+            if(z.norm() > 2) {
+                return [false, i];
+            }
+        }
+        return [true, n]
+    };
+
+    /**
+     * @module
+     * @desc     邻近搜索算法: 在向量集中搜索给定目标向量的邻近集 
+     * @project  Vision
+     * @author   Ais
+     * @date     2023-01-30
+     * @version  0.1.0
+    */
+
+
+    /** 邻近搜索算法(基类) */
+    class NearestNeighborSearch {
+
+        /**
+         * @classdesc 邻近搜索算法模块，用于在向量集中搜索给定目标向量的邻近元素集
+         * 
+         * @property { Object[] } ps - 对象集，算法基于该属性进行数据结构的构建与邻近集的计算
+         * @property { callable } vect - 向量提取器(可调用对象), 用于从对象中提取向量作为算法处理单元
+         * @property { bool } IS_LOOP_BORDER - 循环边界标记, 用于标记算法是否在循环边界下进行计算
+         * 
+         * @param { Object[] } ps - 对象集 
+         * @param { callable } vect - 向量提取器
+         * 
+         * @example
+         * let NNS = new NearestNeighborSearch(ps, function(particle){return particle.p;});
+         * 
+         * @question 怎样让算法模块支持其他距离计算方式
+         * NNS(NearestNeighborSearch)算法模块通过 "vect" 属性从对象中提取出一个向量对象(Vector)
+         * 作为算法的计算处理单元，默认情况下通过 "Vector.dist" 计算的是欧式距离，为了使算法模块支持
+         * 其他的距离计算类型(比如曼哈顿距离)，可以从 "Vector" 类派生一个子类，并重写 "dist" 方法来实现。
+         */
+        constructor(ps, vect) {
+            /**
+             * 向量提取器
+             * 给定一个对象，从中提取出向量对象(Vector)作为算法的处理单元
+             * 设计该属性的目的是为了提高模块可处理对象的适应性，并让算法的处理单元统一成向量对象。
+             * @param { Object } obj - 处理对象
+             * @returns { Vector } 对象的某个向量属性
+             * @example this.vect = function(particle_obj) { return particle_obj.p }
+             */
+            this.vect = vect || function(obj) { return obj; };
+            this.ps = ps;
+            this.IS_LOOP_BORDER = false;
+        }
+
+        /**
+         * 构建算法的数据结构  
+         * 更新 this.ps 属性并基于对象集(ps)构建算法数据结构，主要用于使用数据结构(状态)进行邻近集计算的算法实现，当ps的状态发生变化时，通过该方法重新构建内部数据结构。
+         * 
+         * @param { Object[] } [ps=null] ps -  对象集
+         * @returns { NearestNeighborSearch } this
+         * @example 
+         * let NNS = new NearestNeighborSearch(ps).build();
+         * let NNS = new NearestNeighborSearch().build(ps);
+         */
+        build(ps=null) {
+            this.ps = ps || this.ps;
+            return this;
+        }
+
+        /**
+         * 生成距离(dist)邻近集: 根据距离(dist)计算目标对象(tp)在对象集(ps)中的邻近集
+         * 
+         * @param { Object } tp - 目标对象(与对象集(ps)中的元素类型一致，或者具有必要属性(从鸭子类型的观点来看))
+         * @param { number } dist - 算法的判定距离(dist>=0)
+         * @returns { Object[] } 邻近集([ps[i], ps[k], ps[j], ...])
+         * @example let ns = new NearestNeighborSearch(ps).near(tp, 100);
+         */
+        near(tp, dist) {
+            return [];
+        }
+
+        /**
+         * 生成"k"邻近集: 给定目标对象(tp), 计算在对象集(ps)中, 离"tp"最近的"k"个元素
+         * 
+         * @param { Object } tp - 目标对象
+         * @param { number } k - k个最近的元素(k >= nps.length)
+         * @returns { Object[] } 邻近集([ps[i], ps[k], ps[j], ...])
+         * @example let ns = new NearestNeighborSearch(ps).k_near(tp, 5);
+         */
+        k_near(tp, k) {
+            return [];
+        }
+
+        /**
+         * 计算对象集的邻近集: 计算给定对象集中每个元素的邻近集
+         * 
+         * @param { number } d - dist or k, 根据模式确定
+         * @param { enum } mode - "dist" || "k" 
+         * @returns { Object[] } 邻近集([{"tp": ps[i], "nps": [...]}, ...])
+         * @example
+         * let ns = new NearestNeighborSearch(ps).nps(100);
+         * let ns = new NearestNeighborSearch(ps).nps(5, "k");
+         * 
+         * @todo 计算结构优化
+         */
+        nps(d, mode="dist") {
+            //@ERR: 该方式将导致"this"的隐式绑定丢失, 从而导致目标方法(near || k_near)被调用时，无法引用 this.vect 属性。
+            // let _near = (mode=="dist" ? this.near : this.k_near);
+            let _near = (mode=="dist" ? this.near : this.k_near).bind(this);
+            let np_set = [];
+            for(let i=0, n=this.ps.length; i<n; i++) {
+                let _nps = _near(this.ps[i], d);
+                (_nps.length > 0) && np_set.push({"tp": this.ps[i], "nps": _nps});
+            }
+            return np_set;
+        }
+
+        /**
+         * 将邻近集转换成图结构
+         * 
+         * @param { Object[] } nps - 邻近集 
+         */
+        static toGraph(nps) {
+            return ;
+        }
+    }
+
+
+    //线性邻近搜索
+    class LinearNNS extends NearestNeighborSearch {
+
+        /**
+         * @classdesc 线性邻近搜索，通过遍历对象集(ps)来计算目标对象(tp)的邻近集
+         * 
+         * @description 
+         * 由于该算法结构简单，并且不要维护内部数据结构支撑算法计算(无状态)，因此适用于 ps 对象动态变化的场景，
+         * 比如可以在 boids 算法中用来计算邻近视野中的对象。但是缺点也很明显，算法的计算量依赖于 ps 的规模，
+         * 当 ps 规模过大时，算法效率会很低。
+         * 
+         * @param { Object[] } ps - 对象集 
+         * @param { callable } vect - 向量提取器
+         * @example let LNNS = new LinearNNS(ps, function(particle){return particle.p;});
+         */
+        constructor(ps, vect) {
+            super(ps, vect);
+        }
+
+        /**
+         * dist邻近集
+         * 
+         * @override
+         * @param { Object } tp - 目标对象 
+         * @param { number } dist - 判定距离(dist>=0)
+         * @param { Object[] } [ps=null] ps - 对象集，该参数将覆盖 this.ps 进行计算 
+         * @returns { Object[] } 邻近集([ps[i], ps[k], ps[j], ...])
+         */
+        near(tp, dist, ps=null) {
+            ps = ps || this.ps;
+            let tp_v = this.vect(tp), nps = [];
+            for(let i=0, n=ps.length; i<n; i++) {
+                (!(tp === ps[i]) && tp_v.dist(this.vect(ps[i])) <= dist) && nps.push(ps[i]);
+            }
+            return nps;
+        }
+
+        /**
+         * k邻近集
+         * 
+         * @override
+         * @param { Object } tp - 目标对象 
+         * @param { number } k - k个最近的元素(k >= nps.length)
+         * @param { Object[] } [ps=null] ps - 对象集，该参数将覆盖 this.ps 进行计算 
+         * @returns { Object[] } 邻近集([ps[i], ps[k], ps[j], ...])
+         */
+        k_near(tp, k, ps=null) {
+            ps = ps || this.ps;
+            let tp_v = this.vect(tp), dist_ps = [];
+            for(let i=0, n=ps.length; i<n; i++) { 
+                if(tp === ps[i]) { continue; }
+                //计算当前元素与目标元素的距离
+                let dist = tp_v.dist(this.vect(ps[i]));
+                if(dist_ps.length == 0) {
+                    dist_ps.push({"dist": dist, "p": ps[i]});
+                    continue;
+                }
+                //当前元素距离小于邻近集中的最大距离(插入排序)
+                if(dist < dist_ps[dist_ps.length-1].dist || dist_ps.length < k) {
+                    for(let j=dist_ps.length-1; j>=0; j--) {
+                        if(dist>=dist_ps[j].dist) {
+                            dist_ps.splice(j+1, 0, {"dist": dist, "p": ps[i]});
+                            break;
+                        }
+                        //邻近集中的最小距离
+                        if(j==0) {
+                            dist_ps.splice(0, 0, {"dist": dist, "p": ps[i]});
+                        }
+                    }
+                    (dist_ps.length > k) && dist_ps.pop(); 
+                }
+            }
+            //格式化
+            let nps = [];
+            for(let i=0; i<dist_ps.length; i++) {
+                nps.push(dist_ps[i].p);
+            }
+            return nps;
+        }
+
+    }
+
+
+    //网格邻近搜索
+    class GridNNS extends LinearNNS {
+
+        /**
+         * @classdesc 网格邻近搜索，基于 LinearNNS 算法进行优化
+         * 
+         * @description
+         * 算法的基本思路是将目标数据(ps)的向量空间划分成网格，网格中的单元格尺寸为 *dn*, 单元格维度取决于
+         * 目标数据维度。通过将目标数据(ps)映射到网格空间中的位置矢量，来存储目标数据对象。在这种映射下，
+         * 位置间距小于单元格对角线长度(最大距离)的对象会存储在相同的单元格(或邻近的单元格)，在进行邻近搜索时，
+         * 将目标对象(tp)映射到网格空间坐标，并直接读取该单元格(或半径R内邻近单元格)中存储的对象。得到一个近似邻近集，
+         * 再对这个近似解进行精确搜索。以减少 LinearNNS 算法中的无效计算。
+         * GridNNS 算法有以下特征:
+         * 1. "dn" 参数对算法的影响:  
+         *     "dn"参数越小，算法所需的存储空间越大，"dn"参数越大，算法的计算量越接近 LinearNNS 算法。
+         *     当 dn 大于等于目标数据边界大小的情况下，退化成 LinearNNS 算法。
+         * 2. 动态数据:   
+         *     相对于 LinearNNS 算法，该算法是一个具有内部状态的算法，因此在 "ps" 变动的场景下，需要通过 "build" 方法更新内部状态。
+         * 3. 有限空间:   
+         *     该算法适用于数据集聚集在一个有限空间下，当数据集中离散点过多，会导致更多的存储空间开销。
+         * 4. 数据集分量范围限制:  
+         *     对于数据集的 dsr(数据集分量范围) 不能为负数，因为在将数据的向量坐标映射到存储容器索引时，存储容器的索引范围是 [0, N+)，因此数据集中的
+         *     向量分量不能为负数。但是可以通过对数据集进行整体平移来解决该限制。这是由于在采用欧式距离计算的情况下，该邻近搜索算法具有"平移不变性"，
+         *     即对数据集整体平移一个向量(v)，给定目标向量(同时进行平移操作)的邻近集不变。
+         * 5. 边界条件:   
+         *     当目标数据在 dsr(数据集分量范围) 外时，算法需要对该情况进行特殊处理。
+         * 
+         * 
+         * @property { number } dn - 网格单元大小(int & dn>0)
+         * @property { number[] } dsr - 数据集分量范围([min, max])，其长度等于数据集向量维度。每个单元代表数据集对应的分量范围
+         * @property { Vector } dst - 数据集非负平移量，用于解决"数据集分量范围限制"，基于 dsr 构建。在存储数据到 grid 容器时，需要对目标数据进行平移操作
+         * @property { number[] } size - 网格容器尺寸(像素坐标)，要划分成网格的原始空间尺寸
+         * @property { GridNNS.GridContainer } grid - 网格数据存储容器，为算法提供数据结构支撑
+         * 
+         * @param { Object[] } ps - 对象集 
+         * @param { callable } vect - 向量提取器
+         * @param { number } [dn=100] - 网格单元大小
+         * @param { number[] } [dsr=null] - 数据集分量范围
+         * 
+         * @example
+         * let GNNS = new GridNNS(ps, function(particle){return particle.p;}, 150).build();
+         * let GNNS = new GridNNS(ps, function(particle){return particle.p;}, 150, [0, canvas.width, 0, canvas.height]).build();
+         */
+        constructor(ps, vect, dn=100, dsr=null) {
+            super(ps, vect);
+            this.dn = dn;
+            this.dsr = dsr;
+            this.dst = null;
+            this.size = null;
+            this.grid = null;
+        }
+
+        /**
+         * 网格数据存储容器构造器
+         * @param { number } dn - 网格单元大小(int & dn>0) 
+         * @param { number[] } size - 网格容器尺寸
+         * @returns { GridNNS.GridContainer } 网格数据存储容器
+         */
+        static GridContainer(dn, size) {
+
+            /** 网格数据存储容器构造器 */
+            class GridContainer {
+
+                /**
+                 * @classdesc 网格数据存储容器，为 "GridNNS" 算法提供数据结构支撑
+                 * 
+                 * @description
+                 * * 数据结构设计:  
+                 * 该数据容器通过一维数组(实际存储结构)来模拟高维数组(逻辑存储结构)。
+                 * 内部采用一个映射算法(index), 将高维数组坐标映射到实际存储结构的一维数组索引。
+                 * 之所以采用"坐标映射索引"而不是"数组下标索引"的原因在于，"数组下标索引"无法适配
+                 * 高维数据的场景，对于二维数组来说，需要通过 "arr[y][x]" 这种硬编码的方式进行数据
+                 * 的访问，但是当维数变化时，该方式就不适用了，比如三维数组(arr[z][y][x])。
+                 * * 坐标映射算法设计:  
+                 * 设   
+                 *     ds = [x, y, z, ...] 为高维数组(逻辑存储结构)的尺寸，  
+                 *     p  = [x, y, z, ...] 为高维数组上数据的坐标向量    
+                 * 则 index(dim) 坐标映射索引函数的递归结构如下:  
+                 *     index(1) -> p[x]  
+                 *     index(2) -> (ds[x] * p[y]) + index(1)   
+                 *              -> (ds[x] * p[y]) + p[x]  
+                 *     index(3) -> (ds[x] * ds[y] * p[z]) + index(2)   
+                 *              -> (ds[x] * ds[y] * p[z]) + (ds[x] * p[y]) + p[x]  
+                 *     ...  
+                 * 由上述归纳可得:  
+                 *     index(n) -> (1 * ds[x] * ... * ds[n-1]) * p[n-1] + index(n-1)  
+                 * FIN  
+                 * 
+                 * @property { number } dn - 网格单元大小(int & dn>0) 
+                 * @property { number[] } size - 原始空间尺寸(像素坐标)，要划分成网格的原始空间尺寸。
+                 * @property { number[] } dsize - 网格空间尺寸(网格坐标)
+                 * @property { number } length - 存储容器长度(int & length>0)
+                 * @property { Array } _data - 存储容器(一维数组)
+                 * @property { Array } _cache_ds - 计算缓存: 维度-尺寸系数，用于根据向量位置坐标计算存储容器索引的计算缓存
+                 * @property { Array } _cache_gns - 计算缓存: 网格邻域坐标集(r=1)，用于缓存网格邻域坐标集
+                 * 
+                 * @param { number } dn - 网格单元大小(int & dn>0) 
+                 * @param { number[] } size - 网格容器尺寸
+                 * 
+                 * @example let grid = GridNNS.GridContainer(10, [1920, 1080]);
+                 */
+                constructor(dn, size) {
+                    this.dn = dn;
+                    this.size = size;
+                    this.dsize = [];
+                    //存储容器长度
+                    this.length = 1;
+                    //计算存储容器尺寸
+                    for(let i=this.size.length; i--; ) {
+                        let di = Math.ceil(this.size[i]/this.dn) + 1;
+                        this.length *= di; this.dsize[i] = di;
+                    }
+                    //构建存储容器(一维数组容器，映射到虚拟高维数组)
+                    this._data = new Array(this.length);
+                    /** @private */
+                    this._cache_ds = null;
+                    /** @private */
+                    this._cache_gns = this.gns(this.dsize.length, 1);
+                }
+
+                /**
+                 * 将数据集向量映射到网格空间坐标
+                 * 
+                 * @param { Vector } vector - 数据集向量
+                 * @returns { Vector } 对应的网格空间坐标
+                 */
+                toGrid(vector) {
+                    let v = [];
+                    for(let i=0, n=vector.dim(); i<n; i++) {
+                        v[i] = Math.ceil(vector.v[i]/this.dn);
+                    }
+                    return new Vector$1(...v);
+                }
+
+                /**
+                 * 坐标映射算法: 计算网格空间坐标(逻辑存储结构)对应存储容器的索引(实际存储结构)
+                 * 
+                 * @param { Vector } vector - 网格空间坐标向量
+                 * @returns { number } 存储容器索引(int & >=0)
+                 */
+                index(vector) {
+                    /* 
+                    //递归实现 
+                    //n(维数) | ds(dsize) | p(坐标向量)
+                    let _index = function(n, ds, p) {
+                        if(n==1) {
+                            return p[0];
+                        } else {
+                            let k = 1;
+                            for(let i=0; i<n-1; i++) { k*=ds[i]; }
+                            return (k * p[n-1]) + _index(n-1, ds, p);
+                        }
+                    } 
+                    */
+                    //计算缓存优化: 维度-尺寸系数
+                    if(!this._cache_ds) {
+                        this._cache_ds = [1];
+                        for(let i=0, n=this.dsize.length-1, k=1; i<n; i++) {
+                            k *= this.dsize[i];
+                            this._cache_ds.push(k);
+                        }
+                    }
+                    //计算索引
+                    let i = 0;
+                    for(let k=vector.dim(); k--; ) {
+                        i += (this._cache_ds[k] * vector.v[k]);
+                    }
+                    return i;
+                }
+
+                /**
+                 * 计算网格邻域坐标集: 根据"维数"和"邻域半径"计算网格空间的邻域坐标集   
+                 * 网格邻域坐标集生成算法如下:  
+                 * * dim(1):   
+                 *     [  
+                 *         [-1], [0], [1]  
+                 *     ]  
+                 * * dim(2):  
+                 *     [  
+                 *         [-1, -1], [-1, 0], [-1, 1],  
+                 *         [ 0, -1], [ 0, 0], [ 0, 1],  
+                 *         [ 1, -1], [ 1, 0], [ 1, 1],   
+                 *     ]  
+                 * 由上述归纳可知:   
+                 *     dim(n) = (dim(1) x dim(1)) ^ (n-1)  
+                 * 其中 x 为笛卡尔积运算，  
+                 * 即  
+                 *     以 dim(1) 为基，与其自身进行 n 次笛卡尔积运算。  
+                 * 设 r 为邻域半径，则基的定义如下  
+                 *     base = [-r, -r+1, -r+2, ..., 0, 1, 2, r]  
+                 * 则有   
+                 *     dim(n) = (base x base) ^ (n-1)  
+                 * FIN  
+                 * 
+                 * @param { number } dim - 网格坐标维数(int & dim>0)
+                 * @param { number } r - 邻域半径(int & r>=1)
+                 * @returns { Vector[] } 网格邻域坐标集
+                 */
+                gns(dim, r=1) {
+                    //笛卡尔积
+                    let cartesian_product = function(a, b) {
+                        let ps = [];
+                        for(let i=0, endi=a.length; i<endi; i++) {
+                            for(let k=0, endk=b.length; k<endk; k++) {
+                                ps.push([...a[i], ...b[k]]);
+                            }
+                        }
+                        return ps;
+                    };
+                    //生成基坐标
+                    let base = [];
+                    for(let i=-r; i<=r; i++) { base.push([i]); }
+                    //生成网格邻域集
+                    let _gns = base;
+                    for(let i=0; i<dim-1; i++) { _gns = cartesian_product(_gns, base); }
+                    return _gns;
+                }
+
+                /**
+                 * 存储数据: 在原始坐标向量(p)映射的网格坐标位置存储值(val)
+                 * 
+                 * @param { Vector } p - 原始坐标向量
+                 * @param { Object } val - 数据值 
+                 * @returns { boolean } 操作状态
+                 */
+                set(p, val) {
+                    let i = this.index(this.toGrid(p));
+                    if(i<0 || i>this.length) { return false; }
+                    if(this._data[i]) {
+                        this._data[i].push(val);
+                    } else {
+                        this._data[i] = [val];
+                    }
+                    return true;
+                }
+
+                /**
+                 * 获取数据: 获取原始坐标向量(p)映射的网格坐标位置的邻域半径(r)内的数据对象
+                 * 
+                 * @param { Vector } p - 原始坐标向量 
+                 * @param { number } [r=0] 邻域半径(int & r>=0)
+                 * @returns { Object[] } 数据对象列表
+                 */
+                get(p, r=0) {
+                    //网格中心坐标
+                    let po = this.toGrid(p);
+                    //返回网格中心坐标位置的数据
+                    if(r <= 0) { 
+                        return this._data[this.index(po)] || []; 
+                    }
+                    //生成网格邻域坐标集
+                    let _gns = r==1 ? this._cache_gns : this.gns(p.dim(), r);
+                    //遍历网格邻域坐标集获取数据对象
+                    let data = [];
+                    for(let k=0, n=_gns.length; k<n; k++) {
+                        let i = this.index(new Vector$1(..._gns[k]).add(po));
+                        data = [...data, ...(this._data[i] || [])];
+                    }
+                    return data;
+                }
+            }
+            return new GridContainer(dn, size);
+        }
+
+        /**
+         * 构建算法的数据结构: 将数据集存储到网格容器中
+         * 
+         * @override
+         * 
+         * @param { Object[] } [ps=null] ps -  对象集 
+         * @returns { Object } this
+         */
+        build(ps=null) {
+            //数据集
+            this.ps = ps || this.ps;
+            //计算数据集分量范围
+            if(this.dsr==null) {
+                //计算边界向量(由数据集向量分量范围构建)
+                let max = this.vect(this.ps[0]).clone(), min = max.clone();
+                for(let i=1, n=this.ps.length; i<n; i++) {
+                    let p = this.vect(this.ps[i]);
+                    for(let k=0, end=p.v.length; k<end; k++) {
+                        if(max.v[k] < p.v[k]) { max.v[k] = p.v[k]; }
+                        if(min.v[k] > p.v[k]) { min.v[k] = p.v[k]; }
+                    }
+                }
+                this.dsr = [];
+                for(let i=0; i<min.v.length; i++) {
+                    this.dsr[i] = [min.v[i], max.v[i]];
+                }
+            }
+            //计算数据集网格容器尺寸(this.size)与数据集非负平移量(this.dst)
+            this.size = [], this.dst = [];
+            for(let i=0, n=this.dsr.length; i<n; i++) {
+                this.size[i] = this.dsr[i][1] - this.dsr[i][0];
+                this.dst[i] = this.dsr[i][0] < 0 ? -this.dsr[i][0] : 0;
+            }
+            this.dst = new Vector$1(...this.dst);
+            //构建网格数据存储容器
+            this.grid = GridNNS.GridContainer(this.dn, this.size);
+            //将数据集存储到网格容器中
+            for(let i=0, n=this.ps.length; i<n; i++) {
+                this.grid.set(this.vect(this.ps[i]).clone().add(this.dst), this.ps[i]);
+            }
+            return this;
+        }
+
+        /**
+         * dist邻近集
+         * 
+         * @override
+         * @param { Object } tp - 目标对象 
+         * @param { number } dist - 判定距离(dist>=0)
+         * @returns { Object[] } 邻近集([ps[i], ps[k], ps[j], ...])
+         */
+        near(tp, dist) {
+            //计算网格邻域半径
+            let R = Math.ceil(dist/this.dn);
+            //计算网格近似邻近集
+            let gnps = this.grid.get(this.vect(tp).clone().add(this.dst), R);
+            //计算临近集
+            return super.near(tp, dist, gnps);
+        }
+
+        /**
+         * k邻近集: 当数据集离散程度较大时，在极端情况下，该算法的计算效率要低于 "LinearNNS.k_near"。
+         * 
+         * @override
+         * @param { Object } tp - 目标对象 
+         * @param { number } k - k个最近的元素(k >= nps.length)
+         * @returns { Object[] } 邻近集([ps[i], ps[k], ps[j], ...])
+         * 
+         * @todo 计算优化，网格坐标系环形单元格坐标计算算法
+         */
+        k_near(tp, k) {
+            //计算最大网格半径
+            let max_R = Math.max(...this.grid.dsize), R = 1;
+            //计算网格近似邻近集
+            let gnps = [];
+            while(gnps.length<k && R<=max_R) {
+                gnps = this.grid.get(this.vect(tp).clone().add(this.dst), R++);
+            }
+            gnps = this.grid.get(this.vect(tp).clone().add(this.dst), Math.min(R+1, max_R));
+            //计算临近集
+            return super.k_near(tp, k, gnps);
+        }
+    }
+
+
+    //KD树-邻近搜索
+    class KDTreeNNS extends NearestNeighborSearch {
+
+    }
+
+    var NNS = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        GridNNS: GridNNS,
+        KDTreeNNS: KDTreeNNS,
+        LinearNNS: LinearNNS,
+        NearestNeighborSearch: NearestNeighborSearch
+    });
+
+    /**
+     * @module
+     * @desc     optimum solution solver(最优解通用求解器): 一种简化的PSO算法，给定一个目标函数，计算该函数的数值最优解
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-07-11
+     * @version  0.1.0
+    */
+
+
+    /** 局部最优解求解器 */
+    class Solver extends Particle {
+
+        /**
+         * @classdesc 局部最优值求解器: 通过迭代来求解指定域下目标函数的局部最优解
+         * 
+         * @property { Function } tfunc - 目标函数
+         * @property { Array[] } dod - 求解域(定义域的子域)
+         * @property { string } val_type - 最优值类型("min"|"max")
+         * @property { Vector } p - 局部最优解坐标
+         * @property { number } val - 最优值
+         * @property { Vector[] } vs - 速度集(临近坐标集)
+         *  
+         * @param { Function } tfunc - 目标函数 
+         * @param { Vector } ps - 初始坐标 
+         * @param { string } val_type - 最优值类型
+         * 
+         */
+        constructor(tfunc, ps, val_type="min") {
+            super();
+            this.tfunc = tfunc;
+            this.dod = [];
+            this.val_type = val_type;
+            this.p = ps;
+            this.val = (this.val_type == "min" ? Infinity : -Infinity);
+            this.vs = [];
+            //停机状态
+            this._END = false;
+        }
+
+        /** 迭代求值 */
+        action() {
+            if(!this._END) {
+                let _END = true;
+                for(let i=0, end=this.vs.length; i<end; i++) {
+                    //计算目标函数值
+                    let _pv = Vector$1.add(this.p, this.vs[i]);
+                    let _val = this.tfunc(_pv);
+                    //移动到最优解坐标
+                    if((this.val_type=="min" && _val <= this.val) || (this.val_type=="max" && val >= this.val)) {
+                        this.val = _val; this.p = _pv;
+                        _END = false;
+                    }
+                    //停机(超过求解域)
+                    if(!_pv.in(this.dod)) { _END = true; }
+                }
+                this._END = _END;
+            }
+            return this.p;
+        }
+
+        /** 停机 */
+        isEnd() { return this._END; }
+    }
+
+
+    /** 求解器集群 */
+    class OptimumSolutionSolvers {
+
+        /**
+         * @classdesc 求解器集群: 通过在求解域上均匀分布的求解器来求解全局最优值  
+         * 
+         * @description   
+         * 算法思路:
+         * 给定一个目标函数f(x), 其中x是定义域为R*n的向量。现在构造一个求解器s(solver), solver有一个临近坐标集，
+         * 这个集合是其每次迭代后的可能位置。solver在每次迭代时从中选取f(x)的最优解进行移动，直到停机(当临近集中
+         * 的所有值都不是最优时停机)。   
+         * 通过上述算法构建的solver求解的可能是局部最优解。为了应对这种情况，可能通过构建一个求解器集群来避免。
+         * 通过随机生成solver的初始位置，让N个solver均匀分布在定义域上。但这N个solver停机时，从中选择一个
+         * 最优解作为全局最优解。
+         * 
+         * @property { number } n - 求解器数量
+         * @property { Solver[] } - 求解器集群
+         * @property { number } count - 迭代计数器, 用于控制迭代次数
+         * @property { Function } tfunc - 目标函数
+         * @property { Array[] } dod - 求解域(定义域的子域)
+         * @property { Vector[] } vs - 速度集(临近坐标集)
+         * @property { number } [vsd=1] - 求解器速度集步长
+         * @property { string } val_type - 最优值类型("min"|"max")
+         * @property { Vector } os_p - 全局最优值坐标
+         * @property { number } os_val - 全局最优值
+         * 
+         */
+        constructor() {
+            this.n = 30;
+            this.solvers = [];
+            this.count = Infinity;
+            this.tfunc = null;
+            this.dod = [];
+            this.vs = null;
+            this.vsd = 1;
+            this.val_type = "min";
+            this.os_p = null;
+            this.os_val = null;
+            //停机状态
+            this._END = false;
+        }
+
+        /** 初始化求解器 */
+        init() {
+            //最优解初始值
+            this.os_val = (this.val_type == "min" ? Infinity : -Infinity);
+            //构建速度集
+            if(this.vs == null) {
+                this.vs = [
+                    new Vector$1(-1, -1).norm(this.vsd), new Vector$1(0, -1).norm(this.vsd), new Vector$1(1, -1).norm(this.vsd),
+                    new Vector$1(-1, 0).norm(this.vsd),                                    new Vector$1(1, 0).norm(this.vsd),
+                    new Vector$1(-1, 1).norm(this.vsd),  new Vector$1(0, 1).norm(this.vsd),  new Vector$1(1, 1).norm(this.vsd),
+                ];
+            }
+            //构建求解器
+            for(let i=0; i<this.n; i++) {
+                let _solver = new Solver(this.tfunc, Vector$1.random(this.dod), this.val_type);
+                _solver.dod = this.dod; _solver.vs = this.vs;
+                this.solvers.push(_solver);
+            }
+        }
+        
+        /** 迭代求值 */
+        next() {
+            if(this._END || this.count<0) {
+                this._END = true;
+                return this.os_p;
+            }
+            let _END = true;
+            for(let i=0, end=this.solvers.length; i<end; i++) {
+                this.solvers[i].action();
+                _END = _END & this.solvers[i].isEnd();
+                if((this.val_type=="min" && this.solvers[i].val <= this.os_val) || (this.val_type=="max" && this.solvers[i].val >= this.os_val)) {
+                    this.os_val = this.solvers[i].val; this.os_p = this.solvers[i].p;
+                }
+            }
+            this._END = _END;
+            this.count--;
+            return this.os_p;
+        }
+
+        /** 停机状态 */
+        isEnd() { return this._END; }
+    }
+
+    var __index__$4 = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        Complex: Complex,
+        Julia_Set: Julia_Set,
+        LSystem: LSystem,
+        Mandelbrot_Set: Mandelbrot_Set,
+        NNS: NNS,
+        OptimumSolutionSolvers: OptimumSolutionSolvers,
+        boids: Boids
+    });
+
+    /**
+     * @module
+     * @desc     HTML5 Canvas API: 对canvas接口进行二次封装
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-07-05
+     * @version  0.1.0
+    */
+
+
+    class Canvas {
+
+        /**
+         * @classdesc Canvas API 对象封装
+         * 
+         * @property { Element } canvas - canvas元素
+         * @property { number } width - 画布长度
+         * @property { number } height - 画布高度
+         * @property { number } cx - 画布中心点x轴坐标
+         * @property { number } cy - 画布中心点y轴坐标
+         * @property { Object } ctx - 2D绘图上下文对象
+         * @property { string } BGC - 背景色
+         * @property { Object } POINT - 绘制点样式
+         * @property { Object } [POINT.R=2] - 点大小(半径)
+         * @property { Object } [POINT.C="#FFFFFF"] - 点颜色
+         * @property { string } colorStyle - strokeStyle && fillStyle
+         * 
+         * @param { string } canvas_id - canvas元素id 
+         * @param { number } width - 画布长度 
+         * @param { number } height - 画布高度 
+         * @param { string } [BGC='rgb(50, 50, 50)'] - 背景色
+         * 
+         * @example const canvas = new Canvas("vision_canvas", 3840, 2160);
+         */
+        constructor(canvas_id, width, height, BGC='rgb(50, 50, 50)') {
+            this.canvas = document.getElementById(canvas_id);
+            this._width = this.canvas.width = width || window.screen.width;
+            this._height = this.canvas.height = height || window.screen.height;
+            this._cx = parseInt(this._width / 2);
+            this._cy = parseInt(this._height / 2);
+            this.ctx = this.canvas.getContext("2d");
+            this.BGC = BGC;
+            this.POINT = {
+                //大小(半径)
+                "R": 2,
+                //颜色
+                "C": "#FFFFFF"
+            };
+            this.refresh();
+        }
+
+        get width() { return this._width; }
+        set width(w) { this._width = this.canvas.width = w; this._cx = parseInt(this._width / 2); this.refresh(); }
+        get height() { return this._height; }
+        set height(h) { this._height = this.canvas.height = h; this._cy = parseInt(this._height / 2); this.refresh(); }
+        get cx() { return this._cx; }
+        get cy() { return this._cy; }
+
+        //设置颜色(strokeStyle && fillStyle)
+        set colorStyle(color) {
+            this.ctx.strokeStyle = this.ctx.fillStyle = color;
+        }
+
+        /**
+         * 重置画布尺寸
+         * 
+         * @param { number } width - 画布长度 
+         * @param { number } height - 画布高度 
+         */
+        resize(width, height) {
+            this.width = parseInt(width) || window.screen.width;
+            this.height = parseInt(height) || window.screen.height;
+        }
+
+        /**
+         * 刷新画布
+         * 
+         * @param { string } color - 背景色，默认采用 this.BGC 
+         */
+        refresh(color){
+            this.ctx.fillStyle = color || this.BGC;
+            this.ctx.fillRect(0, 0, this._width, this._height);
+        }
+
+        /**
+         * 绘制点(point): 绘制坐标为(x, y)的点
+         * 
+         * @param { number } x - x轴坐标 
+         * @param { number } y - y轴坐标
+         * @param { string } [color=this.POINT.C] - 颜色
+         * @param { string } [r=this.POINT.R] - 半径尺寸 
+         * 
+         * @example 
+         * canvas.point(100, 100);
+         * canvas.point(Vector(100, 100));
+         * canvas.point({"x":100, "y":100});
+         */
+        point(x, y, color=null, r=null) {
+            if(typeof arguments[0] != "number") {
+                x = arguments[0].x; y = arguments[0].y;
+            }
+            this.ctx.strokeStyle = this.ctx.fillStyle = (color || this.POINT.C);
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, r || this.POINT.R, 0, 2*Math.PI);
+            this.ctx.stroke(); 
+            this.POINT.R > 1 && this.ctx.fill();
+        }
+
+        /**
+         * 绘制线段(line): 绘制一条从起始点(xs, ys)到终止点(xe, ye)的线段
+         * 
+         * @param { number } xs - 起始点x轴坐标 
+         * @param { number } ys - 起始点y轴坐标
+         * @param { number } xe - 终止点x轴坐标
+         * @param { number } ye - 终止点y轴坐标
+         * 
+         * @example
+         * canvas.line(100, 100, 300, 300);
+         * canvas.line(Vector(100, 100), Vector(300, 300));
+         */
+        line(xs, ys, xe, ye) {
+            if(typeof arguments[0] != "number") {
+                xs = arguments[0].x; ys = arguments[0].y;
+                xe = arguments[1].x; ye = arguments[1].y;
+            }
+            this.ctx.beginPath();
+            this.ctx.moveTo(xs, ys);
+            this.ctx.lineTo(xe, ye);   
+            this.ctx.stroke(); 
+        }
+
+        /**
+         * 绘制线集: 根据顶点集绘制线集
+         * 
+         * @param { Array[] | Vector[] } ps - 顶点集 -> [[x1, y1], [x2, y2], ..., [xn, yn]] || [v1, v2, v3, ..., vn] 
+         * @param { string | Color } [color] - 线段颜色样式
+         * @param { boolean } [close] - 是否闭合
+         * 
+         * @example
+         * canvas.lines([[100, 100], [300, 300]]);
+         * canvas.lines([Vector(100, 100), Vector(300, 300)]);
+         */
+        lines(ps, color='rgb(255, 255, 255)', close=false) {
+            //判断点集元素类型
+            let isVector = (ps[0].x != undefined);
+            //判断是否是颜色对象
+            let isColor = (color.color != undefined);
+            //绘制线段
+            for(let i=0, n=ps.length, end=(close ? n : n-1); i<end; i++) {
+                this.ctx.beginPath();
+                this.ctx.strokeStyle = (isColor ? color.color() : color);
+                if(isVector) {
+                    this.ctx.moveTo(ps[i].x, ps[i].y); this.ctx.lineTo(ps[(i+1)%n].x, ps[(i+1)%n].y);
+                } else {
+                    this.ctx.moveTo(ps[i][0], ps[i][1]); this.ctx.lineTo(ps[(i+1)%n][0], ps[(i+1)%n][1]);
+                }
+                this.ctx.stroke();
+            }
+        }
+
+        /**
+         * 绘制圆: 绘制圆心坐标为(x, y), 半径为r的圆
+         * 
+         * @param { number } x - 圆心x轴坐标
+         * @param { number } y - 圆心y轴坐标
+         * @param { number } r - 半径 
+         * @param { string } [color] - 填充颜色 
+         * 
+         * @example
+         * canvas.circle(100, 100, 5);
+         */
+        circle(x, y, r, color=null) {
+            if(color){ this.ctx.strokeStyle = this.ctx.fillStyle = color;}        this.ctx.beginPath();
+            this.ctx.arc(x, y, r, 0, 2*Math.PI);
+            this.ctx.stroke(); 
+            color && this.ctx.fill();
+        }
+
+        /**
+         * 绘制矩形: 绘制中心坐标为(x, y), x轴半径为rx, y轴半径为ry的矩形
+         * 
+         * @param { number } x - 矩形中心x坐标 
+         * @param { number } y - 矩形中心y坐标 
+         * @param { number } rx - 矩形x轴半径 
+         * @param { number } ry - 矩形y轴半径
+         * 
+         * @example
+         * canvas.rect(100, 100, 50, 100);
+         */
+        rect(x, y, rx, ry) {
+            this.ctx.beginPath();
+            this.ctx.rect(x-rx, y-ry, rx*2, ry*2);
+            this.ctx.stroke();
+        }
+    }
+
+    var __index__$3 = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        Canvas: Canvas
+    });
+
+    /**
+     * @module
+     * @desc     区域类: 描述一个封闭区域，并给定一个点是否在区域内的判定算法(in)
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-07-13
+     * @version  0.1.0
+     * @since    (2022-07-14, Ais): 增加区域反转功能, 将method(in)的判定反转
+    */
+
+
+    /** @classdesc 区域类(基类) */
+    class BaseArea {
+
+        /**
+         * 判断一个给定坐标是否在区域内
+         * 
+         * @param { Vector | number[] } p - 待判定的坐标向量 
+         * @returns { boolean } 是否在区域内
+         */
+        in(p) {
+            return true;
+        }
+    }
+
+
+    //顶点集区域
+    class Area extends BaseArea {
+
+        /**
+         * 顶点集区域: 通过一系列顶点坐标描述一个封闭区域
+         * 
+         * @property { Vector[] } vps - 构成区域的顶点集
+         * @property { number } [offset=(Math.PI/180)*5] - 判定算法(in)的计算误差
+         * @property { boolean } reverse - 区域反转标记, 将method(in)的判定反转
+         * 
+         * @param { Vector } vpoints - 顶点集 
+         * @param { boolean } [reverse=false] - 区域反转标记
+         * 
+         * @example
+         * let area = new Area([new Vector(0, 0), new Vector(100, 100), new Vector(50, 200)]);
+         * area.in(new Vector(30, 30));
+         */
+        constructor(vpoints, reverse=false) {
+            super();
+            this.vps = vpoints;
+            this.offset = (Math.PI/180)*5;
+            this.reverse = reverse;
+        }
+
+        /**
+         * 点是否在区域内的判定算法  
+         * 求解目标点(p)与区域的顶点集(vps)构成的凸多边形的内角和(rads)，当 rads == Math.PI*2 时，p在区域内部，反之不在。  
+         * PS: 该判定算法仅支持凸多边形
+         * 
+         * @override
+         * @param { Vector } p - 待判定的坐标向量 
+         * @returns { boolean } 是否在区域内
+         */
+        in(p) {
+            p = p.v ? p : new Vector$1(...p);
+            //计算内角和
+            let rads = 0, n = this.vps.length;
+            for(let i=0; i<n; i++) {
+                let _rad = Math.abs(Vector$1.rad(Vector$1.sub(this.vps[i%n], p), Vector$1.sub(this.vps[(i+1)%n], p)));
+                rads += (_rad>Math.PI ? 2*Math.PI-_rad : _rad);
+            }
+            return this.reverse ^ (rads > Math.PI*2-this.offset) && (rads < Math.PI*2+this.offset) 
+        }
+    }
+
+
+    //矩形区域
+    class RectArea extends BaseArea {
+
+        /**
+         * 矩形区域: 通过分量范围来描述一个矩形区域(任意维)
+         * 
+         * @property { Array[] } borders - 矩形边界(分量)范围
+         * @property { boolean } reverse - 区域反转标记
+         * 
+         * @param { Array[] } borders - 矩形边界(分量)范围
+         * @param { boolean } reverse - 区域反转标记
+         * 
+         * @example 
+         * let area = new ReactArea([[100, 300], [100, 300]]);
+         */
+        constructor(borders, reverse=false) {
+            super();
+            this.borders = borders;
+            this.reverse = reverse;
+        }
+
+        /** @override */
+        in(p) {
+            p = p.v ? p : new Vector$1(...p);
+            for(let i=0, n=this.borders.length; i<n; i++) {
+                if((p.v[i] < this.borders[i][0]) || (p.v[i] > this.borders[i][1])) {
+                    return this.reverse ^ false;
+                }
+            }
+            return this.reverse ^ true;
+        }
+    }
+
+
+    //圆形区域
+    class CircleArea extends BaseArea {
+
+        /**
+         * 圆形区域: 描述一个圆形区域(任意维)
+         * 
+         * @property { Vector } po - 中心坐标
+         * @property { number } r - 范围半径(r>0)
+         * @property { boolean } reverse - 区域反转标记
+         * 
+         * @param { Vector } po - 中心坐标
+         * @param { number } r - 范围半径(r>0)
+         * @param { boolean } reverse - 区域反转标记
+         * 
+         * @example 
+         * let area = new CircleArea(new Vector(100, 100), 50);
+         */
+        constructor(po, r, reverse=false) {
+            super();
+            //中心坐标
+            this.po = po;
+            //半径
+            this.r = r;
+            //区域反转标记
+            this.reverse = reverse;
+        }
+
+        /** @override */
+        in(p) {
+            p = p.v ? p : new Vector$1(...p);
+            return this.reverse ^ (p.dist(this.po) < this.r);
+        }
+    }
+
+    var area = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        Area: Area,
+        BaseArea: BaseArea,
+        CircleArea: CircleArea,
+        RectArea: RectArea
+    });
+
+    /**
+     * @module
+     * @desc     边界类: 对到达边界的粒子进行处理
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-07-11
+     * @version  0.1.0
+     * @since    (2022-07-27, Ais): 对limit()添加"r"(质心到边界的距离)参数，以支持在考虑粒子具有形状属性的情况下的限制作用
+    */
+
+
+    /** @classdesc 边界限制器(基类) */
+    class Border {
+
+        /**
+         * 越界处理函数: 当目标发生越界时，通过该函数进行处理。
+         * 
+         * @param { Object } p_obj - 目标对象 
+         * @param { number } [r=0] - 形状半径
+         * @returns { Object } 处理后的目标对象
+         */
+        limit(p_obj, r=0) {
+            return p_obj;
+        } 
+    }
+
+
+    //矩形反射边界
+    class RectReflectBorder extends Border {
+
+        /**
+         * @classdesc 矩形反射边界: 当目标越界时，其垂直与反射面的速度分量将被反转，产生反射效果。
+         * 
+         * @property { number[] } borders - 边界范围
+         * @property { boolean } [on_line=true] - 边界线模式，当该参数为true时，越界时会重置目标位置到边界线上
+         * 
+         * @param { number[] } borders - 边界范围
+         * @param { boolean } [on_line=true] - 边界线模式
+         * 
+         * @example 
+         * let border = new RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+         */
+        constructor(borders, on_line=true) {
+            super();
+            this.borders = borders || [];
+            this.on_line = on_line;
+        }
+
+        /** @override */
+        limit(p_obj, r=0) {
+            for(let i=0; i<this.borders.length; i++) {
+                if(p_obj.p.v[i]-r <= this.borders[i][0]) {
+                    this.on_line ? p_obj.p.v[i] = this.borders[i][0]+r : null;
+                    p_obj.v.v[i] = -p_obj.v.v[i];
+                }
+                if(p_obj.p.v[i]+r >= this.borders[i][1]) {
+                    this.on_line ? p_obj.p.v[i] = this.borders[i][1]-r : null;
+                    p_obj.v.v[i] = -p_obj.v.v[i];
+                }
+            }
+            return p_obj;
+        }
+    }
+
+
+    //矩形循环边界
+    class RectLoopBorder extends Border {
+
+        /**
+         * @classdesc 矩形循环边界: 当目标发生越界时，目标移动到当前边界的相对边界处。
+         * 
+         * @property { number[] } borders - 边界范围
+         * 
+         * @param { number[] } borders - 边界范围
+         * 
+         * @example
+         * let border = new RectLoopBorder([[0, canvas.width], [0, canvas.height]]);
+         */
+        constructor(borders) {
+            super();
+            this.borders = borders || [];
+        }
+
+        /** @override */
+        limit(p_obj, r=0) {
+            for(let i=0; i<this.borders.length; i++) {
+                if(p_obj.p.v[i]-r <= this.borders[i][0]) {
+                    p_obj.p.v[i] = this.borders[i][1]-r;
+                } else if(p_obj.p.v[i]+r >= this.borders[i][1]) {
+                    p_obj.p.v[i] = this.borders[i][0]+r;
+                }
+            }
+            return p_obj;
+        }
+    }
+
+
+    //环形反射边界
+    class RingReflectBorder extends Border {
+
+        /**
+         * @classdesc 环形反射边界: 目标越界时进行速度反射。
+         * 
+         * @property { Vector } po - 边界圆心坐标
+         * @property { number } r - 边界半径(r>0)
+         * 
+         * @param { Vector } po - 边界圆心坐标
+         * @param { number } r - 边界半径(r>0)
+         * 
+         * @example
+         * let border = new RingReflectBorder(new Vector(canvas.cx, canvas.cy), 200);
+         */
+        constructor(po, r) {
+            super();
+            this.po = po;
+            this.r = r;
+        }
+
+        /** @override */
+        limit(p_obj, r=0) {
+            if(this.po.dist(p_obj.p)+r > this.r) {
+                //反射面法向量
+                let rv = Vector.sub(this.po, p_obj.p).normalization();
+                //修正位置坐标
+                p_obj.p = Vector.add(this.po, rv.clone().mult(-(this.r-r)));
+                //反射速度向量
+                p_obj.v = Vector.sub(p_obj.v, rv.clone().mult(rv.dot(p_obj.v)*2));
+            }
+            return p_obj;
+        }
+    }
+
+
+    //环形循环边界
+    class RingLoopBorder extends Border {
+
+        /**
+         * @classdesc 环形循环边界: 目标越界时将其移动到目标与圆心坐标的对角位置。
+         * 
+         * @property { Vector } po - 边界圆心坐标
+         * @property { number } r - 边界半径(r>0)
+         * 
+         * @param { Vector } po - 边界圆心坐标
+         * @param { number } r - 边界半径(r>0)
+         * 
+         * @example
+         * let border = new RingLoopBorder(new Vector(canvas.cx, canvas.cy), 200);
+         */
+        constructor(po, r) {
+            super();
+            //边界圆心坐标
+            this.po = po;
+            //边界半径
+            this.r = r;
+        }
+
+        /** @override */
+        limit(p_obj, r=0) {
+            if(this.po.dist(p_obj.p)+r > this.r) {
+                //反射面法向量
+                let rv = Vector.sub(this.po, p_obj.p).normalization();
+                //修正位置坐标(当前相对与圆心的对角位置)
+                p_obj.p = Vector.add(this.po, rv.clone().mult((this.r-r)));
+            }
+            return p_obj;
+        }
+    }
+
+    var border = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        Border: Border,
+        RectLoopBorder: RectLoopBorder,
+        RectReflectBorder: RectReflectBorder,
+        RingLoopBorder: RingLoopBorder,
+        RingReflectBorder: RingReflectBorder
+    });
+
+    /**
+     * @module
+     * @desc     坐标系: 构建坐标系, 对向量进行坐标变换
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-08-01
+     * @version  0.1.0
+    */
+
+
+    /****************************************  
+    (PCS)屏幕像素坐标系(Canvas画布坐标)
+
+      o(0, 0) ----------> (+x)
+      |
+      | 
+      |
+      V
+     (+y)
+
+     * o(0, 0): 坐标原点位于屏幕左上角
+     * +x: x轴正方向水平向右
+     * +y: y轴正方向垂直向下
+     * scale: 标度为正整数(1), 代表一个像素
+    ****************************************/
+
+
+    /** 坐标系(基类) */
+    class CoordinateSystem {
+
+        /**
+         * PCS(主坐标系/屏幕像素坐标系) -> CS(当前坐标系): 从主坐标系转换到当前坐标系
+         * 
+         * @param { Vector } vector - 主坐标系目标向量
+         * @returns { Vector } 转换后的当前坐标系目标向量
+         */
+        to(vector) {
+            return vector;
+        }
+
+        /**
+         * CS -> PCS: 从当前坐标系转换到主坐标系
+         * @param { Vector } vector - 当前坐标系目标向量
+         * @returns { Vector } 转换后的主坐标系目标向量
+         */
+        from(vector) {
+            return vector;
+        }
+    }
+
+
+    //实数坐标系
+    class RCS extends CoordinateSystem {
+
+        /**
+         * @classdesc 实数坐标系: 将屏幕像素坐标系映射到实数域中进行计算
+         * 
+         * @property { Vector } co - 屏幕像素坐标系原点坐标
+         * @property { number } scale - 标度比例，一个像素对应的值(scale>0)
+         * 
+         * @param { Vector } co - 屏幕像素坐标系原点坐标
+         * @param { number } [scale=1] - 标度比例
+         * 
+         * @example
+         * let rcs = new RCS(Vector.v(canvas.cx, canvas.cy), 0.5);
+         */
+        constructor(co, scale=1) {
+            super();
+            this._co = co;
+            this._scale = scale;
+        }
+        
+        get scale() { return this._scale; }
+        set scale(val) {
+            if(val <= 0) { throw Error(`scale(${val}) must be in (0, Inf)`); }
+            this._scale = val;
+        }
+        get co() { return this._co.clone(); }
+
+        /** @override */
+        to(vector) {
+            let x = ((vector.v ? vector.x : vector[0]) - this._co.x) * this._scale;
+            let y = (-1)*((vector.v ? vector.y : vector[1]) - this._co.y) * this._scale;
+            return vector.v ? Vector$1.v(x, y) : [x, y];
+        }
+
+        /** @override */
+        from(vector) {
+            let x = ((vector.v ? vector.x : vector[0]) / this._scale) + this._co.x;
+            let y = ((-1)*(vector.v ? vector.y : vector[1]) / this._scale) + this._co.y;
+            return vector.v ? Vector$1.v(x, y) : [x, y];
+        }
+
+        /**
+         * 缩放: 对坐标系标度进行缩放  
+         * 当 "zr>0" 时，进行 "放大"，标度变小  
+         * 当 "zr<0" 时，进行 "缩小"， 标度变大  
+         * 
+         * @param { number } zr - 缩放值 
+         * @returns { Object } this
+         * @example
+         * coor.zoom(2)   //放大2倍
+         * coor.zoom(-2)  //缩小2倍 
+         */
+        zoom(zr) {
+            zr > 0 ? this.scale /= Math.abs(zr) : this.scale *=  Math.abs(zr);
+            return this;
+        }
+
+        /**
+         * 平移: 对屏幕像素坐标系原点坐标(co)进行平移
+         * 
+         * @param { Vector } vector - 平移坐标 
+         * @returns { Object } this
+         * @example
+         * //向右平移100个像素
+         * coor.move(Vector.v(-100, 0));  
+         */
+        move(vector) {
+            this._co.add(vector.v ? vector : Vector$1.v(...vector));
+            return this;
+        }
+    }
+
+
+    //网格坐标系
+    class Grid extends CoordinateSystem {
+
+        /**
+         * @classdesc Grid(网格坐标系): 将屏幕像素坐标系映射到网格坐标系
+         * 
+         * @property { Vector } co - 屏幕像素坐标系原点坐标
+         * @property { number } dx - 网格单元x轴尺寸(dx>0)
+         * @property { number } dy - 网格单元y轴尺寸(dx>0)
+         * @property { boolean } RY - y轴反转标记 -> true(向上) | false(向下)
+         * 
+         * @param { Vector } co - 屏幕像素坐标系原点坐标
+         * @param { number } [dx=1] - 网格单元x轴尺寸(dx>0)
+         * @param { number } [dy=1] - 网格单元y轴尺寸(dx>0) 
+         * @param { boolean } [RY=false] - y轴反转标记
+         * 
+         * @example
+         * let grid = new Grid(new Vector(canvas.cx, canvas.cy), 10, 10, true);
+         */
+        constructor(co, dx=1, dy=1, RY=false) {
+            super();
+            this.co = co;
+            this._dx = dx;
+            this._dy = dy;
+            this._RY = RY ? -1 : 1;
+        }
+
+        get dx() { return this._dx; }
+        set dx(val) {
+            if(val < 1) { throw Error(`dx(${val}) must be in [1, Inf)`); }
+            this._dx = Math.round(val);
+        }
+        
+        get dy() { return this._dy; }
+        set dy(val) {
+            if(val < 1) { throw Error(`dy(${val}) must be in [1, Inf)`); }
+            this._dy = Math.round(val);
+        }
+
+        get RY() { return (this._RY == -1); }
+        set RY(val) {
+            this._RY = val ? -1 : 1;
+        }
+        
+        /**
+         * PCS -> Grid: 单元格内的坐标会映射到同一点
+         * 
+         * @override
+         * @param { Vector } vector - 主坐标系目标向量 
+         * @returns { Vector } 网格坐标系的目标向量
+         */
+        to(vector) {
+            let x = Math.round(((vector.v ? vector.v[0] : vector[0]) - this.co.x) / this.dx);
+            let y = Math.round(((vector.v ? vector.y : vector[1]) - this.co.y) / this.dy) * this._RY;
+            return vector.v ? Vector$1.v(x, y) : [x, y];
+        }
+
+        /** @override */
+        from(vector) {
+            let x = this.dx * (vector.v ? vector.x : vector[0]) + this.co.x;
+            let y = this.dy * (vector.v ? vector.y : vector[1]) * this._RY + this.co.y;
+            return vector.v ? Vector$1.v(x, y) : [x, y];
+        }
+
+    }
+
+
+    //极坐标系
+    class PolarCS extends CoordinateSystem {
+
+        /**
+         * @classdesc 极坐标系: 将屏幕像素坐标系映射到极坐标系
+         * 
+         * @property { Vector } co - 屏幕像素坐标系原点坐标
+         * 
+         * @param { Vector } co - 屏幕像素坐标系原点坐标
+         * 
+         * @example
+         * let coor = new PolarCS(new Vector(canvas.cx, canvas.cy));
+         */
+        constructor(co) {
+            super();
+            this.co = co;
+        }
+
+        /**
+         * PCS -> PolarCS
+         * 
+         * @param { Vector | Array } vector - 主坐标系目标向量 
+         * @returns { Vector | Array } 极坐标系目标向量 | [dist, rad]
+         */
+        to(vector) {
+            let v = (vector.v ? vector : new Vector$1(...vector)).sub(this.co);
+            let dist = v.dist(), rad = v.rad();
+            return vector.v ? Vector$1.v(dist, rad) : [dist, rad];
+        }
+
+        /**
+         * PolarCS -> PCS
+         * @param { Vector | Array } vector - 极坐标系目标向量 | [dist, rad]
+         * @returns { Vector | Array } 主坐标系的目标向量 
+         */
+        from(vector) {
+            let dist = (vector.v ? vector.x : vector[0]);
+            let rad = (vector.v ? vector.y : vector[1]);
+            let x = dist * Math.sin(rad) + this.co.x;
+            let y = dist * Math.cos(rad) + this.co.y;
+            return vector.v ? Vector$1.v(x, y) : [x, y];
+        }
+
+    }
+
+    var coor = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        CoordinateSystem: CoordinateSystem,
+        Grid: Grid,
+        PolarCS: PolarCS,
+        RCS: RCS
+    });
+
+    /**
+     * @module
+     * @desc     矢量场: 在给定区域内影响粒子行为
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-07-13
+     * @version  0.1.0
+    */
+
+
+    //矢量场(基类)
+    class Field {
+
+        /**
+         * @classdesc 矢量力场: 影响场范围内的粒子行为(对粒子进行力的作用)
+         * 
+         * @property { BaseArea } area - 场作用范围
+         * 
+         * @param { BaseArea } area - 场作用范围
+         */
+        constructor(area) {
+            this.area = area || new BaseArea();
+        }
+
+        /**
+         * 场作用力函数: 描述场对粒子的作用力
+         * 
+         * @param { ForceParticle } fp - 目标受力粒子
+         */
+        force(fp) {}
+    }
+
+
+    //引力场
+    class Gravity extends Field {
+
+        //引力常数(6.67e-11|0.0000000000667)
+        static G = 0.01;
+
+        /**
+         * @classdesc 引力场: 模拟引力效果  
+         * 引力作用: F = G * (m*M) / r^2  
+         * 考虑视觉效果，引力常数G的默认值为(G=0.01)  
+         * 
+         * @property { Vector } gp - 引力场中心质点坐标
+         * @property { number } mass - 场心质点质量大小(mass>0)
+         * @property { number } G - 引力常数，(G>0)为引力，(G<0)为斥力
+         * @property { Area } area - 引力场作用范围(默认为无限大)
+         *  
+         * @param { Vector } gp - 引力场中心质点坐标
+         * @param { number } [mass=1] - 场心质点质量大小(mass>0)
+         * 
+         * @example
+         * let gf = new Gravity(new Vector(canvas.cx, canvas.cy));
+         */
+        constructor(gp, mass=1) {
+            super();
+            this.gp = gp || new Vector$1(0, 0);
+            this.mass = mass;
+            this.G = Gravity.G;
+        }
+
+        /** @override */
+        force(fp) {
+            if(this.area.in(fp.p)) {
+                let r = this.gp.dist(fp.p);
+                let g = Vector$1.sub(this.gp, fp.p).norm(this.G * (this.mass * fp.mass) / r*r);
+                fp.force(g);
+            }
+        }
+
+        /**
+         * 计算两个粒子间的引力
+         * 
+         * @param { ForceParticle } fp1 - 目标受力粒子1 
+         * @param { ForceParticle } fp2 - 目标受力粒子2
+         */
+        static gravity(fp1, fp2) {
+            let r = Vector$1.dist(fp1.p, fp2.p);
+            let g = Gravity.G * (fp1.mass * fp2.mass) / r*r;
+            fp1.force(Vector$1.sub(fp2.p, fp1.p).norm(g));
+            fp2.force(Vector$1.sub(fp1.p, fp2.p).norm(g));
+        }
+    }
+
+
+    //匀加速场
+    class AccelerateField extends Field {
+
+        /**
+         * @classdesc 匀加速场: 对场内粒子施加固定力的作用  
+         * 匀加速场作用: F = A  
+         * 
+         * @property { Vector } A - 场内加速度
+         * 
+         * @param { Vector } A - 场内作用加速度 
+         * @param { Area } area - 场作用范围
+         * 
+         * @example
+         * let field = new AccelerateField(new Vector(0.1, -0.1));
+         */
+        constructor(A, area) {
+            super(area);
+            this.A = A;
+        }
+
+        /** @override */
+        force(fp) {
+            fp.force(this.A);
+        }
+    }
+
+
+    //减速场
+    class DecelerateField extends Field {
+                
+        /**
+         * @classdesc 减速场: 对场内粒子施加减速作用   
+         * 减速作用: F = D * v  
+         * 
+         * @property { number } D - 减速系数
+         * 
+         * @param { number } [D=0.015] - 减速系数
+         * @param { Area } area - 场作用范围
+         * 
+         * @example
+         * let field = new DecelerateField(0.01, new vision.area.CircleArea(new Vector(canvas.cx, canvas.cy), 400));
+         */
+        constructor(D, area) {
+            super(area);
+            this._D = -Math.abs(D || 0.015);
+        }
+
+        get D() { return this._D; }
+        set D(val) { this._D = -Math.abs(val); }
+        
+        /** @override */
+        force(fp) {
+            if(this.area.in(fp.p)) {
+                fp.force(fp.v.clone().norm(this.D * fp.v.norm() * fp.mass));
+            }
+        }
+
+    }
+
+
+    //偏转场
+    class DeflectField extends Field {
+
+        /**
+         * @classdesc 偏转场: 对场内粒子的速度产生偏转作用  
+         * 偏转作用: v_val(线速度) = r(半径) * w(角速度)  
+         * 
+         * @property { number } W - 偏转角速度(弧度), W>0(顺时针旋转) 
+         * 
+         * @param { number } [W=0.017] - 偏转角速度(弧度)
+         * @param { Area } area - 场作用范围
+         * 
+         * @example
+         * let field = new DeflectField(Tools.ATR(5));
+         */
+        constructor(W, area) {
+            super(area);
+            //偏转角速度
+            this.W = W || 0.017;
+        }
+
+        /** @override */
+        force(fp) {
+            if(this.area.in(fp.p)) {
+                fp.force(Vector$1.sub(fp.v.clone().rotate(this.W), fp.v));
+            }
+        }
+    }
+
+    var field = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        AccelerateField: AccelerateField,
+        DecelerateField: DecelerateField,
+        DeflectField: DeflectField,
+        Field: Field,
+        Gravity: Gravity
+    });
+
+    /**
+     * @module
+     * @desc     粒子系统: 粒子集群容器，模拟粒子的集群行为
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-07-10
+     * @version  0.1.0
+     * @since    (2023-03-06, Ais): ParticleSystem(粒子系统)结构优化 
+    */
+
+
+    //粒子系统(基类)
+    class ParticleSystem {
+
+        /**
+         * @classdesc 粒子系统: 粒子集群容器，模拟粒子的集群行为
+         * 
+         * @property { Particle[] } ps - 粒子容器
+         * @property { callable } particle_builder - 粒子生成器
+         * @property { Object } action_middlewares - action中间件(钩子系统)
+         * @property { callable[] } action_middlewares.before - action中间件挂载点(before)
+         * @property { callable[] } action_middlewares.after - action中间件挂载点(after)
+         * @property { number } max_pn - 最大粒子数(int & max_pn>0)
+         * @property { number } gen_pn - 迭代过程粒子生成数(int & gen_pn>0)
+         * @property { boolean } GENR - 粒子生成开关, 用于在迭代过程中生成新的粒子
+         * @property { boolean } DSTR - 粒子销毁开关, 当容器中的粒子进入停机状态时，从容器中移除该粒子
+         * 
+         * @param { callable } particle_builder - 粒子生成器
+         * @param { Object } options - 粒子生命周期控制参数
+         * @param { number } [options.max_pn=500] - 最大粒子数(int & max_pn>0)
+         * @param { number } [options.gen_pn=1] - 迭代过程粒子生成数(int & gen_pn>0)
+         * @param { boolean } [options.GENR=false] - 粒子生成开关
+         * @param { boolean } [options.DSTR=false] - 粒子销毁开关
+         * 
+         * @example
+         * let pcs = new vision.particle.ParticleSystem(() => {
+         *     return new vision.particle.ForceParticle(
+         *         Vector.random([[0, canvas.width], [0, canvas.height]]),
+         *         Vector.random([confs.vR, confs.vR])
+         *     );
+         * }, {max_pn: confs.N, gen_pn: confs.gn, GENR: confs.GENR}).build(confs.N);
+         */
+        constructor(particle_builder, {max_pn=500, gen_pn=1, GENR=false, DSTR=true}={}) {
+            this.ps = [];
+            this.particle_builder = particle_builder;
+            this.action_middlewares = {
+                "before": [],
+                "after": [],
+            };
+            this.max_pn = max_pn;
+            this.gen_pn = gen_pn;
+            this.GENR = GENR;
+            this.DSTR = DSTR;
+        }
+
+        /**
+         * 构建粒子系统并进行初始化
+         * 
+         * @param { number } pn - 初始化生成的粒子数 
+         * @returns { Object } this
+         * 
+         * @example particle_system.build(100);
+         */
+        build(pn=0) {
+            this.ps = [];
+            for(let i=(pn < this.max_pn ? pn : this.max_pn); i--; ) {
+                this.ps.push(this.particle_builder());
+            }
+            return this;
+        }
+
+        /**
+         * 粒子运动与生命周期管理: 更新粒子容器中的粒子运动状态，并进行生命周期的管理  
+         * 该方法在 action() 内部进行调用，可通过重写该方法来控制粒子运动和生命周期逻辑
+         */
+        particle_action() {
+            let _ps = [];
+            for(let i=0, n=this.ps.length; i<n; i++) {
+                //判断粒子的停机状态
+                if(!this.ps[i].isEnd()) {
+                    //调用粒子的行为模式方法
+                    this.ps[i].action(); _ps.push(this.ps[i]);
+                } else {
+                    //根据"粒子销毁开关"判断是否销毁停机粒子
+                    (!this.DSTR) && _ps.push(this.ps[i]);
+                }
+            }
+            //生成新的粒子
+            if(this.GENR) {
+                let diff_pn = this.max_pn - _ps.length;
+                for(let i=(diff_pn>=this.gen_pn ? this.gen_pn : diff_pn); i>0; i--) {
+                    _ps.push(this.particle_builder());
+                }
+            }
+            //更新粒子容器
+            this.ps = _ps;
+        }
+
+        /**
+         * 粒子集群运动(迭代过程): 描述粒子集群的行为模式
+         * 
+         * @example particle_system.action();
+         */
+        action() {
+            //action中间件挂载点(before)
+            for(let i=0, n=this.action_middlewares.before.length; i<n; i++) {
+                this.action_middlewares.before[i](this.ps);
+            }
+            //粒子运动与生命周期管理
+            this.particle_action();
+            //action中间件挂载点(after)
+            for(let i=0, n=this.action_middlewares.after.length; i<n; i++) {
+                this.action_middlewares.after[i](this.ps);
+            }
+        }
+
+    }
+
+    /**
+     * @module
+     * @desc     轨迹追踪器: 追踪记录目标粒子的移动轨迹
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-07-15
+     * @version  0.1.0
+    */
+
+
+    class TrailTracker {
+
+        /**
+         * @classdesc 轨迹追踪器: 基于Hook式的方法隐式地追踪记录目标粒子的移动轨迹  
+         * 通过hook目标对象的action()方法来实现隐式的轨迹追踪效果
+         * 
+         * @property { Particle } tp - 追踪的目标粒子
+         * @property { number } tn - 轨迹长度(int & tn>0)
+         * @property { Vector[] } trail - 轨迹向量容器，记录的轨迹坐标
+         * 
+         * @param { Particle } tp - 追踪的目标粒子 
+         * @param { number } [tn=10] - 轨迹长度(int & tn>0)
+         * 
+         * @example
+         * let p = new Particle();
+         * let tracker = new TrailTracker(p, 50);
+         */
+        constructor(tp, tn=10) {
+            this.tp = tp;
+            this.tn = tn;
+            this.trail = [];
+            //绑定目标对象
+            this._bind();
+        }
+
+        /**
+         * 绑定追踪的粒子对象: 通过hook目标对象的action()方法来实现隐式的轨迹追踪效果
+         * @private
+         */
+        _bind() {
+            this.trail = [this.tp.p.clone()];
+            //hook目标对象的action方法
+            let _this = this;
+            this.tp._tracker_hook_action = this.tp.action;
+            this.tp.action = function() {
+                let p = this._tracker_hook_action(...arguments);
+                (_this.trail.length >= _this.tn) && _this.trail.shift();
+                _this.trail.push(p.clone());
+                return p;
+            };
+        }
+    }
+
+    var __index__$2 = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        CircularMotorParticle: CircularMotorParticle,
+        ForceParticle: ForceParticle,
+        LinearMotorParticle: LinearMotorParticle,
+        Particle: Particle,
+        ParticleSystem: ParticleSystem,
+        RandomWalkerParticle: RandomWalkerParticle,
+        TrailTracker: TrailTracker,
+        area: area,
+        border: border,
+        coor: coor,
+        field: field
+    });
+
+    /**
+     * @module
+     * @desc     迭代器: 实现迭代器对象
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-07-26
+     * @version  0.1.0
+    */
+
+
+    /** 迭代器(基类) */
+    class Iterator {
+
+        /**
+         * @classdesc 迭代器(基类): 通过val接口实现值的迭代
+         * 
+         * @param { any } val 
+         */
+        constructor(val) {
+            //值
+            this._val = val;
+        }
+
+        /**
+         * 值迭代逻辑接口: 实现迭代逻辑,并返回迭代的值
+         * 
+         * @returns { Any } this._val
+         */
+        val() {
+            return this._val;
+        }
+
+        /**
+         * 停机状态: 判断迭代器是否停机(迭代结束)
+         * 
+         * @returns { boolean } 停机状态 
+         */
+        end() {
+            return false;
+        }
+
+        /**
+         * 数组转换器: 迭代并输出值的变化过程
+         * 
+         * @param { number } n - 迭代次数 
+         * @returns { Array } [val(0), val(1), val(2) ... val(n)]
+         */
+        tolist(n=500) {
+            let vals = [];
+            for(let i=0; i<n; i++) { 
+                vals.push(this.val());
+                if(this.end()) { break; }
+            }
+            return vals
+        }
+    }
+
+
+    /** 范围迭代器 */
+    class Range extends Iterator {
+
+        /**
+         * @classdesc 范围迭代器: 一种值线性变化的迭代器
+         * 
+         * @param { number } start - 起始值 
+         * @param { number } end   - 终止值
+         * @param { number } step  - 步长(速率)
+         * 
+         * @example
+         * new Range(1, 3);   //-> [1, 2, 3]
+         * Range.S(0, 4, 2);  //-> [0, 2, 4]
+         * Range.N(0, 5, 4);  //-> [0, 1.25, 2.5, 3.75, 5]
+         */
+        constructor(start, end, step=1) {
+            super(start);
+            //起始值
+            this._start = start;
+            //终止值
+            this._end = end;
+            //步长
+            this._step = start<end ? Math.abs(step) : -Math.abs(step);
+        }
+
+        /**
+         * 根据"步长"构建范围迭代器
+         * 
+         * @param { number } start    - 起始值 
+         * @param { number } end      - 终止值
+         * @param { number } [step=1] - 步长(速率)
+         * @returns { Range } 范围迭代器
+         */
+        static S(start, end, step=1) {
+            return new Range(start, end, step);
+        }
+
+        /**
+         * 根据"迭代次数"构建范围迭代器
+         * 
+         * @param { number } start - 起始值 
+         * @param { number } end   - 终止值
+         * @param { number } n     - 迭代次数
+         * @returns { Range } 范围迭代器
+         */
+        static N(start, end, n) {
+            return new Range(start, end, (end-start)/n);
+        }
+
+        /** @override */
+        val() {
+            let val = this._val;
+            if(!this.end()) {
+                this._val += this._step;
+            } else {
+                this._val = this._end;
+            }
+            return val;
+        }
+
+        /** @override */
+        end() {
+            return (this._step>0) ? (this._val>this._end) : (this._val<this._end);
+        }
+
+        /** 复制迭代器 */
+        clone() {
+            return new Range(this._start, this._end, this._step);
+        }
+
+    }
+
+
+    //函数迭代器
+    class FuncIterator extends Iterator {
+
+        /**
+         * @classdesc 函数迭代器: 指定定义域范围(dod)和函数(fx)迭代生成对应的值域
+         * 
+         * @property { Function } fx - 目标函数
+         * @property { Range } dod - 定义域
+         * 
+         * @param { Function } fx - 目标函数
+         * @param { Range } dod - 定义域
+         * 
+         * @example 
+         * new FuncIterator((x)=>{return x*x;}, Range.S(0, 3));  //-> [0, 1, 4, 9]
+         * new FuncIterator((x)=>{return x*x;}, [0, 3]);         //-> [0, 1, 4, 9]
+         */
+        constructor(fx, dod) {
+            super();
+            this.fx = fx;
+            this.dod = dod.val ? dod : Range.S(...dod);
+        }
+        
+        /** @override */
+        val(toPoint=false) {
+            let x = this.dod.val();
+            return toPoint ? [x, this.fx(x)] : this.fx(x);
+        }
+
+        /** @override */
+        end() {
+            return this.dod.end();
+        }
+    }
+
+    var iterator = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        FuncIterator: FuncIterator,
+        Iterator: Iterator,
+        Range: Range
+    });
+
+    /**
+     * @module
+     * @desc     随机选择器
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-08-01
+     * @version  0.1.0
+    */
+
+
+    //随机选择器
+    class RandomSelector {
+
+        /**
+         * @classdesc 随机选择器: 给定选项集，根据权重生成概率，随机选择一个选项。
+         * 
+         * @property { Object[] } _ops - 选项集
+         * @property { Object } _ops.op - 选项对象
+         * @property { number } _ops.p - 选中概率
+         * @property { number } _ops.ps - 起始概率值
+         * @property { number } _ops.pe - 终止概率值
+         * 
+         * @param { Array[] } options - 选项集: [[op(选项, any), wt(权重, number:>0)]...]
+         * 
+         * @example
+         * let rs = new RandomSelector([["a", 1], ["b", 1], ["c", 3], ["d", 1]])
+         */
+        constructor(options) {
+            //选项集
+            this._ops = this._probability(options);
+        }
+
+        /**
+         * 计算概率: 基于选项的权重计算概率 -> p[i] = wt[i] / sum(wt)
+         *  
+         * @param { Array[] } options - 选项集: [[op(选项, any), wt(权重, number:>0)], ...]
+         * @returns { Object[] } 选项集: [{"op": "选项", "p": "概率", "ps/pe": "概率范围"}, ...]
+         */
+        _probability(options) {
+            //计算总权重
+            let swt = 0;
+            for(let i=0, n=options.length; i<n; i++) {
+                swt += options[i][1] || 0;
+            }
+            //计算每个选项的概率
+            let _ops = [], _ps = 0;
+            for(let i=0, n=options.length; i<n; i++) {
+                let p = (options[i][1] || 0) / swt;
+                _ops.push({
+                    //选项
+                    "op": options[i][0],
+                    //概率
+                    "p": p,
+                    //概率范围
+                    "ps": _ps, "pe": _ps + p
+                });
+                _ps += p;
+            }
+            return _ops;
+        }
+
+        /**
+         * 从选项集中随机选择一个选项
+         * 
+         * @returns { any } 选中的选项集中的对象 this._ops[i].op
+         * @example rs.select();
+         */
+        select() {
+            let r = Math.random();
+            for(let i=0, n=this._ops.length; i<n; i++) {
+                if(r > this._ops[i].ps && r <= this._ops[i].pe) {
+                    return this._ops[i].op;
+                }
+            }
+        }
+
+    }
+
+    /**
+     * @module
+     * @desc     常用工具代码
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-08-10
+     * @version  0.1.0
+    */
+
+
+    /** @classdesc 常用工具代码 */
+    class Tools {
+
+        /**
+         * 正多边形生成器  
+         * 并非严格意义上的正多边形，而是一种"近似"正多边形。
+         * 
+         * @param { number } n - 多边形边数(int & n>=3) 
+         * @param { number } r - 多边形中心到顶点的半径(r>0)
+         * @param { Array } po - 多边形中心坐标([x, y])
+         * @param { number } rad - 初始弧度
+         * 
+         * @returns { Array[] } 顶点坐标集
+         * 
+         * @example Tools.regular_polygon(5, 100, [canvas.cx, canvas.cy]);
+         */
+        static regular_polygon(n, r, po, rad=0) {
+            po = po || [0, 0];
+            let d_rad = (2*Math.PI)/n;
+            let ps = [];
+            for(let i=0; i<n; i++) {
+                ps.push([r*Math.cos(rad)+po[0], r*Math.sin(rad)+po[1]]);
+                rad += d_rad;
+            }
+            return ps;
+        }
+        /** @alias Tools#regular_polygon */
+        static RP(n, r, po, rad=0) {
+            return Tools.regular_polygon(n, r, po, rad);
+        }
+
+        /**
+         * 角度转弧度
+         * 
+         * @param { number } angle - 角度 
+         * @returns { number } 对应弧度
+         * @example Tools.ATR(45)  //-> Math.PI/4
+         */
+        static ATR(angle) {
+            return (Math.PI/180)*angle;
+        }
+        /**
+         * 弧度转角度
+         * @param { number } rad - 弧度 
+         * @returns { number } 对应角度
+         * @example Tools.RTA(Math.PI/4)  //-> 45
+         */
+        static RTA(rad) {
+            return (180/Math.PI)*rad;
+        }
+
+        /**
+         * 生成随机数
+         * 
+         * @param { number } start - 起始值 
+         * @param { number } end - 终止值
+         * @returns { number } [start, end]范围内的随机数
+         * @example Tools.random(-5, 5)
+         */
+        static random(start, end) {
+            return (end-start)*Math.random()+start;
+        }
+
+        /**
+         * 随机选择器: 从数组中随机选择一个元素
+         * 
+         * @param { Array } ops - 选项集 
+         * @returns { any } 随机选中的元素
+         * @example Tools.rslist(["a", "b", "c"])
+         */
+        static rselect(ops) {
+            return ops[parseInt((ops.length)*Math.random())];
+        }
+
+        /**
+         * RGB(list) -> RGB(str): 将RGB数组装换成RGB字符串  
+         * 
+         * @param { Array } color - 颜色数组 
+         * @returns { string } 颜色值 -> "rgb(r, g, b)"
+         * @example Tools.RGB([255, 255, 255]);  //-> "rgb(255, 255, 255, 1)";
+         */
+        static RGB(color) {
+            return `rgb(${color[0]||0}, ${color[1]||0}, ${color[2]||0}, ${color[3]||1})`;
+        }
+
+    }
+
+    var __index__$1 = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        RandomSelector: RandomSelector,
+        Tools: Tools,
+        iter: iterator
+    });
+
+    /**
+     * @module
+     * @desc     截图器: 截取Canvas图像后导出
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-09-06
+     * @version  0.1.0
+    */
+
+
+    class Capturer {
+
+        /**
+         * @classdesc 截图器: 截取Canvas图像后导出
+         * 
+         * @property { Canvas } canvasObj - canvas对象
+         * @property { string } fileTitle - 导出文件标题，默认值为 *title* 标签内容
+         * @property { number } fn - 导出文件计数器(int & fn>0)
+         * @property { get/set } [captureKey='Q'] - 截图按键值
+         * 
+         * @param { Canvas } canvasObj - canvas对象
+         * @param { string } fileTitle - 导出文件标题
+         * 
+         * @example
+         * let captuer = new Capturer(canvas).capturing();
+         */
+        constructor(canvasObj, fileTitle) {
+            this.canvasObj = canvasObj;
+            this.fileTitle = fileTitle || document.getElementsByTagName("title")[0].innerText.replace(/\s+/g, "");
+            /** @readonly */
+            this.fn = 0;
+            this._capture_keyCode = 'Q'.charCodeAt();
+        }
+
+        /** 获取截图按键值 */
+        get captureKey() { return String.fromCharCode(this._capture_keyCode); }
+        /** 设置截图按键值 */
+        set captureKey(key) { this._capture_keyCode = key.charCodeAt(); return this; }
+
+        /**
+         * 监听截图事件: 将截图函数绑定到按键事件上
+         */
+        capturing() {
+            let _this = this;
+            //绑定按键监听截图事件
+            window.addEventListener("keydown", function(event) {
+                if(event.keyCode == _this._capture_keyCode) {
+                    _this.capture();
+                }
+            }); 
+            return this;
+        }
+
+        /**
+         * 截图并导出当前canvas二进制数据
+         * 
+         * @param { string } fileName 导出文件名，默认值为 `${this.fileTitle}_${this.fn}`
+         */
+        capture(fileName) {
+            //构建文件名
+            fileName = fileName || `${this.fileTitle}_${this.fn++}`;
+            //导出canvas二进制数据
+            this.canvasObj.canvas.toBlob((blob) => {
+                let temp_node = document.createElement('a');
+                temp_node.style.display = 'none';
+                temp_node.id = fileName;
+                temp_node.href = window.URL.createObjectURL(blob);
+                temp_node.download = `${fileName}.png`; 
+                temp_node.click();
+            });
+        }
+    }
+
+    /**
+     * @module
+     * @desc     颜色容器
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-07-18
+     * @version  0.1.0
+    */
+
+
+    //颜色向量
+    class ColorVector extends Vector$1 {
+
+        /**
+         * 颜色向量(Vector):  
+         * 用向量来描述颜色，一个颜色表达式可以看作RGB空间中的一个向量，之所以采用
+         * 向量的形式来描述颜色在于，可以通过这种方式替换粒子中的位置向量，
+         * 来描述颜色向量在颜色空间中的移动，从而构建颜色渐变器。
+         * 
+         * @property { number[] } v - 颜色向量容器(内部存储结构)
+         * @property { get/set } r - R分量(this.v[0])
+         * @property { get/set } g - G分量(this.v[1])
+         * @property { get/set } b - B分量(this.v[2])
+         * @property { get/set } a - alpht通道分量(this.v[3])
+         * 
+         * @param { number } [r=0] - R分量(int & [0, 255]) 
+         * @param { number } [g=0] - G分量(int & [0, 255])  
+         * @param { number } [b=0] - B分量(int & [0, 255])  
+         * @param { number } [a=1] - alpht通道分量([0, 1])
+         * 
+         * @example
+         * let color = new ColorVector(100, 200, 300);
+         * color.color();  //'rgb(100, 200, 300)'
+         */
+        constructor(r=0, g=0, b=0, a=1) {
+            super();
+            //颜色分量
+            this.v = a==1 ? [r, g, b] : [r, g, b, a];
+        }
+
+        get r(){ return this.v[0]; }
+        get g(){ return this.v[1]; }
+        get b(){ return this.v[2]; }
+        get a(){ return this.v[3]; }
+        set r(val){ this.v[0] = val; }
+        set g(val){ this.v[1] = val; }
+        set b(val){ this.v[2] = val; }
+        set a(val){ this.v[3] = val; }
+
+        /**
+         * 返回颜色值
+         * 
+         * @param { boolean } [tolist=false] - {"false": "rgb(r, g, b)", "true": [r, g, b]} 
+         * @returns { string | Array } 颜色值
+         */
+        color(tolist=false) {
+            if(this.v.length<=3) {
+                return tolist ? [this.v[0], this.v[1], this.v[2]] : `rgb(${this.v[0]}, ${this.v[1]}, ${this.v[2]})`;
+            } else {
+                return tolist ? [this.v[0], this.v[1], this.v[2], this.v[3]] : `rgb(${this.v[0]}, ${this.v[1]}, ${this.v[2]})`;
+            }
+        }
+        /** 返回颜色值 */
+        val(tolist=false) { return this.color(tolist); }
+
+        /** 复制颜色 */
+        clone() {
+            return new ColorVector(...this.v);
+        }
+    }
+
+
+    //颜色渐变器
+    class ColorGradient {
+
+        /**
+         * @classdesc 线性颜色渐变器: 用于产生渐变色
+         * 
+         * @property { ColorVector } scv  - 起始颜色向量
+         * @property { ColorVector } ecv  - 终止颜色向量
+         * @property { ColorVector } cv   - 当前颜色向量
+         * @property { number } n - 渐变次数，用于计算每次迭代时的颜色增量
+         *  
+         * @param { ColorVector } start_color - 起始颜色向量
+         * @param { ColorVector } end_color - 终止颜色向量 
+         * @param { number } n - 渐变次数
+         * 
+         * @example
+         * let cg = new ColorGradient([100, 200, 200], [50, 50, 50], 100);
+         */
+        constructor(start_color, end_color, n) {
+            this.scv = new ColorVector(...start_color);
+            this.ecv = new ColorVector(...end_color);
+            this.cv = this.scv.clone();
+            this.n = n; 
+            //内部计数器，用于记录当前迭代次数
+            this._count = n;
+            //计算颜色增量: 每次迭代的颜色增量
+            this._dcv = Vector$1.sub(this.ecv, this.scv).norm(Vector$1.dist(this.ecv, this.scv)/n);
+        }
+
+        /**
+         * 迭代并返回颜色值
+         * 
+         * @param { boolean } [tolist=false] - {"false": "rgb(r, g, b)", "true": [r, g, b]} 
+         * @returns { string | Array } 颜色值
+         */
+        color(tolist=false) {
+            let color_val = this.cv.color(tolist);
+            if(this._count > 0) { this.cv.add(this._dcv); }
+            this._count--;
+            return color_val;
+        } 
+        val(tolist=false) { return this.color(tolist); }
+
+        /** 迭代终止条件 */
+        isEnd() {
+            return !(this._count > 0);
+        }
+
+    }
+
+    /**
+     * @module
+     * @desc     渲染器模块
+     * @project  Vision
+     * @author   Ais
+     * @date     2022-09-06
+     * @version  0.1.0
+    */
+
+
+    //渲染器基类
+    class Randerer {
+
+        /**
+         * @classdesc 渲染器基类: 实现行为逻辑和图像绘制的调度。
+         * 
+         * @property { get } ft - 帧时间轴，时钟
+         * @property { number } fps - 帧数(Frames Per Second)(int & fps>0)
+         * 
+         * @param { number } [fps=60] - 渲染帧数 
+         */
+        constructor(fps=60) {
+            this._ft = 0;
+            this.fps = fps;
+        }
+
+        /** 帧时间轴访问器 */
+        get ft() { return this._ft; }
+
+        /** 渲染接口  */
+        rander() { 
+            this._ft++; 
+        }
+    }
+
+
+    //间隔渲染器
+    class IntervalRanderer extends Randerer {
+
+        /**
+         * @classdesc 间隔渲染器: 通过 setInterval 函数实现渲染功能
+         * 
+         * @property { get } ft - 帧时间轴，时钟
+         * @property { number } fps - 帧数(Frames Per Second)(int & fps>0)
+         * @property { Function } rander_func - 渲染函数: 函数形参 => function() || function(ft), ft为帧时间轴，可选参数
+         * 
+         * @param { number } [fps=60] - 渲染帧数
+         * 
+         * @example 
+         * const randerer = new vision.randerer.IntervalRanderer().rander(() => {
+         *     canvas.refresh();
+         * });
+         */
+        constructor(fps=60) {
+            super(fps);
+            //停止时间点
+            this._stop_ftp = Infinity;
+            //间隔执行器
+            this._timer = null;
+            //渲染函数
+            this.rander_func = null;
+        }
+
+        /**
+         * 渲染接口: 通过 setInterval 间隔执行 rander_func 实现渲染功能
+         * 
+         * @param { Function } rander_func - 渲染函数: 函数形参 => function() || function(ft), ft为帧时间轴，可选参数
+         * @returns { Object } this
+         */
+        rander(rander_func) {
+            this.rander_func = rander_func;
+            //构建间隔执行器
+            this._timer = setInterval(()=>{
+                if(this._ft < this._stop_ftp) {
+                    //渲染
+                    this.rander_func(this._ft++);
+                 } else {
+                    //停机
+                    clearInterval(this._timer);
+                 } 
+             }, Math.ceil(1000/this.fps));
+             return this;
+        }
+
+        /**
+         * 设置停机时间点
+         * 
+         * @param { number } t - 停机时间点 
+         * @returns { Object } this
+         */
+        stop(t) {
+            this._stop_ftp = t; return this;
+        }
+    }
+
+
+    //单帧渲染器
+    class SingleFrameRanderer extends Randerer {
+
+        /**
+         * @classdesc 单帧渲染器/手动渲染器: 通过绑定按键来控制渲染行为
+         * 
+         * @property { number } act_ft_n - 每次触发渲染时，行为函数的调用次数(int & act_ft_n>0)
+         * @property { Function } act_func - 行为函数
+         * @property { Function } draw_func - 绘制函数
+         * @property { get/set } randerKey - 渲染按键值，控制由什么按键触发渲染
+         * 
+         * @param { number } [act_ft_n=1] - 每次触发渲染时，行为函数的调用次数(int & act_ft_n>0)
+         * 
+         * @example
+         * const randerer = new vision.randerer.SingleFrameRanderer().rander(
+         *     (ft) => {
+         *         pcs.action();
+         *     },
+         *     (ft) => {
+         *         canvas.refresh();
+         *     }
+         * );
+         */
+        constructor(act_ft_n=1) {
+            super(1);
+            this.act_ft_n = act_ft_n;
+            this.act_func = null;
+            this.draw_func = null;
+            //渲染按键值
+            this._rander_keyCode = ' '.charCodeAt();
+        }
+
+        /** 获取渲染按键值 */
+        get randerKey() { return String.fromCharCode(this._rander_keyCode); }
+        /** 设置渲染按键值 */
+        set randerKey(key) { this._rander_keyCode = key.charCodeAt(); }
+           
+        /**
+         * 渲染接口: 通过在 window 对象上绑定 keydown 事件来触发渲染
+         * 
+         * @param { Function } act_func - 行为函数
+         * @param { Function } draw_func - 绘制函数 
+         * @returns 
+         */
+        rander(act_func, draw_func) {
+            this.act_func = act_func, this.draw_func = draw_func;
+            let _this = this;
+            //绑定键盘事件
+            window.addEventListener("keydown", function(event) {
+                if(event.keyCode == _this._rander_keyCode) {
+                    //行为函数调用
+                    for(let i=0; i<_this.act_ft_n; i++) {
+                        _this.act_func(_this._ft++);
+                    }
+                    //绘制函数调用
+                    _this.draw_func && _this.draw_func(_this._ft);
+                }
+            }); 
+            return this;
+        }
+
+    }
+
+    var randerer = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        IntervalRanderer: IntervalRanderer,
+        SingleFrameRanderer: SingleFrameRanderer
+    });
+
+    /**
+     * @module
+     * @desc     高级绘制模块: 常用绘制方法封装
+     * @project  Vision
+     * @author   Ais
+     * @date    2022-08-01
+     * @version  0.1.0
+    */
+
+
+    /**
+     * @classdesc 高级绘制模块: 常用绘制方法封装
+     * 
+     * @property { Canvas } context - 绘图上下文容器
+     * 
+     * @example
+     * const Views = vision.Views; Views.context = canvas;
+     */
+    class Views {
+
+        //绘图上下文容器
+        context = null;
+
+        /**
+         * 节点连接器: 绘制点距范围在给定区间内的粒子之间的连线
+         * 
+         * @param { Particle[] } ps - 节点粒子
+         * @param { number[] } dr - 可绘制的点距范围，只绘制距离在该范围内的粒子连线
+         * @param { Array | ColorGradient } line_color - 连线的颜色，支持渐变色
+         * 
+         * @example  
+         * Views.nodelink(pcs.ps, [50, 100], [0, 175, 175]);
+         * Views.nodelink(pcs.ps, 100, new ColorGradient([0, 0, 0], [255, 255, 255], 100));
+         */
+        static nodelink(ps, dr=[0, 100], line_color=[255, 255, 255]) {
+            //粒子点距范围
+            let pdr = (typeof dr === "number") ? [0, dr] : dr;
+            let d = pdr[1] - pdr[0];
+            //颜色向量|颜色渐变器
+            let cv = line_color.color ? line_color : new ColorVector(...line_color);
+            //绘制
+            for(let i=0, n=ps.length; i<n; i++) {
+                let c = cv.color(true);
+                for(let k=i; k<n; k++) {
+                    //计算点距
+                    let pd = ps[i].p.dist(ps[k].p);
+                    if(pd >= pdr[0] && pd <= pdr[1]) {
+                        Views.context.ctx.strokeStyle = `rgb(${c[0]}, ${c[1]}, ${c[2]}, ${1-pd/d})`;
+                        Views.context.line(ps[i].p, ps[k].p);
+                    }
+                }
+            }
+        }
+
+        /**
+         * 绘制网格
+         * 
+         * @param { Object } params - 绘制参数
+         * @param { Vector } params.co - 网格中心坐标
+         * @param { number } params.dx - 网格单元长度(dx>0)
+         * @param { number } params.dy - 网格单元高度(dy>0)
+         * @param { number[] } params.xR - x轴坐标范围
+         * @param { number[] } params.yR - y轴坐标范围
+         * @param { number[] } [params.color=[255, 255, 255]] - 线段颜色
+         * @param { boolean } [params.center=true] - 网格坐标是否居中 -> true(中心坐标位于线段交界点) | false(中心坐标位于网格单元中心)
+         * 
+         * @example
+         * Views.grid({co: new Vector(canvas.cx, canvas.cy), dx: 10, dy: 10});
+         */
+        static grid({co, dx, dy, xR, yR, color=[255, 255, 255], center=true}) {
+            //中心坐标
+            co = co || new Vector$1(Views.context.cx, Views.context.cy);
+            //网格单元尺寸
+            dy = dy || dx;
+            //x轴范围
+            xR = xR || [-parseInt(Views.context.cx/dx)-1, parseInt(Views.context.cx/dx)+1];
+            let xs = xR[0]*dx+co.x, xe = xR[1]*dx+co.x;
+            //y轴范围
+            yR = yR || [-parseInt(Views.context.cy/dy)-1, parseInt(Views.context.cy/dy)+1];
+            let ys = yR[0]*dy+co.y, ye = yR[1]*dy+co.y;
+            //居中偏移量
+            let cdx = (center ? 0 : dx/2), cdy = (center ? 0 : dy/2); 
+            //设置颜色
+            Views.context.ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]||0.25})`;
+            //绘制x轴平行线
+            for(let x=xR[0], n=xR[1]; x<=n; x++) {
+                let _x = x*dx+co.x+cdx;
+                Views.context.line(_x, ys, _x, ye);
+            }
+            //绘制y轴平行线
+            for(let y=yR[0], n=yR[1]; y<=n; y++) {
+                let _y = y*dy+co.y+cdy;
+                Views.context.line(xs, _y, xe, _y);
+            }
+        }
+
+        /**
+         * 光线
+         * 
+         * @param { Vector[] } ps - 线的顶点集
+         * @param { Object } params - 绘制参数
+         * @param { Function } [params.Lfx=(x) => {return 1/(x+0.0001);}] - 亮度衰减函数(Lfx应满足在[1, n]区间单调递减)
+         * @param { number } [params.n=10] - 光线的层数(int & n>0)
+         * @param { number } [params.d=3] - 每层光线的宽度
+         * @param { number[] } [params.cs=[255, 255, 255]] - 起始颜色
+         * @param { number[] } [params.ce=[0, 0, 0]] - 终止颜色
+         * 
+         * @example
+         * 
+         */
+        static lightLine(ps, {Lfx, n=10, d=3, cs=[255, 255, 255], ce=[0, 0, 0]} = {}) {
+            //亮度衰减函数
+            Lfx = Lfx || ((x) => {return 1/(x+0.0001);});
+            //Lfx函数在[1, n]区间的最值, 用于进行后续归一化处理
+            let max = Lfx(1), min = Lfx(n);
+            //绘制光线
+            Views.context.ctx.lineCap = "round";
+            for(let i=n; i>0; i--) {
+                //计算亮度
+                let lr = (Lfx(i) - min) / (max - min);
+                let lc = [(cs[0]-ce[0])*lr+ce[0], (cs[1]-ce[1])*lr+ce[1], (cs[2]-ce[2])*lr+ce[2]];
+                //绘制光线层
+                Views.context.ctx.lineWidth = i * d;
+                Views.context.lines(ps, new ColorGradient(lc, ce, ps.length));
+            }  
+        }
+
+        /**
+         * 光环
+         * 
+         * @param { number } x - 圆心x轴坐标
+         * @param { number } y - 圆心y轴坐标
+         * @param { number } r - 半径
+         * @param { Object } params - 绘制参数
+         * @param { Function } [params.Lfx=(x) => {return 1/(x+0.0001);}] - 亮度衰减函数(Lfx应满足在[1, n]区间单调递减)
+         * @param { number } [params.n=50] - 光线的层数(int & n>0)
+         * @param { number[] } [params.cs=[255, 255, 255]] - 起始颜色
+         * @param { number[] } [params.ce=[0, 0, 0]] - 终止颜色
+         * @param { boolean } [params.point=false] - (true)绘制成光点样式
+         * 
+         */
+        static lightRing(x, y, r, {Lfx, n=50, cs=[255, 255, 255], ce=[0, 0, 0], point=false}={}) {
+            //亮度衰减函数
+            Lfx = Lfx || ((x) => {return 1/(x+0.0001);});
+            //Lfx函数在[1, n]区间的最值, 用于进行后续归一化处理
+            let max = Lfx(1), min = Lfx(n);
+            //计算环宽
+            let dR = r / n;
+            //绘制
+            for(let i=n; i>0; i--) {
+                //计算亮度
+                let lr = (Lfx(point ? i : n-i) - min) / (max - min);
+                let lc = [(cs[0]-ce[0])*lr+ce[0], (cs[1]-ce[1])*lr+ce[1], (cs[2]-ce[2])*lr+ce[2]];
+                //绘制光环
+                Views.context.colorStyle = `rgb(${lc[0]}, ${lc[1]}, ${lc[2]})`;
+                Views.context.circle(x, y, dR*i);
+                Views.context.ctx.fill();
+            }  
+        }
+
+        /**
+         * 绘制粒子轨迹: 解决“循环边界”下的轨迹绘制异常，通过将完整轨迹按照阈值进行分段绘制。
+         * 
+         * @param { Vector[] } trail - 轨迹点向量
+         * @param { Object } params - 绘制参数
+         * @param { number } [params.split_x=100] - x轴分量分段阈值: 点间隔超过阈值的将被拆分
+         * @param { number } [params.split_y=100] - y轴分量分段阈值
+         * @param { string } [params.color='rgb(255, 255, 255)'] - 轨迹颜色(支持渐变对象)
+         * 
+         * @example
+         * trail(pcs.ps[i].tracker.trail, {"color": new ColorGradient([50, 50, 50], [255, 255, 255], pcs.ps[i].tracker.trail.length)});
+         */
+        static trail(trail, {split_x=100, split_y=100, color='rgb(255, 255, 255)'}={}) {
+            let split_trail = [[]];
+            //按照分量分段阈值对轨迹进行分段
+            for(let i=0, n=trail.length-1; i<n; i++) {
+                split_trail[split_trail.length-1].push(trail[i]);
+                if(Math.abs(trail[i].x-trail[i+1].x)>split_x | Math.abs(trail[i].y-trail[i+1].y)>split_y) {
+                    split_trail.push([]);
+                }
+            }
+            for(let i=0, n=split_trail.length; i<n; i++) {
+                if(split_trail[i].length <= 1) { continue; }
+                Views.context.lines(split_trail[i], color);
+            }
+        }
+    }
+
+    var __index__ = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        Capturer: Capturer,
+        ColorGradient: ColorGradient,
+        ColorVector: ColorVector,
+        Views: Views,
+        randerer: randerer
+    });
+
+    exports.Canvas = Canvas;
+    exports.Capturer = Capturer;
+    exports.Particle = Particle;
+    exports.ParticleSystem = ParticleSystem;
+    exports.Tools = Tools;
+    exports.Vector = Vector$1;
+    exports.Views = Views;
+    exports.algo = __index__$4;
+    exports.context = __index__$3;
+    exports.particle = __index__$2;
+    exports.randerer = randerer;
+    exports.utils = __index__$1;
+    exports.vector = vector;
+    exports.views = __index__;
+
+}));

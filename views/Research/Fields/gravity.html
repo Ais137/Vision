@@ -31,10 +31,10 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.canvas.Canvas("vision_canvas");
-        const Vector = vision.vector.Vector;
-        const Views = vision.views.Views; Views.canvas = canvas;
-        const Tools = vision.tools.Tools;
+        const canvas = new vision.Canvas("vision_canvas");
+        const Vector = vision.Vector;
+        const Views = vision.Views; Views.context = canvas;
+        const Tools = vision.Tools;
 
         //配置参数
         const confs = {
@@ -58,12 +58,12 @@
                 Vector.random([[0, canvas.width], [0, canvas.height]]),
                 Vector.random([confs.vR, confs.vR])
             );
-            p.tracker = new vision.tracker.TrailTracker(p, confs.tn);
+            p.tracker = new vision.particle.TrailTracker(p, confs.tn);
             return p;
         }, {max_pn: confs.N, gen_pn: confs.gn, GENR: confs.GENR}).build(confs.N);
 
         //引力源
-        const gf = new vision.field.Gravity(new Vector(canvas.cx, canvas.cy));
+        const gf = new vision.particle.field.Gravity(new Vector(canvas.cx, canvas.cy));
         gf.G = confs.G;
         //矢量场作用
         pcs.action_middlewares.before.push((function () {
@@ -92,7 +92,7 @@
             for (let i = 0, n = pcs.ps.length; i < n; i++) {
                 canvas.lines(
                     pcs.ps[i].tracker.trail, 
-                    new vision.color.ColorGradient([50, 50, 50], [255, 255, 255], confs.tn)
+                    new vision.views.ColorGradient([50, 50, 50], [255, 255, 255], confs.tn)
                 );
                 // canvas.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, 3);
                 // canvas.ctx.fill();

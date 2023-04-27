@@ -31,11 +31,11 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.canvas.Canvas("vision_canvas");
-        const Vector = vision.vector.Vector;
-        const Views = vision.views.Views; Views.canvas = canvas;
-        const Tools = vision.tools.Tools;
-        const MBS = vision.Mandelbrot_Set;
+        const canvas = new vision.Canvas("vision_canvas");
+        const Vector = vision.Vector;
+        const Views = vision.Views; Views.context = canvas;
+        const Tools = vision.Tools;
+        const MBS = vision.algo;
         canvas.BGC = "rgb(0, 0, 0)";
 
         //渲染参数
@@ -66,7 +66,7 @@
 
 
         //构建实数坐标系: 将屏幕像素坐标系映射到 MBS 计算用的坐标系
-        let rcs = new vision.coor.RCS(
+        let rcs = new vision.particle.coor.RCS(
             co = Vector.v(confs.width*(2/3), confs.height/2), 
             scale = (confs.dod[1]-confs.dod[0])/confs.width
         );
@@ -141,7 +141,7 @@
             MBS_randerer(confs)
         }
 
-        let captuer = new vision.capturer.Capturer(canvas).capturing();
+        let captuer = new vision.views.Capturer(canvas).capturing();
 </script>
 </body>
 

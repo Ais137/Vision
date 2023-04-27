@@ -31,10 +31,10 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.canvas.Canvas("vision_canvas");
-        const Vector = vision.vector.Vector;
-        const Views = vision.views.Views; Views.canvas = canvas;
-        const Tools = vision.tools.Tools;
+        const canvas = new vision.Canvas("vision_canvas");
+        const Vector = vision.Vector;
+        const Views = vision.Views; Views.context = canvas;
+        const Tools = vision.Tools;
 
         //配置参数
         const confs = {
@@ -60,7 +60,7 @@
                 new Vector((confs.bR-10)*Math.cos(rad), (confs.bR-10)*Math.sin(rad)),
                 Vector.random([confs.vR, confs.vR])
             );
-            p.tracker = new vision.tracker.TrailTracker(p, confs.tn);
+            p.tracker = new vision.particle.TrailTracker(p, confs.tn);
             p.isEnd = function() {
                 let v_val = p.v.norm();
                 return v_val > 30000 || v_val < 5;
@@ -71,9 +71,9 @@
         //力场计算与边界处理
         pcs.action_middlewares.after.push((function () {
             //构建矢量场
-            let field = new vision.field.DeflectField(Tools.ATR(5));
+            let field = new vision.particle.field.DeflectField(Tools.ATR(5));
             //环形边界限制器
-            let border = new vision.border.RingReflectBorder(new Vector(canvas.cx, canvas.cy), confs.bR);
+            let border = new vision.particle.border.RingReflectBorder(new Vector(canvas.cx, canvas.cy), confs.bR);
             //边界处理中间件
             return function action_middleware(ps) {
                 for (let i = ps.length; i--;) { 
@@ -93,7 +93,7 @@
                 //绘制粒子轨迹
                 canvas.lines(
                     pcs.ps[i].tracker.trail,
-                    new vision.color.ColorGradient([50, 50, 50], [0, 255, 200], confs.tn)
+                    new vision.views.ColorGradient([50, 50, 50], [0, 255, 200], confs.tn)
                 );
                 //绘制粒子坐标
                 // canvas.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, 3);

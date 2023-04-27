@@ -102,7 +102,7 @@ class RCS extends CoordinateSystem {
 ```
 其中 **this._co** 表示在屏幕坐标系的原点坐标，**this._scale** 则为坐标系刻度(1个像素对于的坐标增量)
 
-完整的代码详见 [vector.coor.RCS](../../src/vector/coor.js)
+完整的代码详见 [particle.coor.RCS](../../src/particle/coor.js)
 
 ------------------------------------------------------------
 ## 绘制集合

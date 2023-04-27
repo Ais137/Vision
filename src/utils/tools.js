@@ -1,27 +1,29 @@
-/****************************************
- * Name: tool | 工具
- * Date: 
- * Author: Ais
- * Project: Vision
- * Desc: 常用工具代码
- * Version: 0.1
-****************************************/
+/**
+ * @module
+ * @desc     常用工具代码
+ * @project  Vision
+ * @author   Ais
+ * @date     2022-08-10
+ * @version  0.1.0
+*/
 
 
+/** @classdesc 常用工具代码 */
 class Tools {
 
-    /*----------------------------------------
-    @func: regular polygon | 正多边形生成器
-    @desc: 并非严格意义上的正多边形，而是一种"近似"正多边形。
-    @params: 
-        * n(number(N+, n>=3)): 边数
-        * r(number(r>0)): 半径
-        * po(list): 中心坐标
-        * rad(number): 起始弧度
-    @return(list)
-    @exp:
-        * Tools.regular_polygon(5, 100, [canvas.cx, canvas.cy]);
-    ----------------------------------------*/
+    /**
+     * 正多边形生成器  
+     * 并非严格意义上的正多边形，而是一种"近似"正多边形。
+     * 
+     * @param { number } n - 多边形边数(int & n>=3) 
+     * @param { number } r - 多边形中心到顶点的半径(r>0)
+     * @param { Array } po - 多边形中心坐标([x, y])
+     * @param { number } rad - 初始弧度
+     * 
+     * @returns { Array[] } 顶点坐标集
+     * 
+     * @example Tools.regular_polygon(5, 100, [canvas.cx, canvas.cy]);
+     */
     static regular_polygon(n, r, po, rad=0) {
         po = po || [0, 0];
         let d_rad = (2*Math.PI)/n;
@@ -32,65 +34,66 @@ class Tools {
         }
         return ps;
     }
+    /** @alias Tools#regular_polygon */
     static RP(n, r, po, rad=0) {
         return Tools.regular_polygon(n, r, po, rad);
     }
 
-    /*----------------------------------------
-    @func: 角度<>弧度 转换器
-    @desc: 在角度与弧度之间转换
-    @return(number)
-    @exp:
-        * Tools.ATR(45) -> Math.PI/4
-        * Tools.ATR(Math.PI) -> 45
-    ----------------------------------------*/
+    /**
+     * 角度转弧度
+     * 
+     * @param { number } angle - 角度 
+     * @returns { number } 对应弧度
+     * @example Tools.ATR(45)  //-> Math.PI/4
+     */
     static ATR(angle) {
         return (Math.PI/180)*angle;
     }
+    /**
+     * 弧度转角度
+     * @param { number } rad - 弧度 
+     * @returns { number } 对应角度
+     * @example Tools.RTA(Math.PI/4)  //-> 45
+     */
     static RTA(rad) {
         return (180/Math.PI)*rad;
     }
 
-    /*----------------------------------------
-    @func: 生成随机数
-    @params: 
-        * start/end: 生成范围
-    @return(number)
-    @exp: 
-        Tools.random(-5, 5)
-    ----------------------------------------*/
+    /**
+     * 生成随机数
+     * 
+     * @param { number } start - 起始值 
+     * @param { number } end - 终止值
+     * @returns { number } [start, end]范围内的随机数
+     * @example Tools.random(-5, 5)
+     */
     static random(start, end) {
         return (end-start)*Math.random()+start;
     }
 
-    /*----------------------------------------
-    @func: (list)随机选择器
-    @desc: 从数组中随机选择一个元素
-    @params: 
-        * ops(list): 选项集
-    @return(any)
-    @exp: 
-        Tools.rslist(["a", "b", "c"])
-    ----------------------------------------*/
-    static rslist(ops) {
+    /**
+     * 随机选择器: 从数组中随机选择一个元素
+     * 
+     * @param { Array } ops - 选项集 
+     * @returns { any } 随机选中的元素
+     * @example Tools.rslist(["a", "b", "c"])
+     */
+    static rselect(ops) {
         return ops[parseInt((ops.length)*Math.random())];
     }
 
-    /*----------------------------------------
-    @func: RGB(list) -> RGB(str)
-    @desc: 将RGB数组装换成RGB字符串
-    @params: 
-        * color(list): 颜色数组
-    @exp: 
-        Tools.RGB([255, 255, 255]) -> "rgb(255, 255, 255, 1)";
-    ----------------------------------------*/
+    /**
+     * RGB(list) -> RGB(str): 将RGB数组装换成RGB字符串  
+     * 
+     * @param { Array } color - 颜色数组 
+     * @returns { string } 颜色值 -> "rgb(r, g, b)"
+     * @example Tools.RGB([255, 255, 255]);  //-> "rgb(255, 255, 255, 1)";
+     */
     static RGB(color) {
         return `rgb(${color[0]||0}, ${color[1]||0}, ${color[2]||0}, ${color[3]||1})`;
     }
 
-
 }
 
 
-
-module.exports.Tools = Tools;
+export { Tools };

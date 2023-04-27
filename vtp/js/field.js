@@ -13,7 +13,7 @@ const confs = {
 }
 
 //矢量场
-class Field extends vision.field.Field {
+class Field extends vision.particle.field.Field {
 
     constructor(area) {
         super(area);
@@ -33,7 +33,7 @@ let pcs = new vision.particle.ParticleSystem(() => {
         Vector.random([[0, canvas.width], [0, canvas.height]]),
         Vector.random([confs.vR, confs.vR])
     );
-    p.tracker = new vision.tracker.TrailTracker(p, confs.tn);
+    p.tracker = new vision.particle.TrailTracker(p, confs.tn);
     return p;
 }, {max_pn: confs.N, gen_pn: confs.gn, GENR: confs.GENR}).build(confs.N);
 
@@ -50,7 +50,7 @@ pcs.action_middlewares.before.push((function() {
 //边界处理
 pcs.action_middlewares.after.push((function() {
     //构建边界限制器
-    let border = new vision.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+    let border = new vision.particle.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
     //边界处理中间件
     return function border_middleware(ps) {
         for(let i=ps.length; i--; ) { border.limit(ps[i]); }
@@ -68,7 +68,7 @@ const randerer = new vision.randerer.IntervalRanderer().rander(() => {
         //绘制粒子轨迹
         canvas.lines(
             pcs.ps[i].tracker.trail, 
-            new vision.color.ColorGradient([50, 50, 50], [255, 255, 255], confs.tn)
+            new vision.views.ColorGradient([50, 50, 50], [255, 255, 255], confs.tn)
         );
         //绘制粒子坐标
         // canvas.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, 3);
