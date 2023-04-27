@@ -22,7 +22,7 @@
 > *Vision* 框架是一座桥梁，用于连接想法创意与现实。一种将想法与创意进行可视化的绘制框架。
 
 --------------------------------------------------
-## Docs · 文档 
+## Docs · 核心文档 
 * [DevStandard · 开发规范](./docs/DevStandard.md)
 * [Spark · 想法与灵感记录](./Spark.md)
 
@@ -67,22 +67,28 @@
 
 --------------------------------------------------
 ## Build · 项目构建
-* 项目构建器 
-```shell
+* 构建项目 
+```sh
 npm run build
 ```
 
+* 运行测试(基于jest)
+```sh
+npm run test
+```
+
+* 文档构建(基于jsdoc)
+```sh
+npm run doc
+```
+
 * Views模板构建器
-```shell
+```sh
 # 查看当前模板
 npm run vtp -- -list
 # 生成模板
 npm run vtp -- 文件名 模板名  
 # exp: npm run vtp -- test pcs
-```
-* 项目测试(基于jest)
-```shell
-npm run test
 ```
 
 --------------------------------------------------

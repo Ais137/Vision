@@ -1,30 +1,41 @@
-/****************************************
- * Name: view | 视图绘制
- * Date: 2022-08-01
- * Author: Ais
- * Project: Vision
- * Desc: 常用绘制方法封装
- * Version: 0.1
-****************************************/
+/**
+ * @module
+ * @desc     高级绘制模块: 常用绘制方法封装
+ * @project  Vision
+ * @author   Ais
+ * @date    2022-08-01
+ * @version  0.1.0
+*/
 
 
 import { Vector } from "../vector/vector.js";
 import { ColorVector, ColorGradient } from "./color.js";
 
 
+/**
+ * @classdesc 高级绘制模块: 常用绘制方法封装
+ * 
+ * @property { Canvas } context - 绘图上下文容器
+ * 
+ * @example
+ * const Views = vision.Views; Views.context = canvas;
+ */
 class Views {
 
-    //绘图上下文
+    //绘图上下文容器
     context = null;
 
-    /*----------------------------------------
-    @func: 节点连接器
-    @desc: 绘制点距范围在给定区间内的粒子之间的连线
-    @params:
-        * ps(list:Particle): 节点粒子
-        * dr(list:number): 可绘制的点距范围
-        * line_color(list|ColorGradient): 连线的颜色
-    ----------------------------------------*/
+    /**
+     * 节点连接器: 绘制点距范围在给定区间内的粒子之间的连线
+     * 
+     * @param { Particle[] } ps - 节点粒子
+     * @param { number[] } dr - 可绘制的点距范围，只绘制距离在该范围内的粒子连线
+     * @param { Array | ColorGradient } line_color - 连线的颜色，支持渐变色
+     * 
+     * @example  
+     * Views.nodelink(pcs.ps, [50, 100], [0, 175, 175]);
+     * Views.nodelink(pcs.ps, 100, new ColorGradient([0, 0, 0], [255, 255, 255], 100));
+     */
     static nodelink(ps, dr=[0, 100], line_color=[255, 255, 255]) {
         //粒子点距范围
         let pdr = (typeof dr === "number") ? [0, dr] : dr;
@@ -45,19 +56,21 @@ class Views {
         }
     }
 
-    /*----------------------------------------
-    @func: 绘制网格
-    @params: 
-        * co(Vector): 网格中心坐标
-        * dx(number,>0): 网格单元长度
-        * dy(number,>0): 网格单元高度
-        * xR(list:int): x轴坐标范围
-        * yR(list:int): y轴坐标范围
-        * color(list:int): 线段颜色
-        * center(bool): 网格坐标是否居中 -> true(中心坐标位于线段交界点) | false(中心坐标位于网格单元中心)
-    @exp: 
-        Views.grid({co: grid.co, dx: grid.dx, dy: grid.dy});
-    ----------------------------------------*/
+    /**
+     * 绘制网格
+     * 
+     * @param { Object } params - 绘制参数
+     * @param { Vector } params.co - 网格中心坐标
+     * @param { number } params.dx - 网格单元长度(dx>0)
+     * @param { number } params.dy - 网格单元高度(dy>0)
+     * @param { number[] } params.xR - x轴坐标范围
+     * @param { number[] } params.yR - y轴坐标范围
+     * @param { number[] } [params.color=[255, 255, 255]] - 线段颜色
+     * @param { boolean } [params.center=true] - 网格坐标是否居中 -> true(中心坐标位于线段交界点) | false(中心坐标位于网格单元中心)
+     * 
+     * @example
+     * Views.grid({co: new Vector(canvas.cx, canvas.cy), dx: 10, dy: 10});
+     */
     static grid({co, dx, dy, xR, yR, color=[255, 255, 255], center=true}) {
         //中心坐标
         co = co || new Vector(Views.context.cx, Views.context.cy);
@@ -85,16 +98,20 @@ class Views {
         }
     }
 
-    /*----------------------------------------
-    @func: 光线
-    @params:
-        * ps(list:Vector): 线的点集
-        * Lfx(function): 亮度衰减函数(Lfx应满足在[1, n]区间单调递减)
-        * n(int:>0): 光线的层数
-        * d(number:>0): 每次光线的宽度
-        * cs(list): 起始颜色
-        * ce(list): 终止颜色
-    ----------------------------------------*/
+    /**
+     * 光线
+     * 
+     * @param { Vector[] } ps - 线的顶点集
+     * @param { Object } params - 绘制参数
+     * @param { Function } [params.Lfx=(x) => {return 1/(x+0.0001);}] - 亮度衰减函数(Lfx应满足在[1, n]区间单调递减)
+     * @param { number } [params.n=10] - 光线的层数(int & n>0)
+     * @param { number } [params.d=3] - 每层光线的宽度
+     * @param { number[] } [params.cs=[255, 255, 255]] - 起始颜色
+     * @param { number[] } [params.ce=[0, 0, 0]] - 终止颜色
+     * 
+     * @example
+     * 
+     */
     static lightLine(ps, {Lfx, n=10, d=3, cs=[255, 255, 255], ce=[0, 0, 0]} = {}) {
         //亮度衰减函数
         Lfx = Lfx || ((x) => {return 1/(x+0.0001);});
@@ -112,16 +129,20 @@ class Views {
         }  
     }
 
-    /*----------------------------------------
-    @func: 光环
-    @params: 
-        * x, y, r(number): 圆心坐标与半径
-        * Lfx(function): 亮度衰减函数(Lfx应满足在[1, n]区间单调递减)
-        * n(int:>0): 光线的层数
-        * cs(list): 起始颜色
-        * ce(list): 终止颜色
-        * point(bool): true->绘制成光点样式
-    ----------------------------------------*/
+    /**
+     * 光环
+     * 
+     * @param { number } x - 圆心x轴坐标
+     * @param { number } y - 圆心y轴坐标
+     * @param { number } r - 半径
+     * @param { Object } params - 绘制参数
+     * @param { Function } [params.Lfx=(x) => {return 1/(x+0.0001);}] - 亮度衰减函数(Lfx应满足在[1, n]区间单调递减)
+     * @param { number } [params.n=50] - 光线的层数(int & n>0)
+     * @param { number[] } [params.cs=[255, 255, 255]] - 起始颜色
+     * @param { number[] } [params.ce=[0, 0, 0]] - 终止颜色
+     * @param { boolean } [params.point=false] - (true)绘制成光点样式
+     * 
+     */
     static lightRing(x, y, r, {Lfx, n=50, cs=[255, 255, 255], ce=[0, 0, 0], point=false}={}) {
         //亮度衰减函数
         Lfx = Lfx || ((x) => {return 1/(x+0.0001);});
@@ -141,18 +162,18 @@ class Views {
         }  
     }
 
-    /*----------------------------------------
-    @func: 绘制轨迹
-    @desc: 
-        解决“循环边界”下的轨迹绘制异常，通过将完整轨迹按照阈值进行分段绘制。
-    @params: 
-        * trail(list:Vector): 轨迹向量列表
-        * split_x(number): x轴分量分段阈值
-        * split_y(number): y轴分量分段阈值
-        * color: 轨迹颜色(支持渐变对象)
-    @exp: 
-        trail(pcs.ps[i].tracker.trail, {"color": new vision.views.ColorGradient([50, 50, 50], [255, 255, 255], pcs.ps[i].tracker.trail.length)});
-    ----------------------------------------*/
+    /**
+     * 绘制粒子轨迹: 解决“循环边界”下的轨迹绘制异常，通过将完整轨迹按照阈值进行分段绘制。
+     * 
+     * @param { Vector[] } trail - 轨迹点向量
+     * @param { Object } params - 绘制参数
+     * @param { number } [params.split_x=100] - x轴分量分段阈值: 点间隔超过阈值的将被拆分
+     * @param { number } [params.split_y=100] - y轴分量分段阈值
+     * @param { string } [params.color='rgb(255, 255, 255)'] - 轨迹颜色(支持渐变对象)
+     * 
+     * @example
+     * trail(pcs.ps[i].tracker.trail, {"color": new ColorGradient([50, 50, 50], [255, 255, 255], pcs.ps[i].tracker.trail.length)});
+     */
     static trail(trail, {split_x=100, split_y=100, color='rgb(255, 255, 255)'}={}) {
         let split_trail = [[]];
         //按照分量分段阈值对轨迹进行分段

@@ -1,39 +1,41 @@
-/****************************************
- * Name: random
- * Date: 2022-08-01
- * Author: Ais
- * Project: Vision
- * Desc: 
- * Version: 0.1
-****************************************/
+/**
+ * @module
+ * @desc     随机选择器
+ * @project  Vision
+ * @author   Ais
+ * @date     2022-08-01
+ * @version  0.1.0
+*/
 
 
 //随机选择器
 class RandomSelector {
 
-    /*----------------------------------------
-    @class: RandomSelector(随机选择器)
-    @desc: 给定选项集，根据权重生成概率，随机选择一个选项。
-    @property: 
-        * _ops(list:obj): 选项集
-    @method: 
-        * _probability: 根据选项集中选项的权重计算概率
-        * select: 随机从选项集中选择一个选项
-    @exp:
-        * let rs = new RandomSelector([["a", 1], ["b", 1], ["c", 3], ["d", 1]])
-    ----------------------------------------*/
+    /**
+     * @classdesc 随机选择器: 给定选项集，根据权重生成概率，随机选择一个选项。
+     * 
+     * @property { Object[] } _ops - 选项集
+     * @property { Object } _ops.op - 选项对象
+     * @property { number } _ops.p - 选中概率
+     * @property { number } _ops.ps - 起始概率值
+     * @property { number } _ops.pe - 终止概率值
+     * 
+     * @param { Array[] } options - 选项集: [[op(选项, any), wt(权重, number:>0)]...]
+     * 
+     * @example
+     * let rs = new RandomSelector([["a", 1], ["b", 1], ["c", 3], ["d", 1]])
+     */
     constructor(options) {
         //选项集
         this._ops = this._probability(options);
     }
 
-    /*----------------------------------------
-    @func: 计算概率
-    @desc: 基于权重计算概率 -> p[i] = wt[i] / sum(wt)
-    @params: 
-        * options(list:list): [[op(选项, any), wt(权重, number:>0)]...]
-    @return(opt(list:obj)): [{"op": 选项, "p": 概率, "ps/pe": 概率范围}] 
-    ----------------------------------------*/
+    /**
+     * 计算概率: 基于选项的权重计算概率 -> p[i] = wt[i] / sum(wt)
+     *  
+     * @param { Array[] } options - 选项集: [[op(选项, any), wt(权重, number:>0)], ...]
+     * @returns { Object[] } 选项集: [{"op": "选项", "p": "概率", "ps/pe": "概率范围"}, ...]
+     */
     _probability(options) {
         //计算总权重
         let swt = 0;
@@ -57,11 +59,12 @@ class RandomSelector {
         return _ops;
     }
 
-    /*----------------------------------------
-    @func: 随机选择
-    @desc: 从选项集中随机选择一个选项
-    @return(any) 
-    ----------------------------------------*/
+    /**
+     * 从选项集中随机选择一个选项
+     * 
+     * @returns { any } 选中的选项集中的对象 this._ops[i].op
+     * @example rs.select();
+     */
     select() {
         let r = Math.random();
         for(let i=0, n=this._ops.length; i<n; i++) {

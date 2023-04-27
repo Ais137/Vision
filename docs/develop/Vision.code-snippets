@@ -5,15 +5,14 @@
         "scope": "javascript,typescript",
         "prefix": "meta",
         "body": [
-            "/****************************************",
-            " * Name: $1",
-            " * Date: $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE", 
-            " * Author: Ais",
-            " * Project: $2",
-            " * Desc: $0",
-            " * Version: 0.1",
-            " * Update: ",
-            "****************************************/",
+            "/**",
+            " * @module",
+            " * @desc     $1",
+            " * @project  Vision",
+            " * @author   Ais",
+            " * @date     $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE",
+            " * @version  0.1.0",
+            "*/"
         ]
     },
     //类构造器注解
@@ -22,15 +21,15 @@
         "scope": "javascript,typescript",
         "prefix": "clsanno", 
         "body": [
-            "/*----------------------------------------",
-            "@class: $1",
-            "@desc: $2",
-            "@property: ", 
-            "    * key(type): desc",
-            "@method: ",
-            "    * method: func",
-            "@exp: ",
-            "----------------------------------------*/"
+            "/**",
+            "* @classdesc $1",
+            "*", 
+            "* @property {}",
+            "*", 
+            "* @param {}",
+            "*", 
+            "* @example",
+            "*/",
         ]
     },
     //方法注解
@@ -39,14 +38,12 @@
         "scope": "javascript,typescript",
         "prefix": "anno",
         "body": [
-            "/*----------------------------------------",
-            "@func: $1",
-            "@desc: $2",
-            "@params: ",
-            "    * key(type): value",
-            "@return(type): ",
-            "@exp: ",
-            "----------------------------------------*/",
+            "/**",
+            "* $1",
+            "*", 
+            "* @param {}",
+            "* @returns {}",
+            "*/"
         ]
     },
 

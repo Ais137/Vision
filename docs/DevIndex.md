@@ -11,7 +11,7 @@
         * [Vision.code-snippets](./develop/Vision.code-snippets) : 代码片段(vscode) 
     * ### */framework* : 架构设计文档
     * ### */technology* : 技术方案评估文档
-    * ### */tutorial* : 简介教程
+    * ### */tutorials* : 简介教程
     * [DevIndex]() : 项目结构索引
     * [DevDevStandard](./DevStandard.md) : 项目开发规范
 * ### ***/src***: 源码目录

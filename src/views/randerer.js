@@ -1,41 +1,33 @@
-/****************************************
- * Name: randerer | 渲染器
- * Date: 2022-09-06
- * Author: Ais
- * Project: Vision
- * Desc: 渲染器模块
- * Version: 0.1
-****************************************/
+/**
+ * @module
+ * @desc     渲染器模块
+ * @project  Vision
+ * @author   Ais
+ * @date     2022-09-06
+ * @version  0.1.0
+*/
 
 
 //渲染器基类
 class Randerer {
 
-    /*----------------------------------------
-    @class: 渲染器基类
-    @desc: 渲染器，实现行为逻辑和图像绘制的调度。
-    @property: 
-        * _ft(number:>0): 帧时间轴，时钟
-        * fps(number:>0): 帧数(Frames Per Second)
-    @method: 
-        * rander: 渲染接口
-    ----------------------------------------*/
+    /**
+     * @classdesc 渲染器基类: 实现行为逻辑和图像绘制的调度。
+     * 
+     * @property { get } ft - 帧时间轴，时钟
+     * @property { number } fps - 帧数(Frames Per Second)(int & fps>0)
+     * 
+     * @param { number } [fps=60] - 渲染帧数 
+     */
     constructor(fps=60) {
-        //帧时间轴
         this._ft = 0;
-        //帧数(Frames Per Second)
         this.fps = fps;
     }
 
-    /*----------------------------------------
-    @func: 帧时间轴访问器
-    @desc: this._ft用于在类内部实现帧的计数, 对外只读
-    ----------------------------------------*/
+    /** 帧时间轴访问器 */
     get ft() { return this._ft; }
 
-    /*----------------------------------------
-    @func: 渲染接口
-    ----------------------------------------*/
+    /** 渲染接口  */
     rander() { 
         this._ft++; 
     }
@@ -45,21 +37,20 @@ class Randerer {
 //间隔渲染器
 class IntervalRanderer extends Randerer {
 
-    /*----------------------------------------
-    @class: 间隔渲染器
-    @desc: 标准渲染器，通过 setInterval 函数实现渲染功能
-    @property: 
-        * _stop_ft(number:>0): 渲染器停机时间点
-        * _timer(obj): setInterval函数返回对象，用于在停机时停止渲染器
-        * rander_func(func): 渲染函数
-    @method: 
-        * rander: 渲染接口
-        * stop: 设置停机时间点
-    @exp: 
-        const randerer = new vision.randerer.IntervalRanderer().rander(() => {
-            canvas.refresh();
-        });
-    ----------------------------------------*/
+    /**
+     * @classdesc 间隔渲染器: 通过 setInterval 函数实现渲染功能
+     * 
+     * @property { get } ft - 帧时间轴，时钟
+     * @property { number } fps - 帧数(Frames Per Second)(int & fps>0)
+     * @property { Function } rander_func - 渲染函数: 函数形参 => function() || function(ft), ft为帧时间轴，可选参数
+     * 
+     * @param { number } [fps=60] - 渲染帧数
+     * 
+     * @example 
+     * const randerer = new vision.randerer.IntervalRanderer().rander(() => {
+     *     canvas.refresh();
+     * });
+     */
     constructor(fps=60) {
         super(fps);
         //停止时间点
@@ -70,13 +61,12 @@ class IntervalRanderer extends Randerer {
         this.rander_func = null;
     }
 
-    /*----------------------------------------
-    @func: 渲染接口
-    @desc: 通过 setInterval 间隔执行 rander_func 实现渲染功能
-    @params: 
-        * rander_func(func): 渲染函数，
-        函数形参 => function() || function(ft), ft为帧时间轴，可选参数
-    ----------------------------------------*/
+    /**
+     * 渲染接口: 通过 setInterval 间隔执行 rander_func 实现渲染功能
+     * 
+     * @param { Function } rander_func - 渲染函数: 函数形参 => function() || function(ft), ft为帧时间轴，可选参数
+     * @returns { Object } this
+     */
     rander(rander_func) {
         this.rander_func = rander_func;
         //构建间隔执行器
@@ -92,9 +82,12 @@ class IntervalRanderer extends Randerer {
          return this;
     }
 
-    /*----------------------------------------
-    @func: 设置停机时间点
-    ----------------------------------------*/
+    /**
+     * 设置停机时间点
+     * 
+     * @param { number } t - 停机时间点 
+     * @returns { Object } this
+     */
     stop(t) {
         this._stop_ftp = t; return this;
     }
@@ -104,51 +97,47 @@ class IntervalRanderer extends Randerer {
 //单帧渲染器
 class SingleFrameRanderer extends Randerer {
 
-    /*----------------------------------------
-    @class: 单帧渲染器/手动渲染器
-    @desc: 通过绑定按键来控制渲染行为
-    @property: 
-        * act_ft_n(number:>0): 每次触发渲染时，行为函数的调用次数
-        * _rander_keyCode(int): 渲染按键值，控制由什么按键进行渲染
-        * act_func(func): 行为函数
-        * draw_func(func): 绘制函数
-    @method: 
-        * method: func
-    @exp: 
-        const randerer = new vision.randerer.SingleFrameRanderer().rander(
-            (ft) => {
-                pcs.action();
-            },
-            (ft) => {
-                canvas.refresh();
-            }
-        );
-    ----------------------------------------*/
+    /**
+     * @classdesc 单帧渲染器/手动渲染器: 通过绑定按键来控制渲染行为
+     * 
+     * @property { number } act_ft_n - 每次触发渲染时，行为函数的调用次数(int & act_ft_n>0)
+     * @property { Function } act_func - 行为函数
+     * @property { Function } draw_func - 绘制函数
+     * @property { get/set } randerKey - 渲染按键值，控制由什么按键触发渲染
+     * 
+     * @param { number } [act_ft_n=1] - 每次触发渲染时，行为函数的调用次数(int & act_ft_n>0)
+     * 
+     * @example
+     * const randerer = new vision.randerer.SingleFrameRanderer().rander(
+     *     (ft) => {
+     *         pcs.action();
+     *     },
+     *     (ft) => {
+     *         canvas.refresh();
+     *     }
+     * );
+     */
     constructor(act_ft_n=1) {
         super(1);
-        //行为函数调用次数
         this.act_ft_n = act_ft_n;
+        this.act_func = null;
+        this.draw_func = null;
         //渲染按键值
         this._rander_keyCode = ' '.charCodeAt();
-        //行为函数
-        this.act_func = null;
-        //绘制函数
-        this.draw_func = null;
     }
 
-    /*----------------------------------------
-    @func: 获取/设置 渲染按键
-    ----------------------------------------*/
+    /** 获取渲染按键值 */
     get randerKey() { return String.fromCharCode(this._rander_keyCode); }
+    /** 设置渲染按键值 */
     set randerKey(key) { this._rander_keyCode = key.charCodeAt(); }
        
-    /*----------------------------------------
-    @func: 渲染接口
-    @desc: 通过在 window 对象上绑定 keydown 事件来触发渲染
-    @params: 
-        * act_func(func): 行为函数
-        * draw_func(func): 绘制函数
-    ----------------------------------------*/
+    /**
+     * 渲染接口: 通过在 window 对象上绑定 keydown 事件来触发渲染
+     * 
+     * @param { Function } act_func - 行为函数
+     * @param { Function } draw_func - 绘制函数 
+     * @returns 
+     */
     rander(act_func, draw_func) {
         this.act_func = act_func, this.draw_func = draw_func;
         let _this = this;

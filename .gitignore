@@ -1,6 +1,6 @@
 /node_modules
-**/dist/*
-!**/dist/vision.js
+# **/dist/*
+# !**/dist/vision.js
 /dev
 /docs/dev.md
 index.js
@@ -8,3 +8,4 @@ index.js
 !**/img/disp
 /DevPlan.md
 package-lock.json
+/api

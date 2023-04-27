@@ -1,114 +1,102 @@
-/****************************************
- * Name: Nearest Neighbor Search | 邻近搜索算法
- * Date: 2023-01-30
- * Author: Ais
- * Project: Vision
- * Desc: 在向量集中搜索给定目标向量的邻近集
- * Version: 0.1
-****************************************/
+/**
+ * @module
+ * @desc     邻近搜索算法: 在向量集中搜索给定目标向量的邻近集 
+ * @project  Vision
+ * @author   Ais
+ * @date     2023-01-30
+ * @version  0.1.0
+*/
 
 
 import { Vector } from "../vector/vector.js";
 
 
-//邻近搜索算法(基类)
+/** 邻近搜索算法(基类) */
 class NearestNeighborSearch {
 
-    /*----------------------------------------
-    @class: NearestNeighborSearch 
-    @desc: 邻近搜索算法模块，用于在向量集中搜索给定目标向量的邻近元素集
-    @property: 
-        * ps(list:obj): 对象集，算法基于该属性进行数据结构的构建与邻近集的计算
-        * vect(callable): 向量提取器(可调用对象), 用于从对象中提取向量作为算法处理单元
-        * IS_LOOP_BORDER(bool): 循环边界标记, 用于标记算法是否在循环边界下进行计算
-    @method: 
-        * build: 构建算法的数据结构
-        * near: 根据距离(dist)计算目标对象(tp)的邻近集
-        * k_near: 计算离给定目标对象(tp)最近的“k”个对象
-        * nps: 根据对象集生成每个元素的邻近集
-    @exp: 
-        let NNS = new NearestNeighborSearch(ps, function(particle){return particle.p;});
-    @question: 怎样让算法模块支持其他距离计算方式
-        NNS(NearestNeighborSearch)算法模块通过 "vect" 属性从对象中提取出一个向量对象(Vector)
-        作为算法的计算处理单元，默认情况下通过 "Vector.dist" 计算的是欧式距离，为了使算法模块支持
-        其他的距离计算类型(比如曼哈顿距离)，可以从 "Vector" 类派生一个子类，并重写 "dist" 方法来实现。
-    ----------------------------------------*/
+    /**
+     * @classdesc 邻近搜索算法模块，用于在向量集中搜索给定目标向量的邻近元素集
+     * 
+     * @property { Object[] } ps - 对象集，算法基于该属性进行数据结构的构建与邻近集的计算
+     * @property { callable } vect - 向量提取器(可调用对象), 用于从对象中提取向量作为算法处理单元
+     * @property { bool } IS_LOOP_BORDER - 循环边界标记, 用于标记算法是否在循环边界下进行计算
+     * 
+     * @param { Object[] } ps - 对象集 
+     * @param { callable } vect - 向量提取器
+     * 
+     * @example
+     * let NNS = new NearestNeighborSearch(ps, function(particle){return particle.p;});
+     * 
+     * @question 怎样让算法模块支持其他距离计算方式
+     * NNS(NearestNeighborSearch)算法模块通过 "vect" 属性从对象中提取出一个向量对象(Vector)
+     * 作为算法的计算处理单元，默认情况下通过 "Vector.dist" 计算的是欧式距离，为了使算法模块支持
+     * 其他的距离计算类型(比如曼哈顿距离)，可以从 "Vector" 类派生一个子类，并重写 "dist" 方法来实现。
+     */
     constructor(ps, vect) {
-        /*----------------------------------------
-        @func: 向量提取器
-        @desc: 
-            给定一个对象，从中提取出向量对象(Vector)作为算法的处理单元
-            设计该属性的目的是为了提高模块可处理对象的适应性，并让算法的处理单元统一成向量对象。
-        @params: 
-            * obj(obj): 任意对象
-        @return(Vector): 对象的某个向量属性
-        @exp: 
-            this.vect = function(particle_obj) { return particle_obj.p }
-        ----------------------------------------*/
+        /**
+         * 向量提取器
+         * 给定一个对象，从中提取出向量对象(Vector)作为算法的处理单元
+         * 设计该属性的目的是为了提高模块可处理对象的适应性，并让算法的处理单元统一成向量对象。
+         * @param { Object } obj - 处理对象
+         * @returns { Vector } 对象的某个向量属性
+         * @example this.vect = function(particle_obj) { return particle_obj.p }
+         */
         this.vect = vect || function(obj) { return obj; };
-        //对象集: 用于算法数据结构(状态)的构建
         this.ps = ps;
-        //循环边界标记: 该标记为(true)时, 在有边界限制的情况下需要将边界当成循环边界进行处理
         this.IS_LOOP_BORDER = false;
     }
 
-    /*----------------------------------------
-    @func: 构建算法的数据结构
-    @desc: 
-        更新 this.ps 属性并基于对象集(ps)构建算法数据结构，主要用于使用数据结构(状态)进行邻近集计算的算法实现，
-        当ps的状态发生变化时，通过该方法重新构建内部数据结构。
-    @params: 
-        * ps(list:obj): 对象集
-    @return(this) 
-    @exp: 
-        let NNS = new NearestNeighborSearch(ps).build();
-        let NNS = new NearestNeighborSearch().build(ps);
-    ----------------------------------------*/
+    /**
+     * 构建算法的数据结构  
+     * 更新 this.ps 属性并基于对象集(ps)构建算法数据结构，主要用于使用数据结构(状态)进行邻近集计算的算法实现，当ps的状态发生变化时，通过该方法重新构建内部数据结构。
+     * 
+     * @param { Object[] } [ps=null] ps -  对象集
+     * @returns { NearestNeighborSearch } this
+     * @example 
+     * let NNS = new NearestNeighborSearch(ps).build();
+     * let NNS = new NearestNeighborSearch().build(ps);
+     */
     build(ps=null) {
         this.ps = ps || this.ps;
         return this;
     }
 
-    /*----------------------------------------
-    @func: 生成距离(dist)邻近集
-    @desc: 根据距离(dist)计算目标对象(tp)在对象集(ps)中的邻近集
-    @params: 
-        * tp(obj): 目标对象(与对象集(ps)中的元素类型一致，或者具有必要属性(从鸭子类型的观点来看))
-        * dist(number:>=0): 算法的判定距离
-    @return(list:obj): [ps[i], ps[k], ps[j], ...]
-    @exp: 
-        let ns = new NearestNeighborSearch(ps).near(tp, 100);
-    ----------------------------------------*/
+    /**
+     * 生成距离(dist)邻近集: 根据距离(dist)计算目标对象(tp)在对象集(ps)中的邻近集
+     * 
+     * @param { Object } tp - 目标对象(与对象集(ps)中的元素类型一致，或者具有必要属性(从鸭子类型的观点来看))
+     * @param { number } dist - 算法的判定距离(dist>=0)
+     * @returns { Object[] } 邻近集([ps[i], ps[k], ps[j], ...])
+     * @example let ns = new NearestNeighborSearch(ps).near(tp, 100);
+     */
     near(tp, dist) {
         return [];
     }
 
-    /*----------------------------------------
-    @func: 生成"k"邻近集
-    @desc: 给定目标对象(tp), 计算在对象集(ps)中, 离"tp"最近的"k"个元素
-    @params: 
-        * tp(obj): 目标对象
-        * k(int:>0): k个最近的元素(k >= nps.length)
-    @return(list:obj): [ps[i], ps[k], ps[j], ...]
-    @exp: 
-        let ns = new NearestNeighborSearch(ps).k_near(tp, 5);
-    ----------------------------------------*/
+    /**
+     * 生成"k"邻近集: 给定目标对象(tp), 计算在对象集(ps)中, 离"tp"最近的"k"个元素
+     * 
+     * @param { Object } tp - 目标对象
+     * @param { number } k - k个最近的元素(k >= nps.length)
+     * @returns { Object[] } 邻近集([ps[i], ps[k], ps[j], ...])
+     * @example let ns = new NearestNeighborSearch(ps).k_near(tp, 5);
+     */
     k_near(tp, k) {
         return [];
     }
 
-    /*----------------------------------------
-    @func: 计算对象集的邻近集
-    @desc: 计算给定对象集中每个元素的邻近集
-    @params: 
-        * d(number): dist or k, 根据模式确定
-        * mode(enum): "dist" || "k" 
-    @return(list:obj): [{"tp": ps[i], "nps": [...]}, ...]
-    @exp: 
-        let ns = new NearestNeighborSearch(ps).nps(100);
-        let ns = new NearestNeighborSearch(ps).nps(5, "k");
-    @TODO: 计算结构优化
-    ----------------------------------------*/
+    /**
+     * 计算对象集的邻近集: 计算给定对象集中每个元素的邻近集
+     * 
+     * @param { number } d - dist or k, 根据模式确定
+     * @param { enum } mode - "dist" || "k" 
+     * @returns { Object[] } 邻近集([{"tp": ps[i], "nps": [...]}, ...])
+     * @example
+     * let ns = new NearestNeighborSearch(ps).nps(100);
+     * let ns = new NearestNeighborSearch(ps).nps(5, "k");
+     * 
+     * @todo 计算结构优化
+     */
     nps(d, mode="dist") {
         //@ERR: 该方式将导致"this"的隐式绑定丢失, 从而导致目标方法(near || k_near)被调用时，无法引用 this.vect 属性。
         // let _near = (mode=="dist" ? this.near : this.k_near);
@@ -121,14 +109,11 @@ class NearestNeighborSearch {
         return np_set;
     }
 
-    /*----------------------------------------
-    @func: 将邻近集转换成图结构
-    @desc: 
-    @params: 
-        * nps(list: ns): 邻近集
-    @return(type): 
-    @exp: 
-    ----------------------------------------*/
+    /**
+     * 将邻近集转换成图结构
+     * 
+     * @param { Object[] } nps - 邻近集 
+     */
     static toGraph(nps) {
         return ;
     }
@@ -138,23 +123,31 @@ class NearestNeighborSearch {
 //线性邻近搜索
 class LinearNNS extends NearestNeighborSearch {
 
-    /*----------------------------------------
-    @class: LinearNNS 
-    @desc: 线性邻近搜索，通过遍历对象集(ps)来计算目标对象(tp)的邻近集
-    @algo:
-        由于该算法结构简单，并且不要维护内部数据结构支撑算法计算(无状态)，因此适用于 ps 对象动态变化的场景，
-        比如可以在 boids 算法中用来计算邻近视野中的对象。但是缺点也很明显，算法的计算量依赖于 ps 的规模，
-        当 ps 规模过大时，算法效率会很低。
-    @exp: 
-        let LNNS = new LinearNNS(ps, function(particle){return particle.p;});
-    ----------------------------------------*/
+    /**
+     * @classdesc 线性邻近搜索，通过遍历对象集(ps)来计算目标对象(tp)的邻近集
+     * 
+     * @description 
+     * 由于该算法结构简单，并且不要维护内部数据结构支撑算法计算(无状态)，因此适用于 ps 对象动态变化的场景，
+     * 比如可以在 boids 算法中用来计算邻近视野中的对象。但是缺点也很明显，算法的计算量依赖于 ps 的规模，
+     * 当 ps 规模过大时，算法效率会很低。
+     * 
+     * @param { Object[] } ps - 对象集 
+     * @param { callable } vect - 向量提取器
+     * @example let LNNS = new LinearNNS(ps, function(particle){return particle.p;});
+     */
     constructor(ps, vect) {
         super(ps, vect);
     }
 
-    /*----------------------------------------
-    @func: dist邻近集
-    ----------------------------------------*/
+    /**
+     * dist邻近集
+     * 
+     * @override
+     * @param { Object } tp - 目标对象 
+     * @param { number } dist - 判定距离(dist>=0)
+     * @param { Object[] } [ps=null] ps - 对象集，该参数将覆盖 this.ps 进行计算 
+     * @returns { Object[] } 邻近集([ps[i], ps[k], ps[j], ...])
+     */
     near(tp, dist, ps=null) {
         ps = ps || this.ps;
         let tp_v = this.vect(tp), nps = [];
@@ -164,9 +157,15 @@ class LinearNNS extends NearestNeighborSearch {
         return nps;
     }
 
-    /*----------------------------------------
-    @func: k邻近集
-    ----------------------------------------*/
+    /**
+     * k邻近集
+     * 
+     * @override
+     * @param { Object } tp - 目标对象 
+     * @param { number } k - k个最近的元素(k >= nps.length)
+     * @param { Object[] } [ps=null] ps - 对象集，该参数将覆盖 this.ps 进行计算 
+     * @returns { Object[] } 邻近集([ps[i], ps[k], ps[j], ...])
+     */
     k_near(tp, k, ps=null) {
         ps = ps || this.ps;
         let tp_v = this.vect(tp), dist_ps = [];
@@ -207,108 +206,107 @@ class LinearNNS extends NearestNeighborSearch {
 //网格邻近搜索
 class GridNNS extends LinearNNS {
 
-    /*----------------------------------------
-    @class: GridNNS 
-    @desc: 网格邻近搜索，基于 LinearNNS 算法进行优化。
-    @algo:
-        算法的基本思路是将目标数据(ps)的向量空间划分成网格，网格中的单元格尺寸为"dn", 单元格维度取决于
-        目标数据维度。通过将目标数据(ps)映射到网格空间中的位置矢量，来存储目标数据对象。在这种映射下，
-        位置间距小于单元格对角线长度(最大距离)的对象会存储在相同的单元格(或邻近的单元格)，在进行邻近搜索时，
-        将目标对象(tp)映射到网格空间坐标，并直接读取该单元格(或半径R内邻近单元格)中存储的对象。得到一个近似邻近集，
-        再对这个近似解进行精确搜索。以减少 LinearNNS 算法中的无效计算。
-        GridNNS 算法有以下特征:
-            * "dn" 参数对算法的影响: 
-                "dn"参数越小，算法所需的存储空间越大，"dn"参数越大，算法的计算量越接近 LinearNNS 算法。
-                当 dn 大于等于目标数据边界大小的情况下，退化成 LinearNNS 算法。
-            * 动态数据: 
-                相对于 LinearNNS 算法，该算法是一个具有内部状态的算法，因此在 "ps" 变动的场景下，需要通过 "build" 方法更新内部状态。
-            * 有限空间: 
-                该算法适用于数据集聚集在一个有限空间下，当数据集中离散点过多，会导致更多的存储空间开销。
-            * 数据集分量范围限制:
-                对于数据集的 dsr(数据集分量范围) 不能为负数，因为在将数据的向量坐标映射到存储容器索引时，存储容器的索引范围是 [0, N+)，因此数据集中的
-                向量分量不能为负数。但是可以通过对数据集进行整体平移来解决该限制。这是由于在采用欧式距离计算的情况下，该邻近搜索算法具有"平移不变性"，
-                即对数据集整体平移一个向量(v)，给定目标向量(同时进行平移操作)的邻近集不变。
-            * 边界条件: 
-                当目标数据在 dsr(数据集分量范围) 外时，算法需要对该情况进行特殊处理。 
-    @property:
-        * dn(int|>0): 网格单元大小
-        * dsr(list:[min, max]): 数据集分量范围，其长度等于数据集向量维度。每个单元代表数据集对应的分量范围。
-        * dst(Vector): 数据集非负平移量，用于解决"数据集分量范围限制"，基于 dsr 构建。在存储数据到 grid 容器时，需要对目标数据进行平移操作。
-        * size(arr:number|>0): 要划分成网格的原始空间尺寸。
-        * grid(GridNNS.GridContainer): 网格数据存储容器，为算法提供数据结构支撑。
-    @method:
-        * GridContainer(static): 网格数据存储容器构造器
-    @exp: 
-        let GNNS = new GridNNS(ps, function(particle){return particle.p;}, 150).build();
-        let GNNS = new GridNNS(ps, function(particle){return particle.p;}, 150, [0, canvas.width, 0, canvas.height]).build();
-    ----------------------------------------*/
+    /**
+     * @classdesc 网格邻近搜索，基于 LinearNNS 算法进行优化
+     * 
+     * @description
+     * 算法的基本思路是将目标数据(ps)的向量空间划分成网格，网格中的单元格尺寸为 *dn*, 单元格维度取决于
+     * 目标数据维度。通过将目标数据(ps)映射到网格空间中的位置矢量，来存储目标数据对象。在这种映射下，
+     * 位置间距小于单元格对角线长度(最大距离)的对象会存储在相同的单元格(或邻近的单元格)，在进行邻近搜索时，
+     * 将目标对象(tp)映射到网格空间坐标，并直接读取该单元格(或半径R内邻近单元格)中存储的对象。得到一个近似邻近集，
+     * 再对这个近似解进行精确搜索。以减少 LinearNNS 算法中的无效计算。
+     * GridNNS 算法有以下特征:
+     * 1. "dn" 参数对算法的影响:  
+     *     "dn"参数越小，算法所需的存储空间越大，"dn"参数越大，算法的计算量越接近 LinearNNS 算法。
+     *     当 dn 大于等于目标数据边界大小的情况下，退化成 LinearNNS 算法。
+     * 2. 动态数据:   
+     *     相对于 LinearNNS 算法，该算法是一个具有内部状态的算法，因此在 "ps" 变动的场景下，需要通过 "build" 方法更新内部状态。
+     * 3. 有限空间:   
+     *     该算法适用于数据集聚集在一个有限空间下，当数据集中离散点过多，会导致更多的存储空间开销。
+     * 4. 数据集分量范围限制:  
+     *     对于数据集的 dsr(数据集分量范围) 不能为负数，因为在将数据的向量坐标映射到存储容器索引时，存储容器的索引范围是 [0, N+)，因此数据集中的
+     *     向量分量不能为负数。但是可以通过对数据集进行整体平移来解决该限制。这是由于在采用欧式距离计算的情况下，该邻近搜索算法具有"平移不变性"，
+     *     即对数据集整体平移一个向量(v)，给定目标向量(同时进行平移操作)的邻近集不变。
+     * 5. 边界条件:   
+     *     当目标数据在 dsr(数据集分量范围) 外时，算法需要对该情况进行特殊处理。
+     * 
+     * 
+     * @property { number } dn - 网格单元大小(int & dn>0)
+     * @property { number[] } dsr - 数据集分量范围([min, max])，其长度等于数据集向量维度。每个单元代表数据集对应的分量范围
+     * @property { Vector } dst - 数据集非负平移量，用于解决"数据集分量范围限制"，基于 dsr 构建。在存储数据到 grid 容器时，需要对目标数据进行平移操作
+     * @property { number[] } size - 网格容器尺寸(像素坐标)，要划分成网格的原始空间尺寸
+     * @property { GridNNS.GridContainer } grid - 网格数据存储容器，为算法提供数据结构支撑
+     * 
+     * @param { Object[] } ps - 对象集 
+     * @param { callable } vect - 向量提取器
+     * @param { number } [dn=100] - 网格单元大小
+     * @param { number[] } [dsr=null] - 数据集分量范围
+     * 
+     * @example
+     * let GNNS = new GridNNS(ps, function(particle){return particle.p;}, 150).build();
+     * let GNNS = new GridNNS(ps, function(particle){return particle.p;}, 150, [0, canvas.width, 0, canvas.height]).build();
+     */
     constructor(ps, vect, dn=100, dsr=null) {
         super(ps, vect);
-        //网格单元大小
         this.dn = dn;
-        //数据集分量范围
         this.dsr = dsr;
-        //数据集非负平移量
         this.dst = null;
-        //网格容器尺寸(像素坐标)
         this.size = null;
-        //网格数据存储容器(算法数据结构)
-        // this.grid = GridNNS.GridContainer(this.dn, this.size);
         this.grid = null;
     }
 
-    //网格数据存储容器构造器
+    /**
+     * 网格数据存储容器构造器
+     * @param { number } dn - 网格单元大小(int & dn>0) 
+     * @param { number[] } size - 网格容器尺寸
+     * @returns { GridNNS.GridContainer } 网格数据存储容器
+     */
     static GridContainer(dn, size) {
 
-        //网格数据存储容器
+        /** 网格数据存储容器构造器 */
         class GridContainer {
 
-            /*----------------------------------------
-            @class: GridContainer 
-            @desc: 网格数据存储容器，为 "GridNNS" 算法提供数据结构支撑。
-            @algo:
-                * 数据结构设计:
-                该数据容器通过一维数组(实际存储结构)来模拟高维数组(逻辑存储结构)。
-                内部采用一个映射算法(index), 将高维数组坐标映射到实际存储结构的一维数组索引。
-                之所以采用"坐标映射索引"而不是"数组下标索引"的原因在于，"数组下标索引"无法适配
-                高维数据的场景，对于二维数组来说，需要通过 "arr[y][x]" 这种硬编码的方式进行数据
-                的访问，但是当维数变化时，该方式就不适用了，比如三维数组(arr[z][y][x])。
-                * 坐标映射算法设计:
-                设 
-                    ds = [x, y, z, ...] 为高维数组(逻辑存储结构)的尺寸，
-                    p  = [x, y, z, ...] 为高维数组上数据的坐标向量
-                则 index(dim) 坐标映射索引函数的递归结构如下:
-                    index(1) -> p[x]
-                    index(2) -> (ds[x] * p[y]) + index(1) 
-                             -> (ds[x] * p[y]) + p[x]
-                    index(3) -> (ds[x] * ds[y] * p[z]) + index(2) 
-                             -> (ds[x] * ds[y] * p[z]) + (ds[x] * p[y]) + p[x]
-                    ...
-                由上述归纳可得:
-                    index(n) -> (1 * ds[x] * ... * ds[n-1]) * p[n-1] + index(n-1)
-                FIN
-            @property: 
-                * dn(int|>0): 网格单元大小
-                * size(arr:number|>0): 要划分成网格的原始空间尺寸。
-                * dsize(arr:int|>0): 网格空间尺寸
-                * length(int|>=0): 存储容器长度
-                * _data(arr): 存储容器(一维数组)
-                * _cache_ds(arr): 用于根据向量位置坐标计算存储容器索引的计算缓存
-                * _cache_gns(arr): 用于缓存网格邻域坐标集
-            @method: 
-                * toGrid: 将数据集向量映射到网格空间坐标
-                * index: 坐标映射算法
-                * gns: 根据维数和邻域半径计算网格空间的邻域坐标集
-                * set: 存储数据
-                * get: 获取数据
-            @exp: 
-            ----------------------------------------*/
+            /**
+             * @classdesc 网格数据存储容器，为 "GridNNS" 算法提供数据结构支撑
+             * 
+             * @description
+             * * 数据结构设计:  
+             * 该数据容器通过一维数组(实际存储结构)来模拟高维数组(逻辑存储结构)。
+             * 内部采用一个映射算法(index), 将高维数组坐标映射到实际存储结构的一维数组索引。
+             * 之所以采用"坐标映射索引"而不是"数组下标索引"的原因在于，"数组下标索引"无法适配
+             * 高维数据的场景，对于二维数组来说，需要通过 "arr[y][x]" 这种硬编码的方式进行数据
+             * 的访问，但是当维数变化时，该方式就不适用了，比如三维数组(arr[z][y][x])。
+             * * 坐标映射算法设计:  
+             * 设   
+             *     ds = [x, y, z, ...] 为高维数组(逻辑存储结构)的尺寸，  
+             *     p  = [x, y, z, ...] 为高维数组上数据的坐标向量    
+             * 则 index(dim) 坐标映射索引函数的递归结构如下:  
+             *     index(1) -> p[x]  
+             *     index(2) -> (ds[x] * p[y]) + index(1)   
+             *              -> (ds[x] * p[y]) + p[x]  
+             *     index(3) -> (ds[x] * ds[y] * p[z]) + index(2)   
+             *              -> (ds[x] * ds[y] * p[z]) + (ds[x] * p[y]) + p[x]  
+             *     ...  
+             * 由上述归纳可得:  
+             *     index(n) -> (1 * ds[x] * ... * ds[n-1]) * p[n-1] + index(n-1)  
+             * FIN  
+             * 
+             * @property { number } dn - 网格单元大小(int & dn>0) 
+             * @property { number[] } size - 原始空间尺寸(像素坐标)，要划分成网格的原始空间尺寸。
+             * @property { number[] } dsize - 网格空间尺寸(网格坐标)
+             * @property { number } length - 存储容器长度(int & length>0)
+             * @property { Array } _data - 存储容器(一维数组)
+             * @property { Array } _cache_ds - 计算缓存: 维度-尺寸系数，用于根据向量位置坐标计算存储容器索引的计算缓存
+             * @property { Array } _cache_gns - 计算缓存: 网格邻域坐标集(r=1)，用于缓存网格邻域坐标集
+             * 
+             * @param { number } dn - 网格单元大小(int & dn>0) 
+             * @param { number[] } size - 网格容器尺寸
+             * 
+             * @example let grid = GridNNS.GridContainer(10, [1920, 1080]);
+             */
             constructor(dn, size) {
-                //网格单元大小
                 this.dn = dn;
-                //原始空间尺寸(像素坐标)
                 this.size = size;
-                //网格空间尺寸(网格坐标)
                 this.dsize = [];
                 //存储容器长度
                 this.length = 1;
@@ -319,18 +317,18 @@ class GridNNS extends LinearNNS {
                 }
                 //构建存储容器(一维数组容器，映射到虚拟高维数组)
                 this._data = new Array(this.length);
-                //计算缓存: 维度-尺寸系数
+                /** @private */
                 this._cache_ds = null;
-                //计算缓存: 网格邻域坐标集(r=1)
+                /** @private */
                 this._cache_gns = this.gns(this.dsize.length, 1);
             }
 
-            /*----------------------------------------
-            @func: 将数据集向量映射到网格空间坐标
-            @params: 
-                * vector(Vector): 数据集向量
-            @return(Vector): 对应的网格空间坐标 
-            ----------------------------------------*/
+            /**
+             * 将数据集向量映射到网格空间坐标
+             * 
+             * @param { Vector } vector - 数据集向量
+             * @returns { Vector } 对应的网格空间坐标
+             */
             toGrid(vector) {
                 let v = [];
                 for(let i=0, n=vector.dim(); i<n; i++) {
@@ -339,13 +337,12 @@ class GridNNS extends LinearNNS {
                 return new Vector(...v);
             }
 
-            /*----------------------------------------
-            @func: 坐标映射算法 
-            @desc: 计算网格空间坐标(逻辑存储结构)对应存储容器的索引(实际存储结构)
-            @params: 
-                * vector(Vector): 网格空间坐标向量
-            @return(int): 存储容器索引 
-            ----------------------------------------*/
+            /**
+             * 坐标映射算法: 计算网格空间坐标(逻辑存储结构)对应存储容器的索引(实际存储结构)
+             * 
+             * @param { Vector } vector - 网格空间坐标向量
+             * @returns { number } 存储容器索引(int & >=0)
+             */
             index(vector) {
                 /* 
                 //递归实现 
@@ -376,36 +373,34 @@ class GridNNS extends LinearNNS {
                 return i;
             }
 
-            /*----------------------------------------
-            @func: 计算网格邻域坐标集
-            @desc: 根据"维数"和"邻域半径"计算网格空间的邻域坐标集
-            @algp:
-                网格邻域坐标集生成算法如下:
-                * dim(1): 
-                    [
-                        [-1], [0], [1]
-                    ]
-                * dim(2):
-                    [
-                        [-1, -1], [-1, 0], [-1, 1],
-                        [ 0, -1], [ 0, 0], [ 0, 1],
-                        [ 1, -1], [ 1, 0], [ 1, 1], 
-                    ]
-                由上述归纳可知: 
-                    dim(n) = (dim(1) x dim(1)) ^ (n-1)
-                其中 x 为笛卡尔积运算，
-                即
-                    以 dim(1) 为基，与其自身进行 n 次笛卡尔积运算。
-                设 r 为邻域半径，则基的定义如下
-                    base = [-r, -r+1, -r+2, ..., 0, 1, 2, r]
-                则有 
-                    dim(n) = (base x base) ^ (n-1)
-                FIN
-            @params: 
-                * dim(int|>0): 网格坐标维数
-                * r(int|>=1): 邻域半径
-            @return(list:Vector): 网格邻域坐标集
-            ----------------------------------------*/
+            /**
+             * 计算网格邻域坐标集: 根据"维数"和"邻域半径"计算网格空间的邻域坐标集   
+             * 网格邻域坐标集生成算法如下:  
+             * * dim(1):   
+             *     [  
+             *         [-1], [0], [1]  
+             *     ]  
+             * * dim(2):  
+             *     [  
+             *         [-1, -1], [-1, 0], [-1, 1],  
+             *         [ 0, -1], [ 0, 0], [ 0, 1],  
+             *         [ 1, -1], [ 1, 0], [ 1, 1],   
+             *     ]  
+             * 由上述归纳可知:   
+             *     dim(n) = (dim(1) x dim(1)) ^ (n-1)  
+             * 其中 x 为笛卡尔积运算，  
+             * 即  
+             *     以 dim(1) 为基，与其自身进行 n 次笛卡尔积运算。  
+             * 设 r 为邻域半径，则基的定义如下  
+             *     base = [-r, -r+1, -r+2, ..., 0, 1, 2, r]  
+             * 则有   
+             *     dim(n) = (base x base) ^ (n-1)  
+             * FIN  
+             * 
+             * @param { number } dim - 网格坐标维数(int & dim>0)
+             * @param { number } r - 邻域半径(int & r>=1)
+             * @returns { Vector[] } 网格邻域坐标集
+             */
             gns(dim, r=1) {
                 //笛卡尔积
                 let cartesian_product = function(a, b) {
@@ -426,14 +421,13 @@ class GridNNS extends LinearNNS {
                 return _gns;
             }
 
-            /*----------------------------------------
-            @func: 存储数据
-            @desc: 在原始坐标向量(p)映射的网格坐标位置存储值(val)
-            @params: 
-                * p(Vector): 原始坐标向量
-                * val(obj): 数据值
-            @return(bool): 操作状态 
-            ----------------------------------------*/
+            /**
+             * 存储数据: 在原始坐标向量(p)映射的网格坐标位置存储值(val)
+             * 
+             * @param { Vector } p - 原始坐标向量
+             * @param { Object } val - 数据值 
+             * @returns { boolean } 操作状态
+             */
             set(p, val) {
                 let i = this.index(this.toGrid(p));
                 if(i<0 || i>this.length) { return false; }
@@ -445,14 +439,13 @@ class GridNNS extends LinearNNS {
                 return true;
             }
 
-            /*----------------------------------------
-            @func: 获取数据
-            @desc: 获取原始坐标向量(p)映射的网格坐标位置的邻域半径(r)内的数据对象
-            @params: 
-                * p(Vector): 原始坐标向量
-                * r(int|>=0): 邻域半径 
-            @return(list:obj): 数据对象列表 
-            ----------------------------------------*/
+            /**
+             * 获取数据: 获取原始坐标向量(p)映射的网格坐标位置的邻域半径(r)内的数据对象
+             * 
+             * @param { Vector } p - 原始坐标向量 
+             * @param { number } [r=0] 邻域半径(int & r>=0)
+             * @returns { Object[] } 数据对象列表
+             */
             get(p, r=0) {
                 //网格中心坐标
                 let po = this.toGrid(p);
@@ -474,10 +467,14 @@ class GridNNS extends LinearNNS {
         return new GridContainer(dn, size);
     }
 
-    /*----------------------------------------
-    @func: 构建算法的数据结构
-    @desc: 将数据集存储到网格容器中
-    ----------------------------------------*/
+    /**
+     * 构建算法的数据结构: 将数据集存储到网格容器中
+     * 
+     * @override
+     * 
+     * @param { Object[] } [ps=null] ps -  对象集 
+     * @returns { Object } this
+     */
     build(ps=null) {
         //数据集
         this.ps = ps || this.ps;
@@ -513,9 +510,14 @@ class GridNNS extends LinearNNS {
         return this;
     }
 
-    /*----------------------------------------
-    @func: dist邻近集
-    ----------------------------------------*/
+    /**
+     * dist邻近集
+     * 
+     * @override
+     * @param { Object } tp - 目标对象 
+     * @param { number } dist - 判定距离(dist>=0)
+     * @returns { Object[] } 邻近集([ps[i], ps[k], ps[j], ...])
+     */
     near(tp, dist) {
         //计算网格邻域半径
         let R = Math.ceil(dist/this.dn);
@@ -525,11 +527,16 @@ class GridNNS extends LinearNNS {
         return super.near(tp, dist, gnps);
     }
 
-    /*----------------------------------------
-    @func: k邻近集
-    @algo: 当数据集离散程度较大时，在极端情况下，该算法的计算效率要低于 "LinearNNS.k_near"。
-    @TODO: 计算优化，网格坐标系环形单元格坐标计算算法
-    ----------------------------------------*/
+    /**
+     * k邻近集: 当数据集离散程度较大时，在极端情况下，该算法的计算效率要低于 "LinearNNS.k_near"。
+     * 
+     * @override
+     * @param { Object } tp - 目标对象 
+     * @param { number } k - k个最近的元素(k >= nps.length)
+     * @returns { Object[] } 邻近集([ps[i], ps[k], ps[j], ...])
+     * 
+     * @todo 计算优化，网格坐标系环形单元格坐标计算算法
+     */
     k_near(tp, k) {
         //计算最大网格半径
         let max_R = Math.max(...this.grid.dsize), R = 1;
