@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>GridContainer - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Tutorials</h3><ul><li><a href="tutorial-01-快速入门.html">01-快速入门</a></li><li><a href="tutorial-02-模板生成器.html">02-模板生成器</a></li></ul><h3>Modules</h3><ul><li><a href="module-algo_Boids.html">algo/Boids</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_Boids.html#~boids_middlewares">boids_middlewares</a></li></ul></li><li><a href="module-algo_LSystem.html">algo/LSystem</a></li><li><a href="module-algo_Mandelbrot_Set.html">algo/Mandelbrot_Set</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set.html#~Mandelbrot_Set">Mandelbrot_Set</a></li><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set.html#~Julia_Set">Julia_Set</a></li></ul></li><li><a href="module-algo_NNS.html">algo/NNS</a></li><li><a href="module-algo_OSS.html">algo/OSS</a></li><li><a href="module-context_canvas.html">context/canvas</a></li><li><a href="module-particle_area.html">particle/area</a></li><li><a href="module-particle_border.html">particle/border</a></li><li><a href="module-particle_coor.html">particle/coor</a></li><li><a href="module-particle_field.html">particle/field</a></li><li><a href="module-particle_particle.html">particle/particle</a></li><li><a href="module-particle_particle_system.html">particle/particle_system</a></li><li><a href="module-particle_tracker.html">particle/tracker</a></li><li><a href="module-utils_iterator.html">utils/iterator</a></li><li><a href="module-utils_random.html">utils/random</a></li><li><a href="module-utils_tools.html">utils/tools</a></li><li><a href="module-vector_vector.html">vector/vector</a></li><li><a href="module-views_capturer.html">views/capturer</a></li><li><a href="module-views_color.html">views/color</a></li><li><a href="module-views_randerer.html">views/randerer</a></li><li><a href="module-views_views.html">views/views</a></li></ul><h3>Classes</h3><ul><li><a href="module-algo_Boids-Boid.html">Boid</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_Boids-Boid.html#rules_action">rules_action</a></li><li data-type='method' style='display: none;'><a href="module-algo_Boids-Boid.html#action">action</a></li></ul></li><li><a href="module-algo_LSystem-LSystem.html">LSystem</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#next">next</a></li><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#gen">gen</a></li><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#iter">iter</a></li><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#act">act</a></li><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#actIter">actIter</a></li></ul></li><li><a href="module-algo_Mandelbrot_Set-Complex.html">Complex</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set-Complex.html#add">add</a></li><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set-Complex.html#mult">mult</a></li><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set-Complex.html#norm">norm</a></li></ul></li><li><a href="module-algo_NNS-NearestNeighborSearch.html">NearestNeighborSearch</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#build">build</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#near">near</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#k_near">k_near</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#nps">nps</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#.toGraph">toGraph</a></li></ul></li><li><a href="module-algo_NNS-LinearNNS.html">LinearNNS</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_NNS-LinearNNS.html#near">near</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-LinearNNS.html#k_near">k_near</a></li></ul></li><li><a href="module-algo_NNS-GridNNS.html">GridNNS</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridNNS.html#.GridContainer">GridContainer</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridNNS.html#build">build</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridNNS.html#near">near</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridNNS.html#k_near">k_near</a></li></ul></li><li><a href="module-algo_NNS-GridContainer.html">GridContainer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#toGrid">toGrid</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#index">index</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#gns">gns</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#set">set</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#get">get</a></li></ul></li><li><a href="module-algo_OSS-Solver.html">Solver</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_OSS-Solver.html#action">action</a></li><li data-type='method' style='display: none;'><a href="module-algo_OSS-Solver.html#isEnd">isEnd</a></li></ul></li><li><a href="module-algo_OSS-OptimumSolutionSolvers.html">OptimumSolutionSolvers</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_OSS-OptimumSolutionSolvers.html#init">init</a></li><li data-type='method' style='display: none;'><a href="module-algo_OSS-OptimumSolutionSolvers.html#next">next</a></li><li data-type='method' style='display: none;'><a href="module-algo_OSS-OptimumSolutionSolvers.html#isEnd">isEnd</a></li></ul></li><li><a href="module-context_canvas-Canvas.html">Canvas</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#resize">resize</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#refresh">refresh</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#point">point</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#line">line</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#lines">lines</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#circle">circle</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#rect">rect</a></li></ul></li><li><a href="module-particle_area-BaseArea.html">BaseArea</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_area-BaseArea.html#in">in</a></li></ul></li><li><a href="module-particle_area-Area.html">Area</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_area-Area.html#in">in</a></li></ul></li><li><a href="module-particle_area-RectArea.html">RectArea</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_area-RectArea.html#in">in</a></li></ul></li><li><a href="module-particle_area-CircleArea.html">CircleArea</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_area-CircleArea.html#in">in</a></li></ul></li><li><a href="module-particle_border-Border.html">Border</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-Border.html#limit">limit</a></li></ul></li><li><a href="module-particle_border-RectReflectBorder.html">RectReflectBorder</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-RectReflectBorder.html#limit">limit</a></li></ul></li><li><a href="module-particle_border-RectLoopBorder.html">RectLoopBorder</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-RectLoopBorder.html#limit">limit</a></li></ul></li><li><a href="module-particle_border-RingReflectBorder.html">RingReflectBorder</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-RingReflectBorder.html#limit">limit</a></li></ul></li><li><a href="module-particle_border-RingLoopBorder.html">RingLoopBorder</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-RingLoopBorder.html#limit">limit</a></li></ul></li><li><a href="module-particle_coor-CoordinateSystem.html">CoordinateSystem</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_coor-CoordinateSystem.html#to">to</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-CoordinateSystem.html#from">from</a></li></ul></li><li><a href="module-particle_coor-RCS.html">RCS</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_coor-RCS.html#to">to</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-RCS.html#from">from</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-RCS.html#zoom">zoom</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-RCS.html#move">move</a></li></ul></li><li><a href="module-particle_coor-Grid.html">Grid</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_coor-Grid.html#to">to</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-Grid.html#from">from</a></li></ul></li><li><a href="module-particle_coor-PolarCS.html">PolarCS</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_coor-PolarCS.html#to">to</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-PolarCS.html#from">from</a></li></ul></li><li><a href="module-particle_field-Field.html">Field</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-Field.html#force">force</a></li></ul></li><li><a href="module-particle_field-Gravity.html">Gravity</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-Gravity.html#force">force</a></li><li data-type='method' style='display: none;'><a href="module-particle_field-Gravity.html#.gravity">gravity</a></li></ul></li><li><a href="module-particle_field-AccelerateField.html">AccelerateField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-AccelerateField.html#force">force</a></li></ul></li><li><a href="module-particle_field-DecelerateField.html">DecelerateField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-DecelerateField.html#force">force</a></li></ul></li><li><a href="module-particle_field-DeflectField.html">DeflectField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-DeflectField.html#force">force</a></li></ul></li><li><a href="module-particle_particle-Particle.html">Particle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-Particle.html#action">action</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-Particle.html#isEnd">isEnd</a></li></ul></li><li><a href="module-particle_particle-ForceParticle.html">ForceParticle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-ForceParticle.html#force">force</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-ForceParticle.html#action">action</a></li></ul></li><li><a href="module-particle_particle-LinearMotorParticle.html">LinearMotorParticle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-LinearMotorParticle.html#isEnd">isEnd</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-LinearMotorParticle.html#action">action</a></li></ul></li><li><a href="module-particle_particle-CircularMotorParticle.html">CircularMotorParticle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-CircularMotorParticle.html#action">action</a></li></ul></li><li><a href="module-particle_particle-RandomWalkerParticle.html">RandomWalkerParticle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-RandomWalkerParticle.html#_probability">_probability</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-RandomWalkerParticle.html#rv_select">rv_select</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-RandomWalkerParticle.html#action">action</a></li></ul></li><li><a href="module-particle_particle_system-ParticleSystem.html">ParticleSystem</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle_system-ParticleSystem.html#build">build</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle_system-ParticleSystem.html#particle_action">particle_action</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle_system-ParticleSystem.html#action">action</a></li></ul></li><li><a href="module-particle_tracker-TrailTracker.html">TrailTracker</a></li><li><a href="module-utils_iterator-Iterator.html">Iterator</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_iterator-Iterator.html#val">val</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Iterator.html#end">end</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Iterator.html#tolist">tolist</a></li></ul></li><li><a href="module-utils_iterator-Range.html">Range</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#.S">S</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#.N">N</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#val">val</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#end">end</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#clone">clone</a></li></ul></li><li><a href="module-utils_iterator-FuncIterator.html">FuncIterator</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_iterator-FuncIterator.html#val">val</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-FuncIterator.html#end">end</a></li></ul></li><li><a href="module-utils_random-RandomSelector.html">RandomSelector</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_random-RandomSelector.html#_probability">_probability</a></li><li data-type='method' style='display: none;'><a href="module-utils_random-RandomSelector.html#select">select</a></li></ul></li><li><a href="module-utils_tools-Tools.html">Tools</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.regular_polygon">regular_polygon</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.ATR">ATR</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.RTA">RTA</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.random">random</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.rselect">rselect</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.RGB">RGB</a></li></ul></li><li><a href="module-vector_vector-Vector.html">Vector</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.v">v</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.ones">ones</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.zeros">zeros</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.random">random</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.rcv">rcv</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#add">add</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#mult">mult</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#sub">sub</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#dot">dot</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#inner">inner</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.LC">LC</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#LM">LM</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#lerp">lerp</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#rotate">rotate</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#dim">dim</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#norm">norm</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#normalization">normalization</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#limit">limit</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#clone">clone</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#copy">copy</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#dist">dist</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#rad">rad</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#toint">toint</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#in">in</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.vpoints">vpoints</a></li></ul></li><li><a href="module-views_capturer-Capturer.html">Capturer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_capturer-Capturer.html#capturing">capturing</a></li><li data-type='method' style='display: none;'><a href="module-views_capturer-Capturer.html#capture">capture</a></li></ul></li><li><a href="module-views_color-ColorVector.html">ColorVector</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_color-ColorVector.html#color">color</a></li><li data-type='method' style='display: none;'><a href="module-views_color-ColorVector.html#val">val</a></li><li data-type='method' style='display: none;'><a href="module-views_color-ColorVector.html#clone">clone</a></li></ul></li><li><a href="module-views_color-ColorGradient.html">ColorGradient</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_color-ColorGradient.html#color">color</a></li><li data-type='method' style='display: none;'><a href="module-views_color-ColorGradient.html#isEnd">isEnd</a></li></ul></li><li><a href="module-views_randerer-Randerer.html">Randerer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_randerer-Randerer.html#rander">rander</a></li></ul></li><li><a href="module-views_randerer-IntervalRanderer.html">IntervalRanderer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_randerer-IntervalRanderer.html#rander">rander</a></li><li data-type='method' style='display: none;'><a href="module-views_randerer-IntervalRanderer.html#stop">stop</a></li></ul></li><li><a href="module-views_randerer-SingleFrameRanderer.html">SingleFrameRanderer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_randerer-SingleFrameRanderer.html#rander">rander</a></li></ul></li><li><a href="module-views_views-Views.html">Views</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.nodelink">nodelink</a></li><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.grid">grid</a></li><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.lightLine">lightLine</a></li><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.lightRing">lightRing</a></li><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.trail">trail</a></li></ul></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">GridContainer</h1>
+    
+
+    
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>
+            <span class="ancestors"><a href="module-algo_NNS.html">algo/NNS</a>~</span>
+        
+        
+            GridContainer
+        
+        </h2>
+        
+            <div class="class-description usertext"><p>网格数据存储容器构造器</p></div>
+        
+    
+</header>
+
+<article>
+    
+        <div class="container-overview">
+        
+            
+
+    
+    <h2>Constructor</h2>
+    
+
+    <h4 class="name" id="GridContainer"><span class="type-signature"></span>new GridContainer<span class="signature">(dn, size)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><ul>
+<li>数据结构设计:<br>
+该数据容器通过一维数组(实际存储结构)来模拟高维数组(逻辑存储结构)。
+内部采用一个映射算法(index), 将高维数组坐标映射到实际存储结构的一维数组索引。
+之所以采用&quot;坐标映射索引&quot;而不是&quot;数组下标索引&quot;的原因在于，&quot;数组下标索引&quot;无法适配
+高维数据的场景，对于二维数组来说，需要通过 &quot;arr[y][x]&quot; 这种硬编码的方式进行数据
+的访问，但是当维数变化时，该方式就不适用了，比如三维数组(arr[z][y][x])。</li>
+<li>坐标映射算法设计:<br>
+设<br>
+ds = [x, y, z, ...] 为高维数组(逻辑存储结构)的尺寸，<br>
+p  = [x, y, z, ...] 为高维数组上数据的坐标向量<br>
+则 index(dim) 坐标映射索引函数的递归结构如下:<br>
+index(1) -&gt; p[x]<br>
+index(2) -&gt; (ds[x] * p[y]) + index(1)<br>
+-&gt; (ds[x] * p[y]) + p[x]<br>
+index(3) -&gt; (ds[x] * ds[y] * p[z]) + index(2)<br>
+-&gt; (ds[x] * ds[y] * p[z]) + (ds[x] * p[y]) + p[x]<br>
+...<br>
+由上述归纳可得:<br>
+index(n) -&gt; (1 * ds[x] * ... * ds[n-1]) * p[n-1] + index(n-1)<br>
+FIN</li>
+</ul></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="algo_NNS.js.html">algo/NNS.js</a>, <a href="algo_NNS.js.html#line267">line 267</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>网格单元大小(int &amp; dn&gt;0)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>size</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;number></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>原始空间尺寸(像素坐标)，要划分成网格的原始空间尺寸。</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>dsize</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;number></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>网格空间尺寸(网格坐标)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>length</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>存储容器长度(int &amp; length&gt;0)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>_data</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>存储容器(一维数组)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>_cache_ds</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>计算缓存: 维度-尺寸系数，用于根据向量位置坐标计算存储容器索引的计算缓存</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>_cache_gns</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>计算缓存: 网格邻域坐标集(r=1)，用于缓存网格邻域坐标集</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-examples">Example</h5>
+    
+    <pre class="prettyprint"><code>let grid = GridNNS.GridContainer(10, [1920, 1080]);</code></pre>
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dn</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>网格单元大小(int &amp; dn&gt;0)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>size</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;number></span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>网格容器尺寸</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+        </div>
+    
+
+    
+
+    
+
+    
+    
+    
+
+     
+
+    
+
+    
+
+    
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="toGrid"><span class="type-signature"></span>toGrid<span class="signature">(vector)</span><span class="type-signature"> &rarr; {Vector}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>将数据集向量映射到网格空间坐标</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="algo_NNS.js.html">algo/NNS.js</a>, <a href="algo_NNS.js.html#line332">line 332</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>vector</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Vector</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>数据集向量</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="returns-param-desc">
+    <span class='param-type'> ( </span>
+    
+<span class="param-type">Vector</span>
+
+
+
+    <span class='param-type'> ) </span>
+    <span class='param-type'> : </span>
+    <span style='margin-left:10px'> <p>对应的网格空间坐标</p> </span>
+</div>
+
+
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="index"><span class="type-signature"></span>index<span class="signature">(vector)</span><span class="type-signature"> &rarr; {number}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>坐标映射算法: 计算网格空间坐标(逻辑存储结构)对应存储容器的索引(实际存储结构)</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="algo_NNS.js.html">algo/NNS.js</a>, <a href="algo_NNS.js.html#line346">line 346</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>vector</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Vector</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>网格空间坐标向量</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="returns-param-desc">
+    <span class='param-type'> ( </span>
+    
+<span class="param-type">number</span>
+
+
+
+    <span class='param-type'> ) </span>
+    <span class='param-type'> : </span>
+    <span style='margin-left:10px'> <p>存储容器索引(int &amp; &gt;=0)</p> </span>
+</div>
+
+
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="gns"><span class="type-signature"></span>gns<span class="signature">(dim, r)</span><span class="type-signature"> &rarr; {Array.&lt;Vector>}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>计算网格邻域坐标集: 根据&quot;维数&quot;和&quot;邻域半径&quot;计算网格空间的邻域坐标集<br>
+网格邻域坐标集生成算法如下:</p>
+<ul>
+<li>dim(1):<br>
+[<br>
+[-1], [0], [1]<br>
+]</li>
+<li>dim(2):<br>
+[<br>
+[-1, -1], [-1, 0], [-1, 1],<br>
+[ 0, -1], [ 0, 0], [ 0, 1],<br>
+[ 1, -1], [ 1, 0], [ 1, 1],<br>
+]<br>
+由上述归纳可知:<br>
+dim(n) = (dim(1) x dim(1)) ^ (n-1)<br>
+其中 x 为笛卡尔积运算，<br>
+即<br>
+以 dim(1) 为基，与其自身进行 n 次笛卡尔积运算。<br>
+设 r 为邻域半径，则基的定义如下<br>
+base = [-r, -r+1, -r+2, ..., 0, 1, 2, r]<br>
+则有<br>
+dim(n) = (base x base) ^ (n-1)<br>
+FIN</li>
+</ul></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="algo_NNS.js.html">algo/NNS.js</a>, <a href="algo_NNS.js.html#line404">line 404</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>dim</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>网格坐标维数(int &amp; dim&gt;0)</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>r</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+                <td class="default">
+                
+                    <code>1</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>邻域半径(int &amp; r&gt;=1)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="returns-param-desc">
+    <span class='param-type'> ( </span>
+    
+<span class="param-type">Array.&lt;Vector></span>
+
+
+
+    <span class='param-type'> ) </span>
+    <span class='param-type'> : </span>
+    <span style='margin-left:10px'> <p>网格邻域坐标集</p> </span>
+</div>
+
+
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="set"><span class="type-signature"></span>set<span class="signature">(p, val)</span><span class="type-signature"> &rarr; {boolean}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>存储数据: 在原始坐标向量(p)映射的网格坐标位置存储值(val)</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="algo_NNS.js.html">algo/NNS.js</a>, <a href="algo_NNS.js.html#line431">line 431</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>p</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Vector</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>原始坐标向量</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>val</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>数据值</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="returns-param-desc">
+    <span class='param-type'> ( </span>
+    
+<span class="param-type">boolean</span>
+
+
+
+    <span class='param-type'> ) </span>
+    <span class='param-type'> : </span>
+    <span style='margin-left:10px'> <p>操作状态</p> </span>
+</div>
+
+
+
+    
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="get"><span class="type-signature"></span>get<span class="signature">(p, r<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Array.&lt;Object>}</span></h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>获取数据: 获取原始坐标向量(p)映射的网格坐标位置的邻域半径(r)内的数据对象</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="algo_NNS.js.html">algo/NNS.js</a>, <a href="algo_NNS.js.html#line449">line 449</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+        <th>Default</th>
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>p</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Vector</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                </td>
+            
+
+            <td class="description last"><p>原始坐标向量</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>r</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+                <td class="default">
+                
+                    <code>0</code>
+                
+                </td>
+            
+
+            <td class="description last"><p>邻域半径(int &amp; r&gt;=0)</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5 class="h5-returns">Returns:</h5>
+
+        
+<div class="returns-param-desc">
+    <span class='param-type'> ( </span>
+    
+<span class="param-type">Array.&lt;Object></span>
+
+
+
+    <span class='param-type'> ) </span>
+    <span class='param-type'> : </span>
+    <span style='margin-left:10px'> <p>数据对象列表</p> </span>
+</div>
+
+
+
+    
+
+
+
+        
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Fri Apr 28 2023 01:12:59 GMT+0800 (香港标准时间) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>

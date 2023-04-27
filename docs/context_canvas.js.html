@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>context/canvas.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Home</a></h2><h3>Tutorials</h3><ul><li><a href="tutorial-01-快速入门.html">01-快速入门</a></li><li><a href="tutorial-02-模板生成器.html">02-模板生成器</a></li></ul><h3>Modules</h3><ul><li><a href="module-algo_Boids.html">algo/Boids</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_Boids.html#~boids_middlewares">boids_middlewares</a></li></ul></li><li><a href="module-algo_LSystem.html">algo/LSystem</a></li><li><a href="module-algo_Mandelbrot_Set.html">algo/Mandelbrot_Set</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set.html#~Mandelbrot_Set">Mandelbrot_Set</a></li><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set.html#~Julia_Set">Julia_Set</a></li></ul></li><li><a href="module-algo_NNS.html">algo/NNS</a></li><li><a href="module-algo_OSS.html">algo/OSS</a></li><li><a href="module-context_canvas.html">context/canvas</a></li><li><a href="module-particle_area.html">particle/area</a></li><li><a href="module-particle_border.html">particle/border</a></li><li><a href="module-particle_coor.html">particle/coor</a></li><li><a href="module-particle_field.html">particle/field</a></li><li><a href="module-particle_particle.html">particle/particle</a></li><li><a href="module-particle_particle_system.html">particle/particle_system</a></li><li><a href="module-particle_tracker.html">particle/tracker</a></li><li><a href="module-utils_iterator.html">utils/iterator</a></li><li><a href="module-utils_random.html">utils/random</a></li><li><a href="module-utils_tools.html">utils/tools</a></li><li><a href="module-vector_vector.html">vector/vector</a></li><li><a href="module-views_capturer.html">views/capturer</a></li><li><a href="module-views_color.html">views/color</a></li><li><a href="module-views_randerer.html">views/randerer</a></li><li><a href="module-views_views.html">views/views</a></li></ul><h3>Classes</h3><ul><li><a href="module-algo_Boids-Boid.html">Boid</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_Boids-Boid.html#rules_action">rules_action</a></li><li data-type='method' style='display: none;'><a href="module-algo_Boids-Boid.html#action">action</a></li></ul></li><li><a href="module-algo_LSystem-LSystem.html">LSystem</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#next">next</a></li><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#gen">gen</a></li><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#iter">iter</a></li><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#act">act</a></li><li data-type='method' style='display: none;'><a href="module-algo_LSystem-LSystem.html#actIter">actIter</a></li></ul></li><li><a href="module-algo_Mandelbrot_Set-Complex.html">Complex</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set-Complex.html#add">add</a></li><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set-Complex.html#mult">mult</a></li><li data-type='method' style='display: none;'><a href="module-algo_Mandelbrot_Set-Complex.html#norm">norm</a></li></ul></li><li><a href="module-algo_NNS-NearestNeighborSearch.html">NearestNeighborSearch</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#build">build</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#near">near</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#k_near">k_near</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#nps">nps</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-NearestNeighborSearch.html#.toGraph">toGraph</a></li></ul></li><li><a href="module-algo_NNS-LinearNNS.html">LinearNNS</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_NNS-LinearNNS.html#near">near</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-LinearNNS.html#k_near">k_near</a></li></ul></li><li><a href="module-algo_NNS-GridNNS.html">GridNNS</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridNNS.html#.GridContainer">GridContainer</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridNNS.html#build">build</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridNNS.html#near">near</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridNNS.html#k_near">k_near</a></li></ul></li><li><a href="module-algo_NNS-GridContainer.html">GridContainer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#toGrid">toGrid</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#index">index</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#gns">gns</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#set">set</a></li><li data-type='method' style='display: none;'><a href="module-algo_NNS-GridContainer.html#get">get</a></li></ul></li><li><a href="module-algo_OSS-Solver.html">Solver</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_OSS-Solver.html#action">action</a></li><li data-type='method' style='display: none;'><a href="module-algo_OSS-Solver.html#isEnd">isEnd</a></li></ul></li><li><a href="module-algo_OSS-OptimumSolutionSolvers.html">OptimumSolutionSolvers</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-algo_OSS-OptimumSolutionSolvers.html#init">init</a></li><li data-type='method' style='display: none;'><a href="module-algo_OSS-OptimumSolutionSolvers.html#next">next</a></li><li data-type='method' style='display: none;'><a href="module-algo_OSS-OptimumSolutionSolvers.html#isEnd">isEnd</a></li></ul></li><li><a href="module-context_canvas-Canvas.html">Canvas</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#resize">resize</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#refresh">refresh</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#point">point</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#line">line</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#lines">lines</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#circle">circle</a></li><li data-type='method' style='display: none;'><a href="module-context_canvas-Canvas.html#rect">rect</a></li></ul></li><li><a href="module-particle_area-BaseArea.html">BaseArea</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_area-BaseArea.html#in">in</a></li></ul></li><li><a href="module-particle_area-Area.html">Area</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_area-Area.html#in">in</a></li></ul></li><li><a href="module-particle_area-RectArea.html">RectArea</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_area-RectArea.html#in">in</a></li></ul></li><li><a href="module-particle_area-CircleArea.html">CircleArea</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_area-CircleArea.html#in">in</a></li></ul></li><li><a href="module-particle_border-Border.html">Border</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-Border.html#limit">limit</a></li></ul></li><li><a href="module-particle_border-RectReflectBorder.html">RectReflectBorder</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-RectReflectBorder.html#limit">limit</a></li></ul></li><li><a href="module-particle_border-RectLoopBorder.html">RectLoopBorder</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-RectLoopBorder.html#limit">limit</a></li></ul></li><li><a href="module-particle_border-RingReflectBorder.html">RingReflectBorder</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-RingReflectBorder.html#limit">limit</a></li></ul></li><li><a href="module-particle_border-RingLoopBorder.html">RingLoopBorder</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_border-RingLoopBorder.html#limit">limit</a></li></ul></li><li><a href="module-particle_coor-CoordinateSystem.html">CoordinateSystem</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_coor-CoordinateSystem.html#to">to</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-CoordinateSystem.html#from">from</a></li></ul></li><li><a href="module-particle_coor-RCS.html">RCS</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_coor-RCS.html#to">to</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-RCS.html#from">from</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-RCS.html#zoom">zoom</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-RCS.html#move">move</a></li></ul></li><li><a href="module-particle_coor-Grid.html">Grid</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_coor-Grid.html#to">to</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-Grid.html#from">from</a></li></ul></li><li><a href="module-particle_coor-PolarCS.html">PolarCS</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_coor-PolarCS.html#to">to</a></li><li data-type='method' style='display: none;'><a href="module-particle_coor-PolarCS.html#from">from</a></li></ul></li><li><a href="module-particle_field-Field.html">Field</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-Field.html#force">force</a></li></ul></li><li><a href="module-particle_field-Gravity.html">Gravity</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-Gravity.html#force">force</a></li><li data-type='method' style='display: none;'><a href="module-particle_field-Gravity.html#.gravity">gravity</a></li></ul></li><li><a href="module-particle_field-AccelerateField.html">AccelerateField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-AccelerateField.html#force">force</a></li></ul></li><li><a href="module-particle_field-DecelerateField.html">DecelerateField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-DecelerateField.html#force">force</a></li></ul></li><li><a href="module-particle_field-DeflectField.html">DeflectField</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_field-DeflectField.html#force">force</a></li></ul></li><li><a href="module-particle_particle-Particle.html">Particle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-Particle.html#action">action</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-Particle.html#isEnd">isEnd</a></li></ul></li><li><a href="module-particle_particle-ForceParticle.html">ForceParticle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-ForceParticle.html#force">force</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-ForceParticle.html#action">action</a></li></ul></li><li><a href="module-particle_particle-LinearMotorParticle.html">LinearMotorParticle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-LinearMotorParticle.html#isEnd">isEnd</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-LinearMotorParticle.html#action">action</a></li></ul></li><li><a href="module-particle_particle-CircularMotorParticle.html">CircularMotorParticle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-CircularMotorParticle.html#action">action</a></li></ul></li><li><a href="module-particle_particle-RandomWalkerParticle.html">RandomWalkerParticle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle-RandomWalkerParticle.html#_probability">_probability</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-RandomWalkerParticle.html#rv_select">rv_select</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle-RandomWalkerParticle.html#action">action</a></li></ul></li><li><a href="module-particle_particle_system-ParticleSystem.html">ParticleSystem</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-particle_particle_system-ParticleSystem.html#build">build</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle_system-ParticleSystem.html#particle_action">particle_action</a></li><li data-type='method' style='display: none;'><a href="module-particle_particle_system-ParticleSystem.html#action">action</a></li></ul></li><li><a href="module-particle_tracker-TrailTracker.html">TrailTracker</a></li><li><a href="module-utils_iterator-Iterator.html">Iterator</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_iterator-Iterator.html#val">val</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Iterator.html#end">end</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Iterator.html#tolist">tolist</a></li></ul></li><li><a href="module-utils_iterator-Range.html">Range</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#.S">S</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#.N">N</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#val">val</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#end">end</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-Range.html#clone">clone</a></li></ul></li><li><a href="module-utils_iterator-FuncIterator.html">FuncIterator</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_iterator-FuncIterator.html#val">val</a></li><li data-type='method' style='display: none;'><a href="module-utils_iterator-FuncIterator.html#end">end</a></li></ul></li><li><a href="module-utils_random-RandomSelector.html">RandomSelector</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_random-RandomSelector.html#_probability">_probability</a></li><li data-type='method' style='display: none;'><a href="module-utils_random-RandomSelector.html#select">select</a></li></ul></li><li><a href="module-utils_tools-Tools.html">Tools</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.regular_polygon">regular_polygon</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.ATR">ATR</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.RTA">RTA</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.random">random</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.rselect">rselect</a></li><li data-type='method' style='display: none;'><a href="module-utils_tools-Tools.html#.RGB">RGB</a></li></ul></li><li><a href="module-vector_vector-Vector.html">Vector</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.v">v</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.ones">ones</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.zeros">zeros</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.random">random</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.rcv">rcv</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#add">add</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#mult">mult</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#sub">sub</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#dot">dot</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#inner">inner</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.LC">LC</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#LM">LM</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#lerp">lerp</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#rotate">rotate</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#dim">dim</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#norm">norm</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#normalization">normalization</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#limit">limit</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#clone">clone</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#copy">copy</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#dist">dist</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#rad">rad</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#toint">toint</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#in">in</a></li><li data-type='method' style='display: none;'><a href="module-vector_vector-Vector.html#.vpoints">vpoints</a></li></ul></li><li><a href="module-views_capturer-Capturer.html">Capturer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_capturer-Capturer.html#capturing">capturing</a></li><li data-type='method' style='display: none;'><a href="module-views_capturer-Capturer.html#capture">capture</a></li></ul></li><li><a href="module-views_color-ColorVector.html">ColorVector</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_color-ColorVector.html#color">color</a></li><li data-type='method' style='display: none;'><a href="module-views_color-ColorVector.html#val">val</a></li><li data-type='method' style='display: none;'><a href="module-views_color-ColorVector.html#clone">clone</a></li></ul></li><li><a href="module-views_color-ColorGradient.html">ColorGradient</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_color-ColorGradient.html#color">color</a></li><li data-type='method' style='display: none;'><a href="module-views_color-ColorGradient.html#isEnd">isEnd</a></li></ul></li><li><a href="module-views_randerer-Randerer.html">Randerer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_randerer-Randerer.html#rander">rander</a></li></ul></li><li><a href="module-views_randerer-IntervalRanderer.html">IntervalRanderer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_randerer-IntervalRanderer.html#rander">rander</a></li><li data-type='method' style='display: none;'><a href="module-views_randerer-IntervalRanderer.html#stop">stop</a></li></ul></li><li><a href="module-views_randerer-SingleFrameRanderer.html">SingleFrameRanderer</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_randerer-SingleFrameRanderer.html#rander">rander</a></li></ul></li><li><a href="module-views_views-Views.html">Views</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.nodelink">nodelink</a></li><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.grid">grid</a></li><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.lightLine">lightLine</a></li><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.lightRing">lightRing</a></li><li data-type='method' style='display: none;'><a href="module-views_views-Views.html#.trail">trail</a></li></ul></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">context/canvas.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @module
+ * @desc     HTML5 Canvas API: 对canvas接口进行二次封装
+ * @project  Vision
+ * @author   Ais
+ * @date     2022-07-05
+ * @version  0.1.0
+*/
+
+
+import { Vector } from "../vector/vector.js";
+
+
+class Canvas {
+
+    /**
+     * @classdesc Canvas API 对象封装
+     * 
+     * @property { Element } canvas - canvas元素
+     * @property { number } width - 画布长度
+     * @property { number } height - 画布高度
+     * @property { number } cx - 画布中心点x轴坐标
+     * @property { number } cy - 画布中心点y轴坐标
+     * @property { Object } ctx - 2D绘图上下文对象
+     * @property { string } BGC - 背景色
+     * @property { Object } POINT - 绘制点样式
+     * @property { Object } [POINT.R=2] - 点大小(半径)
+     * @property { Object } [POINT.C="#FFFFFF"] - 点颜色
+     * @property { string } colorStyle - strokeStyle &amp;&amp; fillStyle
+     * 
+     * @param { string } canvas_id - canvas元素id 
+     * @param { number } width - 画布长度 
+     * @param { number } height - 画布高度 
+     * @param { string } [BGC='rgb(50, 50, 50)'] - 背景色
+     * 
+     * @example const canvas = new Canvas("vision_canvas", 3840, 2160);
+     */
+    constructor(canvas_id, width, height, BGC='rgb(50, 50, 50)') {
+        this.canvas = document.getElementById(canvas_id);
+        this._width = this.canvas.width = width || window.screen.width;
+        this._height = this.canvas.height = height || window.screen.height;
+        this._cx = parseInt(this._width / 2);
+        this._cy = parseInt(this._height / 2);
+        this.ctx = this.canvas.getContext("2d");
+        this.BGC = BGC;
+        this.POINT = {
+            //大小(半径)
+            "R": 2,
+            //颜色
+            "C": "#FFFFFF"
+        }
+        this.refresh();
+    }
+
+    get width() { return this._width; }
+    set width(w) { this._width = this.canvas.width = w; this._cx = parseInt(this._width / 2); this.refresh(); }
+    get height() { return this._height; }
+    set height(h) { this._height = this.canvas.height = h; this._cy = parseInt(this._height / 2); this.refresh(); }
+    get cx() { return this._cx; }
+    get cy() { return this._cy; }
+
+    //设置颜色(strokeStyle &amp;&amp; fillStyle)
+    set colorStyle(color) {
+        this.ctx.strokeStyle = this.ctx.fillStyle = color;
+    }
+
+    /**
+     * 重置画布尺寸
+     * 
+     * @param { number } width - 画布长度 
+     * @param { number } height - 画布高度 
+     */
+    resize(width, height) {
+        this.width = parseInt(width) || window.screen.width;
+        this.height = parseInt(height) || window.screen.height;
+    }
+
+    /**
+     * 刷新画布
+     * 
+     * @param { string } color - 背景色，默认采用 this.BGC 
+     */
+    refresh(color){
+        this.ctx.fillStyle = color || this.BGC;
+        this.ctx.fillRect(0, 0, this._width, this._height);
+    }
+
+    /**
+     * 绘制点(point): 绘制坐标为(x, y)的点
+     * 
+     * @param { number } x - x轴坐标 
+     * @param { number } y - y轴坐标
+     * @param { string } [color=this.POINT.C] - 颜色
+     * @param { string } [r=this.POINT.R] - 半径尺寸 
+     * 
+     * @example 
+     * canvas.point(100, 100);
+     * canvas.point(Vector(100, 100));
+     * canvas.point({"x":100, "y":100});
+     */
+    point(x, y, color=null, r=null) {
+        if(typeof arguments[0] != "number") {
+            x = arguments[0].x; y = arguments[0].y;
+        }
+        this.ctx.strokeStyle = this.ctx.fillStyle = (color || this.POINT.C);
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, r || this.POINT.R, 0, 2*Math.PI);
+        this.ctx.stroke(); 
+        this.POINT.R > 1 &amp;&amp; this.ctx.fill();
+    }
+
+    /**
+     * 绘制线段(line): 绘制一条从起始点(xs, ys)到终止点(xe, ye)的线段
+     * 
+     * @param { number } xs - 起始点x轴坐标 
+     * @param { number } ys - 起始点y轴坐标
+     * @param { number } xe - 终止点x轴坐标
+     * @param { number } ye - 终止点y轴坐标
+     * 
+     * @example
+     * canvas.line(100, 100, 300, 300);
+     * canvas.line(Vector(100, 100), Vector(300, 300));
+     */
+    line(xs, ys, xe, ye) {
+        if(typeof arguments[0] != "number") {
+            xs = arguments[0].x; ys = arguments[0].y;
+            xe = arguments[1].x; ye = arguments[1].y;
+        }
+        this.ctx.beginPath();
+        this.ctx.moveTo(xs, ys);
+        this.ctx.lineTo(xe, ye);   
+        this.ctx.stroke(); 
+    }
+
+    /**
+     * 绘制线集: 根据顶点集绘制线集
+     * 
+     * @param { Array[] | Vector[] } ps - 顶点集 -> [[x1, y1], [x2, y2], ..., [xn, yn]] || [v1, v2, v3, ..., vn] 
+     * @param { string | Color } [color] - 线段颜色样式
+     * @param { boolean } [close] - 是否闭合
+     * 
+     * @example
+     * canvas.lines([[100, 100], [300, 300]]);
+     * canvas.lines([Vector(100, 100), Vector(300, 300)]);
+     */
+    lines(ps, color='rgb(255, 255, 255)', close=false) {
+        //判断点集元素类型
+        let isVector = (ps[0].x != undefined);
+        //判断是否是颜色对象
+        let isColor = (color.color != undefined);
+        //绘制线段
+        for(let i=0, n=ps.length, end=(close ? n : n-1); i&lt;end; i++) {
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = (isColor ? color.color() : color);
+            if(isVector) {
+                this.ctx.moveTo(ps[i].x, ps[i].y); this.ctx.lineTo(ps[(i+1)%n].x, ps[(i+1)%n].y);
+            } else {
+                this.ctx.moveTo(ps[i][0], ps[i][1]); this.ctx.lineTo(ps[(i+1)%n][0], ps[(i+1)%n][1]);
+            }
+            this.ctx.stroke();
+        }
+    }
+
+    /**
+     * 绘制圆: 绘制圆心坐标为(x, y), 半径为r的圆
+     * 
+     * @param { number } x - 圆心x轴坐标
+     * @param { number } y - 圆心y轴坐标
+     * @param { number } r - 半径 
+     * @param { string } [color] - 填充颜色 
+     * 
+     * @example
+     * canvas.circle(100, 100, 5);
+     */
+    circle(x, y, r, color=null) {
+        if(color){ this.ctx.strokeStyle = this.ctx.fillStyle = color};
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, r, 0, 2*Math.PI);
+        this.ctx.stroke(); 
+        color &amp;&amp; this.ctx.fill();
+    }
+
+    /**
+     * 绘制矩形: 绘制中心坐标为(x, y), x轴半径为rx, y轴半径为ry的矩形
+     * 
+     * @param { number } x - 矩形中心x坐标 
+     * @param { number } y - 矩形中心y坐标 
+     * @param { number } rx - 矩形x轴半径 
+     * @param { number } ry - 矩形y轴半径
+     * 
+     * @example
+     * canvas.rect(100, 100, 50, 100);
+     */
+    rect(x, y, rx, ry) {
+        this.ctx.beginPath();
+        this.ctx.rect(x-rx, y-ry, rx*2, ry*2);
+        this.ctx.stroke();
+    }
+}
+
+
+export { Canvas };</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.2</a> on Fri Apr 28 2023 01:12:59 GMT+0800 (香港标准时间) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>

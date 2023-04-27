@@ -12,7 +12,7 @@
     "opts": {
         "template": "./build/docdash-templates",
         "encoding": "utf8",
-        "destination": "api/",
+        "destination": "docs/",
         "readme": "./docs/tutorials/01-快速入门.md",
         "tutorials": "./docs/tutorials",
         "recurse": true,
