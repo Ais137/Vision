@@ -21,15 +21,109 @@ Meta(文件元信息):
 
 --------------------------------------------------
 ## 分支管理
-### ***master*** : 
-主分支，原则上不允许直接提交，但由于项目处于早期阶段，代码变更比较频繁，项目管理者允许在该分支上直接提交，后期引入 **GitFlow** 流程后，该分支将禁止直接操作。
-### ***dev*** : 
-功能/特性开发分支
-### ***doc*** : 
-该分支用于进行 **API文档自动化构建方案** 的可行性验证。
+
+### 分支管理策略
+在参考 ***GitFlow*** 工作流后，Vision 项目中采用以下分支管理策略。
+* ***master*** : 主干分支，受保护分支，正式发布版本的分支，不允许直接提交代码。
+* ***dev*** : 开发分支，用于集成新特性，从 *master* 分支构建。
+* ***doc*** : 用于生成项目文档的分支，从 *master* 分支构建。
+* ***feature/xxx*** : 功能/特性开发分支，从 *dev* 分支构建，*xxx* 为新特性的简要标识。
+* ***fix/xxx*** : bug修复分支，从 *dev* 分支构建，*xxx* 为待修复的BUG的简要标识。
+
+[GitFlow工作流简介](https://www.git-tower.com/learn/git/ebook/cn/command-line/advanced-topics/git-flow)
+
+### Commit 信息规范
+commit 信息规范参考 *Angular* 提出的标准，主要格式如下:
+```
+<type>(<scope>): <subject> 
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+```
+
+其中 ***type*** 字段描述了 commit 的类型，主要有以下选项:
+* feat : 新功能/新特性
+* fix : bug修复
+* docs : 文档变动
+* test : 测试更新
+* build : 构建系统变更
+* pref : 代码性能优化
+* style : 代码风格变化
+* refactor : 重构  
+
+***scope*** 字段是一个可选项，描述了本次提交涉及到的变更范围。  
+***subject*** 字段用于对 commit 的简单描述。  
+***body*** 字段用于对 commit 的详细描述。  
+***footer*** 页脚字段可以包含有关重大更改，弃用信息，和引用 issues 和 PR 的地方。
+
+一个简单的示例如下 :
+
+```
+feat(vector.Vector): 新增静态构建方法
+
+- 新增 Vector.ones 静态构建方法
+- 新增 Vector.zeros 静态构建方法
+- 新增 Vector.random 静态构建方法
+
+```
+
+详细参考: [Angular-commit规范](https://github.com/angular/angular/blob/main/CONTRIBUTING.md#commit)
 
 --------------------------------------------------
 ## 注释规范
+Vision项目采用 ***jsdoc*** 的注释风格。开发过程中需要在以下位置添加整体描述性注释，以便后续API文档的自动化构建:
+* Module(模块)
+```js
+/**
+ * @module
+ * @desc     模块描述
+ * @project  Vision
+ * @author   开发者
+ * @date     创建时间(xxxx-xx-xx)
+ * @version  版本(0.1.0)
+ * @since    (更新时间, 开发者): 更新信息
+*/
+```
+* Class(类)
+```js
+/** Test */
+class Test {
+
+    /**
+     * @classdesc 描述信息
+     * 
+     * @property { number } id - 标识id
+     * @property { string } data - 数据
+     * 
+     * @param { number } id - 标识id
+     * @param { string } [data="test"] - 数据
+     * 
+     * @example
+     * let t = new Test(1, "aaa");
+     */
+    constructor(id, data="test") {
+        this.id = id;
+        this.data = data;
+    }
+}
+```
+* Method(方法)/Function(函数)
+```js
+/**
+ * 方法功能描述
+ * 
+ * @param { number } a - 参数a
+ * @param { number } b - 参数b
+ * @returns { number } 返回值
+ */
+add(a, b) {
+    return a+b;
+}
+```
+详细的注释方法参见:   
+* [jsdoc官方文档](https://jsdoc.app/)
+* [jsdoc中文文档](https://www.jsdoc.com.cn/)
 
 --------------------------------------------------
 ## 版本管理
@@ -42,12 +136,12 @@ Meta(文件元信息):
 * 修订版本号 ：重要Bug修复后需要更新修订版本号。
 
 --------------------------------------------------
-## 单元测试
-
---------------------------------------------------
 ## 代码片段 
 > Code snippets are templates that make it easier to enter repeating code patterns, such as loops or conditional-statements.  
 
 为了提高开发效率，Vision项目封装了一些常用 **代码片段** 来快速生成代码模板。
 具体详见 : [Vision.code-snippets](./develop/Vision.code-snippets)  
 可以考虑将其引入编辑器来简化重复代码的生成，代码片段的具体格式参考 [Snippets in Visual Studio Code](https://code.visualstudio.com/docs/editor/userdefinedsnippets)
+
+--------------------------------------------------
+## 单元测试

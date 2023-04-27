@@ -1,28 +1,28 @@
-/****************************************
- * Name: 曼德勃罗特集
- * Date: 2022-12-06
- * Author: Ais
- * Project: 
- * Desc: 
- * Version: 0.1
-****************************************/
+/**
+ * @module
+ * @desc     曼德勃罗特集
+ * @project  Vision
+ * @author   Ais
+ * @date     2022-12-06
+ * @version  0.1.0
+*/
 
-//复数
+
+/** 复数 */
 class Complex {
 
-    /*----------------------------------------
-    @class: 复数
-    @desc: 实现复数计算
-    @property: 
-        * r(number): 实部
-        * i(number): 虚部
-    @method: 
-        * add: 加法
-        * mult: 乘法
-        * norm: 求模
-    @exp: 
-        let c = new Complex(1, 1);
-    ----------------------------------------*/
+    /**
+     * @classdesc 复数: 实现复数计算
+     * 
+     * @property { number } r - 实部
+     * @property { number } i - 虚部
+     * 
+     * @param { number } r - 实部
+     * @param { number } i - 虚部
+     * 
+     * @example
+     * let c = new Complex(1, 1);
+     */
     constructor(r, i) {
         //实部
         this.r = r;
@@ -30,19 +30,22 @@ class Complex {
         this.i = i;
     }
 
-    /*----------------------------------------
-    @func: 复数加法
-    ----------------------------------------*/
+    /**
+     * 复数加法
+     * @param { Complex } 操作数 
+     * @returns { Complex } this
+     */
     add(complex) {
         this.r += complex.r;
         this.i += complex.i;
         return this;
     }
 
-    /*----------------------------------------
-    @func: 复数乘法
-    @desc: (a+bi)(c+di)=(ac-bd)+(bc+ad)i
-    ----------------------------------------*/
+    /**
+     * 复数乘法: (a+bi)(c+di)=(ac-bd)+(bc+ad)i
+     * @param { Complex } 操作数 
+     * @returns { Complex } this
+     */
     mult(complex) {
         let a = this.r, b = this.i, c = complex.r, d = complex.i;
         this.r = a * c - b * d;
@@ -50,9 +53,10 @@ class Complex {
         return this;
     }
 
-    /*----------------------------------------
-    @func: 求模长
-    ----------------------------------------*/
+    /**
+     * 计算模长
+     * @returns { number } 模长
+     */
     norm() {
         return Math.sqrt(this.r * this.r + this.i * this.i);
     }
@@ -60,16 +64,19 @@ class Complex {
 }
 
 
-/*----------------------------------------
-@func: 曼德勃罗特集: Z(n+1) = Z(n) ^ 2 + C
-@desc: 判断给定参数(C)经过有限次迭代是否收敛
-@params: 
-    * C(Complex): 复数参数
-    * n(int>0): 迭代次数
-@return(type): [是否属于该集合, 迭代次数]
-@exp: 
-    Mandelbrot_Set(new Complex(0, 0)) -> [true, n]
-----------------------------------------*/
+/**
+ * 曼德勃罗特集: Z(n+1) = Z(n) ^ 2 + C
+ * 
+ * 判断给定参数(C)经过有限次迭代是否收敛
+ * 
+ * @param { Complex } C - 复数参数 
+ * @param { number } n - 迭代次数(int&n>0)
+ * 
+ * @returns { Array } [是否属于该集合, 迭代次数]
+ * 
+ * @example
+ * Mandelbrot_Set(new Complex(0, 0)) -> [true, n]
+ */
 const Mandelbrot_Set = function(C, n=500) {
     let z = new Complex(0, 0);
     for(let i=0; i<=n; i++) {
@@ -82,17 +89,20 @@ const Mandelbrot_Set = function(C, n=500) {
 }
 
 
-/*----------------------------------------
-@func: 朱利亚集: Z(n+1) = Z(n) ^ 2 + C
-@desc: 固定参数C, 判断Z0是否在有限次迭代后收敛
-@params: 
-    * Z0(Complex): 初始迭代参数
-    * C(Complex): 固定复数参数
-    * n(int>0): 迭代次数
-@return(type): [是否属于该集合, 迭代次数]
-@exp: 
-    Julia_Set(new Complex(0, 0), new Complex(-0.8, 0.156)) -> [true, n]
-----------------------------------------*/
+/**
+ * 朱利亚集: Z(n+1) = Z(n) ^ 2 + C
+ * 
+ * 固定参数C, 判断Z0是否在有限次迭代后收敛
+ * 
+ * @param { Complex } Z0 - 初始迭代参数 
+ * @param { Complex } C - 固定复数参数
+ * @param { number } n - 迭代次数(int&n>0)
+ * 
+ * @returns { Array } [是否属于该集合, 迭代次数]
+ * 
+ * @example 
+ * Julia_Set(new Complex(0, 0), new Complex(-0.8, 0.156)) -> [true, n]
+ */
 const Julia_Set = function(Z0, C, n=500) {
     let z = Z0;
     for(let i=0; i<=n; i++) {

@@ -1,39 +1,42 @@
-/****************************************
- * Name: 轨迹追踪器
- * Date: 2022-07-15
- * Author: Ais
- * Project: Vision
- * Desc: 追踪记录目标粒子的移动轨迹
- * Version: 0.1
-****************************************/
+/**
+ * @module
+ * @desc     轨迹追踪器: 追踪记录目标粒子的移动轨迹
+ * @project  Vision
+ * @author   Ais
+ * @date     2022-07-15
+ * @version  0.1.0
+*/
+
 
 class TrailTracker {
 
-    /*----------------------------------------
-    @func: 轨迹追踪器
-    @desc: 隐式地追踪记录目标粒子的移动轨迹
-    @property: 
-        * tp(Particle): 目标粒子
-        * tn(number): 轨迹长度
-        * trail(list:Vector): 轨迹向量容器
-    @method:
-        * _bind(): 绑定追踪的粒子对象
-    ----------------------------------------*/
+    /**
+     * @classdesc 轨迹追踪器: 基于Hook式的方法隐式地追踪记录目标粒子的移动轨迹  
+     * 通过hook目标对象的action()方法来实现隐式的轨迹追踪效果
+     * 
+     * @property { Particle } tp - 追踪的目标粒子
+     * @property { number } tn - 轨迹长度(int & tn>0)
+     * @property { Vector[] } trail - 轨迹向量容器，记录的轨迹坐标
+     * 
+     * @param { Particle } tp - 追踪的目标粒子 
+     * @param { number } [tn=10] - 轨迹长度(int & tn>0)
+     * 
+     * @example
+     * let p = new Particle();
+     * let tracker = new TrailTracker(p, 50);
+     */
     constructor(tp, tn=10) {
-        //目标粒子
         this.tp = tp;
-        //轨迹长度
         this.tn = tn;
-        //轨迹
         this.trail = [];
         //绑定目标对象
         this._bind();
     }
 
-    /*----------------------------------------
-    @func: 绑定追踪的粒子对象
-    @desc: 通过hook目标对象的action()方法来实现隐式的轨迹追踪效果
-    ----------------------------------------*/
+    /**
+     * 绑定追踪的粒子对象: 通过hook目标对象的action()方法来实现隐式的轨迹追踪效果
+     * @private
+     */
     _bind() {
         this.trail = [this.tp.p.clone()];
         //hook目标对象的action方法
@@ -46,11 +49,6 @@ class TrailTracker {
             return p;
         }
     }
-}
-
-
-const trail_tracker_middlewares = function(tn) {
-    
 }
 
 

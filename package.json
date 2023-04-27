@@ -12,7 +12,8 @@
     "scripts": {
         "vtp": "node ./vtp/tpBuilder.js",
         "build": "rollup --config ./build/rollup.config.js",
-        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+        "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+        "doc": "jsdoc -c ./build/jsdoc.config.json"
     },
     "keywords": [
         "vision",
@@ -21,7 +22,9 @@
     "author": "Ais",
     "license": "ISC",
     "devDependencies": {
+        "@rollup/plugin-terser": "^0.4.1",
         "jest": "^28.1.1",
+        "jsdoc": "^4.0.2",
         "rollup": "^3.21.0"
     }
 }

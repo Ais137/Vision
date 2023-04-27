@@ -1,11 +1,11 @@
-/****************************************
- * Name: color | 颜色
- * Date: 2022-07-18
- * Author: Ais
- * Project: Vision
- * Desc: 颜色容器
- * Version: 0.1
-****************************************/
+/**
+ * @module
+ * @desc     颜色容器
+ * @project  Vision
+ * @author   Ais
+ * @date     2022-07-18
+ * @version  0.1.0
+*/
 
 
 import { Vector } from "../vector/vector.js";
@@ -14,21 +14,27 @@ import { Vector } from "../vector/vector.js";
 //颜色向量
 class ColorVector extends Vector {
 
-    /*----------------------------------------
-    @class: 颜色向量(Vector)
-    @desc: 
-        用向量来描述颜色，一个颜色表达式可以看作RGB空间中的一个向量，之所以采用
-        向量的形式来描述颜色在于，可以通过这种方式替换粒子中的位置向量，
-        来描述颜色向量在颜色空间中的移动，从而构建颜色渐变器。
-    @property: 
-        * r/g/b(get/set): 颜色的RGB值分量
-        * a(get/set): alpht通道分量
-    @method: 
-        * color(): 返回颜色表达式 -> 'rgb(r, g, b)'
-        * clone(): 复制颜色向量
-    @exp:
-        * new ColorVector(100, 200, 300).color() -> 'rgb(100, 200, 300)';
-    ----------------------------------------*/
+    /**
+     * 颜色向量(Vector):  
+     * 用向量来描述颜色，一个颜色表达式可以看作RGB空间中的一个向量，之所以采用
+     * 向量的形式来描述颜色在于，可以通过这种方式替换粒子中的位置向量，
+     * 来描述颜色向量在颜色空间中的移动，从而构建颜色渐变器。
+     * 
+     * @property { number[] } v - 颜色向量容器(内部存储结构)
+     * @property { get/set } r - R分量(this.v[0])
+     * @property { get/set } g - G分量(this.v[1])
+     * @property { get/set } b - B分量(this.v[2])
+     * @property { get/set } a - alpht通道分量(this.v[3])
+     * 
+     * @param { number } [r=0] - R分量(int & [0, 255]) 
+     * @param { number } [g=0] - G分量(int & [0, 255])  
+     * @param { number } [b=0] - B分量(int & [0, 255])  
+     * @param { number } [a=1] - alpht通道分量([0, 1])
+     * 
+     * @example
+     * let color = new ColorVector(100, 200, 300);
+     * color.color();  //'rgb(100, 200, 300)'
+     */
     constructor(r=0, g=0, b=0, a=1) {
         super();
         //颜色分量
@@ -44,6 +50,12 @@ class ColorVector extends Vector {
     set b(val){ this.v[2] = val; }
     set a(val){ this.v[3] = val; }
 
+    /**
+     * 返回颜色值
+     * 
+     * @param { boolean } [tolist=false] - {"false": "rgb(r, g, b)", "true": [r, g, b]} 
+     * @returns { string | Array } 颜色值
+     */
     color(tolist=false) {
         if(this.v.length<=3) {
             return tolist ? [this.v[0], this.v[1], this.v[2]] : `rgb(${this.v[0]}, ${this.v[1]}, ${this.v[2]})`;
@@ -51,8 +63,10 @@ class ColorVector extends Vector {
             return tolist ? [this.v[0], this.v[1], this.v[2], this.v[3]] : `rgb(${this.v[0]}, ${this.v[1]}, ${this.v[2]})`;
         }
     }
+    /** 返回颜色值 */
     val(tolist=false) { return this.color(tolist); }
 
+    /** 复制颜色 */
     clone() {
         return new ColorVector(...this.v);
     }
@@ -62,36 +76,38 @@ class ColorVector extends Vector {
 //颜色渐变器
 class ColorGradient {
 
-    /*----------------------------------------
-    @class: 线性颜色渐变器
-    @desc: 一种迭代器，用于产生渐变色。
-    @property: 
-        * scv(ColorVector): 起始颜色向量
-        * ecv(ColorVector): 终止颜色向量
-        * cv(ColorVector): 当前颜色向量
-        * n(number): 渐变次数，用于计算每次迭代时的颜色增量
-        * _count(number): 内部计数器，用于记录当前迭代次数
-        * _dcv(ColorVector): 每次迭代的颜色增量
-    @method: 
-        * color(): 返回颜色表达式 -> 'rgb(r, g, b)'
-    @exp: 
-        new ColorGradient([100, 200, 200], [50, 50, 50], 100);
-    ----------------------------------------*/
+    /**
+     * @classdesc 线性颜色渐变器: 用于产生渐变色
+     * 
+     * @property { ColorVector } scv  - 起始颜色向量
+     * @property { ColorVector } ecv  - 终止颜色向量
+     * @property { ColorVector } cv   - 当前颜色向量
+     * @property { number } n - 渐变次数，用于计算每次迭代时的颜色增量
+     *  
+     * @param { ColorVector } start_color - 起始颜色向量
+     * @param { ColorVector } end_color - 终止颜色向量 
+     * @param { number } n - 渐变次数
+     * 
+     * @example
+     * let cg = new ColorGradient([100, 200, 200], [50, 50, 50], 100);
+     */
     constructor(start_color, end_color, n) {
-        //起始颜色向量
         this.scv = new ColorVector(...start_color);
-        //终止颜色向量
         this.ecv = new ColorVector(...end_color);
-        //当前颜色
         this.cv = this.scv.clone();
-        //渐变次数
         this.n = n; 
-        //计数器
+        //内部计数器，用于记录当前迭代次数
         this._count = n;
-        //计算颜色增量
+        //计算颜色增量: 每次迭代的颜色增量
         this._dcv = Vector.sub(this.ecv, this.scv).norm(Vector.dist(this.ecv, this.scv)/n);
     }
 
+    /**
+     * 迭代并返回颜色值
+     * 
+     * @param { boolean } [tolist=false] - {"false": "rgb(r, g, b)", "true": [r, g, b]} 
+     * @returns { string | Array } 颜色值
+     */
     color(tolist=false) {
         let color_val = this.cv.color(tolist);
         if(this._count > 0) { this.cv.add(this._dcv); }
@@ -100,6 +116,7 @@ class ColorGradient {
     } 
     val(tolist=false) { return this.color(tolist); }
 
+    /** 迭代终止条件 */
     isEnd() {
         return !(this._count > 0);
     }
