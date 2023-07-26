@@ -1,0 +1,62 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+
+package vision;
+
+service VisionRendererAPI {
+    rpc refresh (Background) returns (Response) {};
+    rpc line (Line) returns (Response) {};
+    rpc circle (Circle) returns (Response) {};
+    rpc rect (Rect) returns (Response) {};
+    rpc polyline (stream Line) returns (Response) {};
+    rpc polygon(Polygon) returns (Response) {};
+    
+}
+
+message Background {
+    uint32 width = 1;
+    uint32 height = 2;
+    repeated uint32 color = 3;
+}
+
+message Line {
+    float xs = 1;
+    float ys = 2;
+    float xe = 3;
+    float ye = 4;
+    repeated uint32 color = 5;
+    uint32 lineWidth = 6;
+}
+
+message Circle {
+    float x = 1;
+    float y = 2;
+    float r = 3;
+    repeated uint32 color = 4;
+    uint32 lineWidth = 5;
+    bool fill = 6;
+}
+
+message Rect {
+    float x = 1;
+    float y = 2;
+    float rx = 3;
+    float ry = 4;
+    repeated uint32 color = 5;
+    uint32 lineWidth = 6;
+    bool fill = 7;
+}
+
+message Polygon {
+    
+    message Point {
+        repeated float values = 1;
+    }
+
+    repeated Point points = 1;
+    repeated uint32 color = 2;
+}
+
+message Response {
+    bool state = 1;
+}

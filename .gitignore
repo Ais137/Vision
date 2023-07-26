@@ -6,6 +6,7 @@
 index.js
 **/img/*
 !**/img/disp
+!**/img/tech
 /DevPlan.md
 package-lock.json
 /api

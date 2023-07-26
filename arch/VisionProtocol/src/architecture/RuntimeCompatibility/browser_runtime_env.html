@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> test </title>
+    <style>
+        body {overflow: hidden; }
+        * { margin: 0; padding: 0; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+    <script type="module">
+        /**
+         * @desc     运行环境兼容性架构 浏览器 环境测试
+         * @project  Vision
+         * @author   Ais
+         * @date     2023-06-07
+         * @version  0.1.0
+        */
+        
+        //导入Canvas上下文容器
+        import { CanvasContext } from "../../context/CanvasContext.js";
+        //导入渲染模块
+        // import { renderer } from "../../renderer/test.js";
+        // import { renderer } from "../../renderer/helix.js";
+        import { renderer } from "../../renderer/boids.js";
+        
+        const context = new CanvasContext(1920, 1080, [0, 0, 0]).init("vision_canvas");
+        renderer(context, {stop_ft: Infinity});
+
+    </script>
+</body>
+
+</html>
