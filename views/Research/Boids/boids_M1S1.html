@@ -31,11 +31,10 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.canvas.Canvas("vision_canvas");
-        const Vector = vision.vector.Vector;
-        const Views = vision.views.Views; Views.canvas = canvas;
-        const Tools = vision.tools.Tools;
-        canvas.BGC = 'rgb(0, 0, 0)'; 
+        const context = new vision.CanvasContext().init("vision_canvas");
+        const Views = vision.Views; Views.context = context;
+        const Vector = vision.Vector;
+        const Tools = vision.Tools; 
 
         //配置参数
         const confs = {
@@ -57,7 +56,7 @@
             "tn":30,
         } 
 
-        class BoidModule1 extends vision.Boids.Boid {
+        class BoidModule1 extends vision.algo.boids.Boid {
 
             constructor(p, v, R, K) {
                 super(p, v, R, K);
@@ -87,20 +86,20 @@
         //构建粒子群
         let pcs = new vision.particle.ParticleSystem(() => {
             let p = new BoidModule1(
-                Vector.random([[0, canvas.width], [0, canvas.height]]),
+                Vector.random([[0, context.width], [0, context.height]]),
                 Vector.random([confs.vR, confs.vR]),
                 confs.view_rad,
                 confs.K,
             );
-            p.tracker = new vision.tracker.TrailTracker(p, confs.tn);
+            p.tracker = new vision.particle.TrailTracker(p, confs.tn);
             return p;
         }).build(confs.N);
         pcs.max_pn = confs.N; pcs.gen_pn = confs.gn; pcs.GENR = confs.GENR;
 
         //鸟群模型规则集作用
         pcs.action_middlewares.before.push(
-            vision.Boids.boids_middlewares(
-                new vision.NNS.GridNNS([], function(obj){ return obj.p }, confs.view_rad)
+            vision.algo.boids.boids_middlewares(
+                new vision.algo.NNS.GridNNS([], function(obj){ return obj.p }, confs.view_rad)
             )
         );
 
@@ -114,7 +113,7 @@
         //边界处理
         pcs.action_middlewares.after.push((function () {
             //构建边界限制器
-            let border = new vision.border.RectLoopBorder([[0, canvas.width], [0, canvas.height]]);
+            let border = new vision.particle.border.RectLoopBorder([[0, context.width], [0, context.height]]);
             //边界处理中间件
             return function border_middleware(ps) {
                 for (let i = ps.length; i--;) { border.limit(ps[i]); }
@@ -122,10 +121,10 @@
         }()));
 
         //渲染器
-        const randerer = new vision.randerer.IntervalRanderer().rander(() => {
+        const renderer = new vision.renderer.IntervalRenderer().render(() => {
             pcs.action();
             //绘制
-            canvas.refresh();
+            context.refresh();
             for (let i = 0, n = pcs.ps.length; i < n; i++) {
                 Views.trail(pcs.ps[i].tracker.trail, {"color": new vision.color.ColorGradient([0, 0, 0], [255, 255, 255], pcs.ps[i].tracker.trail.length)});
             }

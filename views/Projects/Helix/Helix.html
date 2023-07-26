@@ -31,11 +31,11 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.Canvas("vision_canvas");
+        const context = new vision.CanvasContext().init("vision_canvas");
+        const Views = vision.Views; Views.context = context;
         const Vector = vision.Vector;
-        const Views = vision.Views; Views.context = canvas;
         const Tools = vision.Tools;
-        canvas.BGC = Tools.RGB([0, 0, 0])
+
 
         class Helix {
 
@@ -55,7 +55,7 @@
                 //SHM角速度(100)
                 this.SHM_W = Tools.ATR(100);
                 //中心坐标
-                this.o = new Vector(canvas.cx, canvas.cy);
+                this.o = new Vector(context.cx, context.cy);
                 //前一刻位置
                 this.p0 = this.o;
                 //当前位置
@@ -80,19 +80,18 @@
 
         
         //构建渲染器
-        canvas.refresh();
-        const randerer = new vision.randerer.IntervalRanderer().rander((t) => {
+        context.refresh();
+        const renderer = new vision.renderer.IntervalRenderer().render((t) => {
             helix.action(t);
             let c = parseInt((helix.R-helix.r) * (255/helix.R));
-            canvas.ctx.strokeStyle = Tools.RGB([c, c, c]);
-            canvas.line(helix.p, helix.p0);
+            context.line(helix.p.x, helix.p.y, helix.p0.x, helix.p0.y, {color: [c, c, c]})
             //绘制边界圆
-            // canvas.circle(helix.o.x, helix.o.y, helix.R)
-            // canvas.circle(helix.p.x, helix.p.y, helix.r)
+            // context.circle(helix.o.x, helix.o.y, helix.R)
+            // context.circle(helix.p.x, helix.p.y, helix.r)
 
         }).stop(helix.R/helix.dr*2);
 
-        const capturer = new vision.views.Capturer(canvas).capturing();
+        const capturer = new vision.views.Capturer(context).capturing();
 
     </script>
 </body>

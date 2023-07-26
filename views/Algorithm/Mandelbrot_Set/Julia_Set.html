@@ -31,12 +31,11 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.Canvas("vision_canvas");
+        const context = new vision.CanvasContext().init("vision_canvas");
+        const Views = vision.Views; Views.context = context;
         const Vector = vision.Vector;
-        const Views = vision.Views; Views.context = canvas;
         const Tools = vision.Tools;
         const MBS = vision.algo;
-        canvas.BGC = "rgb(0, 0, 0)";
 
         //渲染参数
         const confs = {
@@ -59,8 +58,8 @@
             "color_out": [0, 255, 255]
         }
         //居中偏移量
-        confs.offset_x = (canvas.width-confs.width)/2;
-        confs.offset_y = (canvas.height-confs.height)/2;
+        confs.offset_x = (context.width-confs.width)/2;
+        confs.offset_y = (context.height-confs.height)/2;
 
 
         //构建实数坐标系: 将屏幕像素坐标系映射到 MBS 计算用的坐标系
@@ -94,9 +93,9 @@
         @func: 朱利亚集渲染器
         @desc: 计算和渲染朱利亚集
         ----------------------------------------*/
-        const JBS_randerer = function() {
+        const JBS_renderer = function() {
             //构建图像容器
-            let img = canvas.ctx.createImageData(confs.width, confs.height);
+            let img = context._context_.createImageData(confs.width, confs.height);
             //构建朱利亚集
             let C0 = new MBS.Complex(...confs.C0);
             for(let y=0; y<confs.height; y++) {
@@ -109,11 +108,11 @@
                     img.data[i] = c[0], img.data[i+1] = c[1], img.data[i+2] = c[2], img.data[i+3] = 255; 
                 }
             }
-            canvas.ctx.putImageData(img, confs.offset_x, confs.offset_y);
+            context._context_.putImageData(img, confs.offset_x, confs.offset_y);
         }
-        JBS_randerer()
+        JBS_renderer()
 
-        let captuer = new vision.views.Capturer(canvas).capturing();
+        let captuer = new vision.views.Capturer(context).capturing();
 </script>
 </body>
 

@@ -1951,7 +1951,7 @@ class OptimumSolutionSolvers {
     isEnd() { return this._END; }
 }
 
-var __index__$4 = /*#__PURE__*/Object.freeze({
+var __index__$3 = /*#__PURE__*/Object.freeze({
     __proto__: null,
     Complex: Complex,
     Julia_Set: Julia_Set,
@@ -1963,205 +1963,398 @@ var __index__$4 = /*#__PURE__*/Object.freeze({
 });
 
 /**
- * @module
- * @desc     HTML5 Canvas API: 对canvas接口进行二次封装
+ * @module   
+ * @desc     渲染协议
  * @project  Vision
  * @author   Ais
- * @date     2022-07-05
+ * @date     2023-05-25
  * @version  0.1.0
 */
 
 
-class Canvas {
+/** @classdesc 渲染协议 */
+class VisionProtocol {
 
     /**
-     * @classdesc Canvas API 对象封装
+     * 刷新
      * 
-     * @property { Element } canvas - canvas元素
-     * @property { number } width - 画布长度
-     * @property { number } height - 画布高度
-     * @property { number } cx - 画布中心点x轴坐标
-     * @property { number } cy - 画布中心点y轴坐标
-     * @property { Object } ctx - 2D绘图上下文对象
-     * @property { string } BGC - 背景色
-     * @property { Object } POINT - 绘制点样式
-     * @property { Object } [POINT.R=2] - 点大小(半径)
-     * @property { Object } [POINT.C="#FFFFFF"] - 点颜色
-     * @property { string } colorStyle - strokeStyle && fillStyle
-     * 
-     * @param { string } canvas_id - canvas元素id 
-     * @param { number } width - 画布长度 
-     * @param { number } height - 画布高度 
-     * @param { string } [BGC='rgb(50, 50, 50)'] - 背景色
-     * 
-     * @example const canvas = new Canvas("vision_canvas", 3840, 2160);
+     * @abstract
+     * @param { number[] } color - 背景颜色
+     * @param { number } width - 画布宽度
+     * @param { number } height - 画布高度
      */
-    constructor(canvas_id, width, height, BGC='rgb(50, 50, 50)') {
-        this.canvas = document.getElementById(canvas_id);
-        this._width = this.canvas.width = width || window.screen.width;
-        this._height = this.canvas.height = height || window.screen.height;
-        this._cx = parseInt(this._width / 2);
-        this._cy = parseInt(this._height / 2);
-        this.ctx = this.canvas.getContext("2d");
+    refresh(color=[50, 50, 50], width=1920, height=1080) {
+        
+    }
+    
+    /**
+     * 直线
+     * 
+     * @abstract
+     * @param { number } xs - 起始点坐标 x 分量
+     * @param { number } ys - 起始点坐标 y 分量
+     * @param { number } xe - 终止点坐标 x 分量
+     * @param { number } ye - 终止点坐标 y 分量
+     * @param { Object } style - 绘制参数
+     * @param { number[] } [style.color=[255, 255, 255]] - 线段颜色
+     * @param { number } [style.lineWidth=1] - 线段宽度 
+     */
+    line(xs, ys, xe, ye, {color=[255, 255, 255], lineWidth=1}={}) {
+
+    }
+
+    /**
+     * 圆
+     * 
+     * @abstract
+     * @param { number } x - 圆心坐标 x 分量
+     * @param { number } y - 圆心坐标 y 分量
+     * @param { number } r - 圆半径
+     * @param { Object } style - 绘制参数
+     * @param { number[] } [style.color=[255, 255, 255]] - 颜色 
+     * @param { number } [style.lineWidth=1] - 线段宽度 
+     * @param { boolean } [style.fill=false] - 填充状态
+     */
+    circle(x, y, r, {color=[255, 255, 255], lineWidth=1, fill=false}={}) {
+
+    }
+
+    /**
+     * 矩形
+     * 
+     * @abstract
+     * @param { number } x - 矩形中心坐标 x 分量
+     * @param { number } y - 矩形中心坐标 y 分量
+     * @param { number } rx - 矩形 x 轴半径
+     * @param { number } ry - 矩形 y 轴半径
+     * @param { Object } style - 绘制参数
+     * @param { number[] } [style.color=[255, 255, 255]] - 颜色 
+     * @param { number } [style.lineWidth=1] - 线段宽度 
+     * @param { boolean } [style.fill=false] - 填充状态
+     */
+    rect(x, y, rx, ry, {color=[255, 255, 255], lineWidth=1, fill=false}={}) {
+       
+    }
+
+    /**
+     * 折线
+     * 
+     * @abstract
+     * @param { Point[] } points - 点集: [[x1, y1], [x2, y2], ...]
+     * @param { Object } style - 绘制参数
+     * @param { number[] } [style.color=[255, 255, 255]] - 颜色 
+     * @param { number } [style.lineWidth=1] - 线段宽度 
+     * @param { boolean } [style.close=false] - 线段闭合状态
+     */
+    polyline(points, {color=[255, 255, 255], lineWidth=1, close=false}={}) {
+        
+    }
+
+    /**
+     * 多边形
+     * 
+     * @abstract
+     * @param { Point[] } points - 点集: [[x1, y1], [x2, y2], ...]
+     * @param { Object } style - 绘制参数
+     * @param { number[] } [style.color=[255, 255, 255]] - 颜色 
+     */
+    polygon(points, {color=[255, 255, 255]}={}) {
+        
+    }
+    
+}
+
+/**
+ * @module   
+ * @desc     渲染上下文容器(基类)
+ * @project  Vision
+ * @author   Ais
+ * @date     2023-06-07
+ * @version  0.1.0
+*/
+
+
+class VisionContext extends VisionProtocol {
+
+    /**
+     * @classdesc 渲染上下文容器(基类)
+     * 
+     * @property { Object } _context_ - 渲染上下文对象
+     * @property { number } width  - 画布宽度(readonly) 
+     * @property { number } height - 画布高度(readonly) 
+     * @property { number } cx - 画布中心坐标 x 分量(readonly) 
+     * @property { number } cy - 画布中心坐标 y 分量(readonly) 
+     * @property { number[] } BGC  - 背景颜色
+     * 
+     * @param { number } width  - 画布宽度 
+     * @param { number } height - 画布高度 
+     * @param { number[] } BGC  - 背景颜色
+     */
+    constructor(width, height, BGC=[50, 50, 50]) {
+        super();
+        this._context_ = null;
+        this._width = width;
+        this._height = height;
         this.BGC = BGC;
-        this.POINT = {
-            //大小(半径)
-            "R": 2,
-            //颜色
-            "C": "#FFFFFF"
-        };
-        this.refresh();
     }
 
     get width() { return this._width; }
-    set width(w) { this._width = this.canvas.width = w; this._cx = parseInt(this._width / 2); this.refresh(); }
     get height() { return this._height; }
-    set height(h) { this._height = this.canvas.height = h; this._cy = parseInt(this._height / 2); this.refresh(); }
-    get cx() { return this._cx; }
-    get cy() { return this._cy; }
+    get cx() { return parseInt(this._width / 2); }
+    get cy() { return parseInt(this._height / 2); }
 
-    //设置颜色(strokeStyle && fillStyle)
-    set colorStyle(color) {
-        this.ctx.strokeStyle = this.ctx.fillStyle = color;
+    /**
+     * 初始化
+     * 
+     * @returns { Object } this 
+     */
+    init() {
+        return this;
     }
 
     /**
-     * 重置画布尺寸
+     * 退出
      * 
-     * @param { number } width - 画布长度 
-     * @param { number } height - 画布高度 
+     * @returns { Any }   
      */
-    resize(width, height) {
-        this.width = parseInt(width) || window.screen.width;
-        this.height = parseInt(height) || window.screen.height;
+    exit() {
+        
+    }
+
+}
+
+/**
+ * @module   
+ * @desc     Canvas渲染上下文容器 
+ * @project  Vision
+ * @author   Ais
+ * @date     2023-06-07
+ * @version  0.1.0
+*/
+
+
+class CanvasContext extends VisionContext {
+    
+    /**
+     * @classdesc Canvas渲染上下文容器
+     * 
+     * @property { Object } _canvas_  - canvas元素对象
+     * @property { Object } _context_ - canvas 2d 上下文对象
+     * 
+     * @param { number } width  - 画布宽度 
+     * @param { number } height - 画布高度 
+     * @param { number[] } BGC  - 背景颜色
+     * 
+     * @example 
+     * const context = new CanvasContext(1920, 1080, [0, 0, 0]).init("vision_canvas");
+     */
+    constructor(width, height, BGC=[0, 0, 0]) {
+        super(
+            width || window.screen.width || 1920, 
+            height || window.screen.height || 2080, 
+            BGC
+        );
+        this._canvas_ = null;
+        this._context_ = null;        
+    }
+
+    /**
+     * 初始化: 创建 Canvas2D 上下文对象对象
+     * 
+     * @param { string } canvas_element_id - canvas元素id 
+     * @returns { Object } this
+     */
+    init(canvas_element_id) {
+        this._canvas_ = document.getElementById(canvas_element_id);
+        this._canvas_.width = this._width, this._canvas_.height = this._height;
+        this._context_ = this._canvas_.getContext("2d");
+        this.refresh();
+        return this;
     }
 
     /**
      * 刷新画布
      * 
-     * @param { string } color - 背景色，默认采用 this.BGC 
-     */
-    refresh(color){
-        this.ctx.fillStyle = color || this.BGC;
-        this.ctx.fillRect(0, 0, this._width, this._height);
-    }
-
-    /**
-     * 绘制点(point): 绘制坐标为(x, y)的点
-     * 
-     * @param { number } x - x轴坐标 
-     * @param { number } y - y轴坐标
-     * @param { string } [color=this.POINT.C] - 颜色
-     * @param { string } [r=this.POINT.R] - 半径尺寸 
-     * 
-     * @example 
-     * canvas.point(100, 100);
-     * canvas.point(Vector(100, 100));
-     * canvas.point({"x":100, "y":100});
-     */
-    point(x, y, color=null, r=null) {
-        if(typeof arguments[0] != "number") {
-            x = arguments[0].x; y = arguments[0].y;
-        }
-        this.ctx.strokeStyle = this.ctx.fillStyle = (color || this.POINT.C);
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, r || this.POINT.R, 0, 2*Math.PI);
-        this.ctx.stroke(); 
-        this.POINT.R > 1 && this.ctx.fill();
-    }
-
-    /**
-     * 绘制线段(line): 绘制一条从起始点(xs, ys)到终止点(xe, ye)的线段
-     * 
-     * @param { number } xs - 起始点x轴坐标 
-     * @param { number } ys - 起始点y轴坐标
-     * @param { number } xe - 终止点x轴坐标
-     * @param { number } ye - 终止点y轴坐标
+     * @param { number[] } color - 背景颜色
+     * @param { number } width - 画布宽度
+     * @param { number } height - 画布高度
      * 
      * @example
-     * canvas.line(100, 100, 300, 300);
-     * canvas.line(Vector(100, 100), Vector(300, 300));
+     * context.refresh();
      */
-    line(xs, ys, xe, ye) {
-        if(typeof arguments[0] != "number") {
-            xs = arguments[0].x; ys = arguments[0].y;
-            xe = arguments[1].x; ye = arguments[1].y;
-        }
-        this.ctx.beginPath();
-        this.ctx.moveTo(xs, ys);
-        this.ctx.lineTo(xe, ye);   
-        this.ctx.stroke(); 
+    refresh(color=null, width=null, height=null){
+        this._context_.fillStyle = CanvasContext.RGB(...(color || this.BGC));
+        this._context_.fillRect(0, 0, width || this.width, height || this.height);
     }
 
     /**
-     * 绘制线集: 根据顶点集绘制线集
+     * 绘制直线
      * 
-     * @param { Array[] | Vector[] } ps - 顶点集 -> [[x1, y1], [x2, y2], ..., [xn, yn]] || [v1, v2, v3, ..., vn] 
-     * @param { string | Color } [color] - 线段颜色样式
-     * @param { boolean } [close] - 是否闭合
+     * @param { number } xs - 起始点坐标 x 分量
+     * @param { number } ys - 起始点坐标 y 分量
+     * @param { number } xe - 终止点坐标 x 分量
+     * @param { number } ye - 终止点坐标 y 分量
+     * @param { Object } style - 绘制参数
+     * @param { number[] } [style.color=[255, 255, 255]] - 线段颜色
+     * @param { number } [style.lineWidth=1] - 线段宽度 
      * 
      * @example
-     * canvas.lines([[100, 100], [300, 300]]);
-     * canvas.lines([Vector(100, 100), Vector(300, 300)]);
+     * context.line(0, 0, context.width, context.height, {color: [0, 255, 0], lineWidth: 3});
      */
-    lines(ps, color='rgb(255, 255, 255)', close=false) {
+    line(xs, ys, xe, ye, {color=[255, 255, 255], lineWidth=1}={}) {
+        let _strokeStyle = CanvasContext.RGB(...color);
+        if(this._context_.strokeStyle != _strokeStyle) { this._context_.strokeStyle = _strokeStyle; }
+        if(this._context_.lineWidth != lineWidth) { this._context_.lineWidth = lineWidth; }
+        this._context_.beginPath();
+        this._context_.moveTo(xs, ys);
+        this._context_.lineTo(xe, ye);   
+        this._context_.stroke(); 
+    }
+
+    /**
+     * 绘制圆
+     * 
+     * @param { number } x - 圆心坐标 x 分量
+     * @param { number } y - 圆心坐标 y 分量
+     * @param { number } r - 圆半径
+     * @param { Object } style - 绘制参数
+     * @param { number[] } [style.color=[255, 255, 255]] - 颜色 
+     * @param { number } [style.lineWidth=1] - 线段宽度 
+     * @param { boolean } [style.fill=false] - 填充状态
+     * 
+     * @example
+     * context.circle(context.cx, context.cy, 100, {color: [0, 175, 175]});
+     */
+    circle(x, y, r=2, {color=[255, 255, 255], lineWidth=1, fill=true}={}) {
+        let _color = CanvasContext.RGB(...color);
+        if(this._context_.strokeStyle != _color) { this._context_.strokeStyle = _color; }
+        if(fill && this._context_.fillStyle != _color) { this._context_.fillStyle = _color; }
+        if(this._context_.lineWidth != lineWidth) { this._context_.lineWidth = lineWidth; }
+        this._context_.beginPath();
+        this._context_.arc(x, y, r, 0, 2*Math.PI);
+        this._context_.stroke(); 
+        fill && this._context_.fill();
+    }
+
+    /**
+     * 绘制矩形
+     * 
+     * @param { number } x - 矩形中心坐标 x 分量
+     * @param { number } y - 矩形中心坐标 y 分量
+     * @param { number } rx - 矩形 x 轴半径
+     * @param { number } ry - 矩形 y 轴半径
+     * @param { Object } style - 绘制参数
+     * @param { number[] } [style.color=[255, 255, 255]] - 颜色 
+     * @param { number } [style.lineWidth=1] - 线段宽度 
+     * @param { boolean } [style.fill=false] - 填充状态
+     * 
+     * @example
+     * context.rect(context.cx, context.cy, 500, 200, {color: [255, 0, 0]});
+     */
+    rect(x, y, rx, ry, {color=[255, 255, 255], lineWidth=1, fill=false}={}) {
+        let _color = CanvasContext.RGB(...color);
+        if(this._context_.strokeStyle != _color) { this._context_.strokeStyle = _color; }
+        if(fill && this._context_.fillStyle != _color) { this._context_.fillStyle = _color; }
+        if(this._context_.lineWidth != lineWidth) { this._context_.lineWidth = lineWidth; }
+        this._context_.beginPath();
+        this._context_.rect(x-rx, y-ry, rx*2, ry*2);
+        this._context_.stroke();
+        fill && this._context_.fill();
+    }
+
+    /**
+     * 绘制折线
+     * 
+     * @param { Point[] } points - 点集: [[x1, y1], [x2, y2], ...]
+     * @param { Object } style - 绘制参数
+     * @param { number[] } [style.color=[255, 255, 255]] - 颜色 
+     * @param { number } [style.lineWidth=1] - 线段宽度 
+     * @param { boolean } [style.close=false] - 线段闭合状态
+     * 
+     * @example
+     * context.polyline([[100, 100], [300, 100], [500, 300], [400, 700]], {color:[0, 100, 255]});
+     */
+    polyline(points, {color=[255, 255, 255], lineWidth=1, close=false}={}) {
         //判断点集元素类型
-        let isVector = (ps[0].x != undefined);
+        let isVector = (points[0].v != undefined);
         //判断是否是颜色对象
         let isColor = (color.color != undefined);
         //绘制线段
-        for(let i=0, n=ps.length, end=(close ? n : n-1); i<end; i++) {
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = (isColor ? color.color() : color);
-            if(isVector) {
-                this.ctx.moveTo(ps[i].x, ps[i].y); this.ctx.lineTo(ps[(i+1)%n].x, ps[(i+1)%n].y);
-            } else {
-                this.ctx.moveTo(ps[i][0], ps[i][1]); this.ctx.lineTo(ps[(i+1)%n][0], ps[(i+1)%n][1]);
-            }
-            this.ctx.stroke();
+        for(let i=0, n=points.length, end=(close ? n : n-1); i<end; i++) {
+            let p1 = isVector ? points[i].v : points[i];
+            let p2 = isVector ? points[(i+1)%n].v : points[(i+1)%n];
+            let line_color = isColor ? color.color() : color;
+            this.line(p1[0], p1[1], p2[0], p2[1], {color: line_color, lineWidth: lineWidth});
         }
     }
 
     /**
-     * 绘制圆: 绘制圆心坐标为(x, y), 半径为r的圆
+     * 绘制多边形
      * 
-     * @param { number } x - 圆心x轴坐标
-     * @param { number } y - 圆心y轴坐标
-     * @param { number } r - 半径 
-     * @param { string } [color] - 填充颜色 
+     * @abstract
+     * @param { Point[] } points - 点集: [[x1, y1], [x2, y2], ...]
+     * @param { Object } style - 绘制参数
+     * @param { number[] } [style.color=[255, 255, 255]] - 颜色 
      * 
      * @example
-     * canvas.circle(100, 100, 5);
+     * context.polygon([[300, 500], [700, 500], [800, 700], [200, 700]], {color: [0, 200, 200]});
      */
-    circle(x, y, r, color=null) {
-        if(color){ this.ctx.strokeStyle = this.ctx.fillStyle = color;}        this.ctx.beginPath();
-        this.ctx.arc(x, y, r, 0, 2*Math.PI);
-        this.ctx.stroke(); 
-        color && this.ctx.fill();
+    polygon(points, {color=[255, 255, 255]}={}) {
+        //填充颜色
+        let _color = CanvasContext.RGB(...color);
+        if(this._context_.fillStyle != _color) { this._context_.fillStyle = _color; }
+        //判断点集元素类型
+        let isVector = (points[0].v != undefined);
+        //绘制多边形
+        this._context_.beginPath();
+        let p = isVector ? points[0].v : points[0];
+        this._context_.moveTo(p[0], p[1]);
+        for(let i=1, n=points.length; i<n; i++) {
+            p = isVector ? points[i].v : points[i];
+            this._context_.lineTo(p[0], p[1]);
+        }
+        this._context_.fill();
     }
 
     /**
-     * 绘制矩形: 绘制中心坐标为(x, y), x轴半径为rx, y轴半径为ry的矩形
+     * 颜色转换: 将RGBA颜色数组转换成颜色字符串(rgb格式)
      * 
-     * @param { number } x - 矩形中心x坐标 
-     * @param { number } y - 矩形中心y坐标 
-     * @param { number } rx - 矩形x轴半径 
-     * @param { number } ry - 矩形y轴半径
+     * @param { int } r - R分量 
+     * @param { int } g - G分量 
+     * @param { int } b - B分量
+     * @param { int } a - a分量
+     * @returns { string } 颜色字符串
      * 
      * @example
-     * canvas.rect(100, 100, 50, 100);
+     * CanvasContext.RGB(50, 50, 50);   //rgb(50, 50, 50)
+     * CanvasContext.RGB(50, 50, 50, 0.5);   //rgb(50, 50, 50, 0.5)
      */
-    rect(x, y, rx, ry) {
-        this.ctx.beginPath();
-        this.ctx.rect(x-rx, y-ry, rx*2, ry*2);
-        this.ctx.stroke();
+    static RGB(r, g, b, a=1) {
+        return (a==1) ? `rgb(${r}, ${g}, ${b})` : `rgb(${r}, ${g}, ${b}, ${a})`;
+    }
+
+    /**
+     * 颜色转换: 将RGB颜色数组转换成颜色字符串(Hex格式)
+     * 
+     * @param { int } r - R分量 
+     * @param { int } g - G分量 
+     * @param { int } b - B分量
+     * @returns { string } 颜色字符串
+     * 
+     * @example
+     * CanvasContext.RGBtoHex(50, 50, 50);   //#323232
+     * CanvasContext.RGBtoHex(0, 175, 175);  //#00afaf
+     */
+    static RGBtoHex(r, g, b) {
+        r = parseInt(r > 255 ? 255 : (r < 0 ? 0 : r));
+        r = r < 16 ? `0${r.toString(16)}` : r.toString(16); 
+        g = parseInt(g > 255 ? 255 : (g < 0 ? 0 : g));
+        g = g < 16 ? `0${g.toString(16)}` : g.toString(16); 
+        b = parseInt(b > 255 ? 255 : (b < 0 ? 0 : b));
+        b = b < 16 ? `0${b.toString(16)}` : b.toString(16); 
+        return `#${r}${g}${b}`;
     }
 }
-
-var __index__$3 = /*#__PURE__*/Object.freeze({
-    __proto__: null,
-    Canvas: Canvas
-});
 
 /**
  * @module
@@ -3472,19 +3665,19 @@ class Capturer {
     /**
      * @classdesc 截图器: 截取Canvas图像后导出
      * 
-     * @property { Canvas } canvasObj - canvas对象
+     * @property { CanvasContext } context - Canvas渲染上下文容器
      * @property { string } fileTitle - 导出文件标题，默认值为 *title* 标签内容
      * @property { number } fn - 导出文件计数器(int & fn>0)
      * @property { get/set } [captureKey='Q'] - 截图按键值
      * 
-     * @param { Canvas } canvasObj - canvas对象
+     * @param { CanvasContext } context - Canvas渲染上下文容器
      * @param { string } fileTitle - 导出文件标题
      * 
      * @example
      * let captuer = new Capturer(canvas).capturing();
      */
-    constructor(canvasObj, fileTitle) {
-        this.canvasObj = canvasObj;
+    constructor(context, fileTitle) {
+        this.context = context;
         this.fileTitle = fileTitle || document.getElementsByTagName("title")[0].innerText.replace(/\s+/g, "");
         /** @readonly */
         this.fn = 0;
@@ -3519,7 +3712,7 @@ class Capturer {
         //构建文件名
         fileName = fileName || `${this.fileTitle}_${this.fn++}`;
         //导出canvas二进制数据
-        this.canvasObj.canvas.toBlob((blob) => {
+        this.context._canvas_.toBlob((blob) => {
             let temp_node = document.createElement('a');
             temp_node.style.display = 'none';
             temp_node.id = fileName;
@@ -3565,15 +3758,13 @@ class ColorVector extends Vector$1 {
      * color.color();  //'rgb(100, 200, 300)'
      */
     constructor(r=0, g=0, b=0, a=1) {
-        super();
-        //颜色分量
-        this.v = a==1 ? [r, g, b] : [r, g, b, a];
+        (a==1) ? super(r, g, b) : super(r, g, b, a);
     }
 
     get r(){ return this.v[0]; }
     get g(){ return this.v[1]; }
     get b(){ return this.v[2]; }
-    get a(){ return this.v[3]; }
+    get a(){ return this.v[3] || 1; }
     set r(val){ this.v[0] = val; }
     set g(val){ this.v[1] = val; }
     set b(val){ this.v[2] = val; }
@@ -3582,18 +3773,11 @@ class ColorVector extends Vector$1 {
     /**
      * 返回颜色值
      * 
-     * @param { boolean } [tolist=false] - {"false": "rgb(r, g, b)", "true": [r, g, b]} 
-     * @returns { string | Array } 颜色值
+     * @returns { Array } 颜色值
      */
-    color(tolist=false) {
-        if(this.v.length<=3) {
-            return tolist ? [this.v[0], this.v[1], this.v[2]] : `rgb(${this.v[0]}, ${this.v[1]}, ${this.v[2]})`;
-        } else {
-            return tolist ? [this.v[0], this.v[1], this.v[2], this.v[3]] : `rgb(${this.v[0]}, ${this.v[1]}, ${this.v[2]})`;
-        }
+    color() {
+        return [...this.v];
     }
-    /** 返回颜色值 */
-    val(tolist=false) { return this.color(tolist); }
 
     /** 复制颜色 */
     clone() {
@@ -3634,16 +3818,14 @@ class ColorGradient {
     /**
      * 迭代并返回颜色值
      * 
-     * @param { boolean } [tolist=false] - {"false": "rgb(r, g, b)", "true": [r, g, b]} 
-     * @returns { string | Array } 颜色值
+     * @returns { Array } 颜色值
      */
-    color(tolist=false) {
-        let color_val = this.cv.color(tolist);
+    color() {
+        let color_val = this.cv.color();
         if(this._count > 0) { this.cv.add(this._dcv); }
         this._count--;
         return color_val;
     } 
-    val(tolist=false) { return this.color(tolist); }
 
     /** 迭代终止条件 */
     isEnd() {
@@ -3651,6 +3833,12 @@ class ColorGradient {
     }
 
 }
+
+var color = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    ColorGradient: ColorGradient,
+    ColorVector: ColorVector
+});
 
 /**
  * @module
@@ -3663,7 +3851,7 @@ class ColorGradient {
 
 
 //渲染器基类
-class Randerer {
+class Renderer {
 
     /**
      * @classdesc 渲染器基类: 实现行为逻辑和图像绘制的调度。
@@ -3682,26 +3870,26 @@ class Randerer {
     get ft() { return this._ft; }
 
     /** 渲染接口  */
-    rander() { 
+    render() { 
         this._ft++; 
     }
 }
 
 
 //间隔渲染器
-class IntervalRanderer extends Randerer {
+class IntervalRenderer extends Renderer {
 
     /**
      * @classdesc 间隔渲染器: 通过 setInterval 函数实现渲染功能
      * 
      * @property { get } ft - 帧时间轴，时钟
      * @property { number } fps - 帧数(Frames Per Second)(int & fps>0)
-     * @property { Function } rander_func - 渲染函数: 函数形参 => function() || function(ft), ft为帧时间轴，可选参数
+     * @property { Function } renderer_func - 渲染函数: 函数形参 => function() || function(ft), ft为帧时间轴，可选参数
      * 
      * @param { number } [fps=60] - 渲染帧数
      * 
      * @example 
-     * const randerer = new vision.randerer.IntervalRanderer().rander(() => {
+     * const renderer = new vision.renderer.IntervalRenderer().render(() => {
      *     canvas.refresh();
      * });
      */
@@ -3712,22 +3900,22 @@ class IntervalRanderer extends Randerer {
         //间隔执行器
         this._timer = null;
         //渲染函数
-        this.rander_func = null;
+        this.renderer_func = null;
     }
 
     /**
-     * 渲染接口: 通过 setInterval 间隔执行 rander_func 实现渲染功能
+     * 渲染接口: 通过 setInterval 间隔执行 renderer_func 实现渲染功能
      * 
-     * @param { Function } rander_func - 渲染函数: 函数形参 => function() || function(ft), ft为帧时间轴，可选参数
+     * @param { Function } renderer_func - 渲染函数: 函数形参 => function() || function(ft), ft为帧时间轴，可选参数
      * @returns { Object } this
      */
-    rander(rander_func) {
-        this.rander_func = rander_func;
+    render(renderer_func) {
+        this.renderer_func = renderer_func;
         //构建间隔执行器
         this._timer = setInterval(()=>{
             if(this._ft < this._stop_ftp) {
                 //渲染
-                this.rander_func(this._ft++);
+                this.renderer_func(this._ft++);
              } else {
                 //停机
                 clearInterval(this._timer);
@@ -3749,7 +3937,7 @@ class IntervalRanderer extends Randerer {
 
 
 //单帧渲染器
-class SingleFrameRanderer extends Randerer {
+class SingleFrameRenderer extends Renderer {
 
     /**
      * @classdesc 单帧渲染器/手动渲染器: 通过绑定按键来控制渲染行为
@@ -3757,12 +3945,12 @@ class SingleFrameRanderer extends Randerer {
      * @property { number } act_ft_n - 每次触发渲染时，行为函数的调用次数(int & act_ft_n>0)
      * @property { Function } act_func - 行为函数
      * @property { Function } draw_func - 绘制函数
-     * @property { get/set } randerKey - 渲染按键值，控制由什么按键触发渲染
+     * @property { get/set } renderKey - 渲染按键值，控制由什么按键触发渲染
      * 
      * @param { number } [act_ft_n=1] - 每次触发渲染时，行为函数的调用次数(int & act_ft_n>0)
      * 
      * @example
-     * const randerer = new vision.randerer.SingleFrameRanderer().rander(
+     * const renderer = new vision.renderer.SingleFrameRenderer().render(
      *     (ft) => {
      *         pcs.action();
      *     },
@@ -3777,13 +3965,13 @@ class SingleFrameRanderer extends Randerer {
         this.act_func = null;
         this.draw_func = null;
         //渲染按键值
-        this._rander_keyCode = ' '.charCodeAt();
+        this._render_keyCode = ' '.charCodeAt();
     }
 
     /** 获取渲染按键值 */
-    get randerKey() { return String.fromCharCode(this._rander_keyCode); }
+    get renderKey() { return String.fromCharCode(this._render_keyCode); }
     /** 设置渲染按键值 */
-    set randerKey(key) { this._rander_keyCode = key.charCodeAt(); }
+    set renderKey(key) { this._render_keyCode = key.charCodeAt(); }
        
     /**
      * 渲染接口: 通过在 window 对象上绑定 keydown 事件来触发渲染
@@ -3792,12 +3980,12 @@ class SingleFrameRanderer extends Randerer {
      * @param { Function } draw_func - 绘制函数 
      * @returns 
      */
-    rander(act_func, draw_func) {
+    render(act_func, draw_func) {
         this.act_func = act_func, this.draw_func = draw_func;
         let _this = this;
         //绑定键盘事件
         window.addEventListener("keydown", function(event) {
-            if(event.keyCode == _this._rander_keyCode) {
+            if(event.keyCode == _this._render_keyCode) {
                 //行为函数调用
                 for(let i=0; i<_this.act_ft_n; i++) {
                     _this.act_func(_this._ft++);
@@ -3811,10 +3999,10 @@ class SingleFrameRanderer extends Randerer {
 
 }
 
-var randerer = /*#__PURE__*/Object.freeze({
+var renderer = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    IntervalRanderer: IntervalRanderer,
-    SingleFrameRanderer: SingleFrameRanderer
+    IntervalRenderer: IntervalRenderer,
+    SingleFrameRenderer: SingleFrameRenderer
 });
 
 /**
@@ -3830,10 +4018,10 @@ var randerer = /*#__PURE__*/Object.freeze({
 /**
  * @classdesc 高级绘制模块: 常用绘制方法封装
  * 
- * @property { Canvas } context - 绘图上下文容器
+ * @property { VisionContext } context - 绘图上下文容器
  * 
  * @example
- * const Views = vision.Views; Views.context = canvas;
+ * const Views = vision.Views; Views.context = context;
  */
 class Views {
 
@@ -3859,18 +4047,17 @@ class Views {
         let cv = line_color.color ? line_color : new ColorVector(...line_color);
         //绘制
         for(let i=0, n=ps.length; i<n; i++) {
-            let c = cv.color(true);
+            let c = cv.color();
             for(let k=i; k<n; k++) {
                 //计算点距
                 let pd = ps[i].p.dist(ps[k].p);
                 if(pd >= pdr[0] && pd <= pdr[1]) {
-                    Views.context.ctx.strokeStyle = `rgb(${c[0]}, ${c[1]}, ${c[2]}, ${1-pd/d})`;
-                    Views.context.line(ps[i].p, ps[k].p);
+                    Views.context.line(ps[i].p.x, ps[i].p.y, ps[k].p.x, ps[k].p.y, {color: [...c, 1-pd/d]});
                 }
             }
         }
     }
-
+    
     /**
      * 绘制网格
      * 
@@ -3899,17 +4086,15 @@ class Views {
         let ys = yR[0]*dy+co.y, ye = yR[1]*dy+co.y;
         //居中偏移量
         let cdx = (center ? 0 : dx/2), cdy = (center ? 0 : dy/2); 
-        //设置颜色
-        Views.context.ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]||0.25})`;
         //绘制x轴平行线
         for(let x=xR[0], n=xR[1]; x<=n; x++) {
             let _x = x*dx+co.x+cdx;
-            Views.context.line(_x, ys, _x, ye);
+            Views.context.line(_x, ys, _x, ye, {color: [color[0], color[1], color[2], color[3]||0.25]});
         }
         //绘制y轴平行线
         for(let y=yR[0], n=yR[1]; y<=n; y++) {
             let _y = y*dy+co.y+cdy;
-            Views.context.line(xs, _y, xe, _y);
+            Views.context.line(xs, _y, xe, _y, {color: [color[0], color[1], color[2], color[3]||0.25]});
         }
     }
 
@@ -3933,14 +4118,13 @@ class Views {
         //Lfx函数在[1, n]区间的最值, 用于进行后续归一化处理
         let max = Lfx(1), min = Lfx(n);
         //绘制光线
-        Views.context.ctx.lineCap = "round";
+        // Views.context.ctx.lineCap = "round";
         for(let i=n; i>0; i--) {
             //计算亮度
             let lr = (Lfx(i) - min) / (max - min);
             let lc = [(cs[0]-ce[0])*lr+ce[0], (cs[1]-ce[1])*lr+ce[1], (cs[2]-ce[2])*lr+ce[2]];
             //绘制光线层
-            Views.context.ctx.lineWidth = i * d;
-            Views.context.lines(ps, new ColorGradient(lc, ce, ps.length));
+            Views.context.polyline(ps, {color: new ColorGradient(lc, ce, ps.length), lineWidth: i * d});
         }  
     }
 
@@ -3971,9 +4155,7 @@ class Views {
             let lr = (Lfx(point ? i : n-i) - min) / (max - min);
             let lc = [(cs[0]-ce[0])*lr+ce[0], (cs[1]-ce[1])*lr+ce[1], (cs[2]-ce[2])*lr+ce[2]];
             //绘制光环
-            Views.context.colorStyle = `rgb(${lc[0]}, ${lc[1]}, ${lc[2]})`;
-            Views.context.circle(x, y, dR*i);
-            Views.context.ctx.fill();
+            Views.context.circle(x, y, dR*i, {color: lc});
         }  
     }
 
@@ -3984,12 +4166,12 @@ class Views {
      * @param { Object } params - 绘制参数
      * @param { number } [params.split_x=100] - x轴分量分段阈值: 点间隔超过阈值的将被拆分
      * @param { number } [params.split_y=100] - y轴分量分段阈值
-     * @param { string } [params.color='rgb(255, 255, 255)'] - 轨迹颜色(支持渐变对象)
+     * @param { string } [params.color=[255, 255, 255]] - 轨迹颜色(支持渐变对象)
      * 
      * @example
      * trail(pcs.ps[i].tracker.trail, {"color": new ColorGradient([50, 50, 50], [255, 255, 255], pcs.ps[i].tracker.trail.length)});
      */
-    static trail(trail, {split_x=100, split_y=100, color='rgb(255, 255, 255)'}={}) {
+    static trail(trail, {split_x=100, split_y=100, color=[255, 255, 255]}={}) {
         let split_trail = [[]];
         //按照分量分段阈值对轨迹进行分段
         for(let i=0, n=trail.length-1; i<n; i++) {
@@ -4000,7 +4182,7 @@ class Views {
         }
         for(let i=0, n=split_trail.length; i<n; i++) {
             if(split_trail[i].length <= 1) { continue; }
-            Views.context.lines(split_trail[i], color);
+            Views.context.polyline(split_trail[i], {color: color});
         }
     }
 }
@@ -4011,7 +4193,7 @@ var __index__ = /*#__PURE__*/Object.freeze({
     ColorGradient: ColorGradient,
     ColorVector: ColorVector,
     Views: Views,
-    randerer: randerer
+    renderer: renderer
 });
 
-export { Canvas, Capturer, Particle, ParticleSystem, Tools, Vector$1 as Vector, Views, __index__$4 as algo, __index__$3 as context, __index__$2 as particle, randerer, __index__$1 as utils, vector, __index__ as views };
+export { CanvasContext, Capturer, Particle, ParticleSystem, Tools, Vector$1 as Vector, Views, __index__$3 as algo, color, __index__$2 as particle, renderer, __index__$1 as utils, vector, __index__ as views };

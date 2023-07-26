@@ -1,5 +1,5 @@
 /**
- * @module
+ * @module   
  * @desc     HTML5 Canvas API: 对canvas接口进行二次封装
  * @project  Vision
  * @author   Ais

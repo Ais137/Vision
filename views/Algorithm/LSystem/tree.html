@@ -31,9 +31,9 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.Canvas("vision_canvas");
+        const context = new vision.CanvasContext().init("vision_canvas");
+        const Views = vision.Views; Views.context = context;
         const Vector = vision.Vector;
-        const Views = vision.Views; Views.context = canvas;
         const Tools = vision.Tools;
 
         //系统参数
@@ -41,7 +41,7 @@
             //迭代次数
             "n": 6,
             //起始位置
-            "p": [canvas.cx, canvas.height-200],
+            "p": [context.cx, context.height-200],
             //绘制向量
             "v": [0, -10],
             //偏转弧度
@@ -59,10 +59,14 @@
             },
             "ops": {
                 "0": (st) => {
-                    canvas.line(st.p.clone(), st.p.add(st.v));
+                    let ps = st.p.clone();
+                    let pe = st.p.add(st.v);
+                    context.line(ps.x, ps.y, pe.x, pe.y, {color: confs.lc});
                 },
                 "1": (st) => {
-                    canvas.line(st.p.clone(), st.p.add(st.v));
+                    let ps = st.p.clone();
+                    let pe = st.p.add(st.v);
+                    context.line(ps.x, ps.y, pe.x, pe.y, {color: confs.lc});
                 },
                 "[": (st) => {
                     st.stack.unshift([st.p.clone(), st.v.clone()]);
@@ -76,7 +80,6 @@
             }
         });
 
-        canvas.ctx.strokeStyle = Tools.RGB(confs.lc);
         ls.act(ls.gen(confs.n), {
             "p": new Vector(...confs.p),
             "v": new Vector(...confs.v),
@@ -86,9 +89,9 @@
 
         let s_it = ls.iter(confs.n);
         let s = ls.S;
-        const randerer = new vision.randerer.SingleFrameRanderer().rander(
+        const renderer = new vision.renderer.SingleFrameRenderer().render(
            (ft) => {
-                canvas.refresh();
+                context.refresh();
                 s = s_it.next().value || s;
                 ls.act(s, {
                     "p": new Vector(...confs.p),

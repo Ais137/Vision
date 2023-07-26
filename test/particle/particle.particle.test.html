@@ -29,8 +29,9 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.Canvas("vision_canvas");
+        const context = new vision.CanvasContext().init("vision_canvas");
         const Vector = vision.Vector;
+        context.BGC = [50, 50, 50];
 
         /* --------------- 线性运动 --------------- */
         //构建线性运动粒子
@@ -58,15 +59,10 @@
         const disp_lmp = function(lmp, r, p_color, ep_color) {
             let p = lmp.p, ps = lmp.ps, pe = lmp.pe;
             //绘制端点
-            canvas.colorStyle = ep_color;
-            canvas.circle(ps.x, ps.y, r);
-            canvas.ctx.fill();
-            canvas.circle(pe.x, pe.y, r);
-            canvas.ctx.fill();
+            context.circle(ps.x, ps.y, r, {color: ep_color});
+            context.circle(pe.x, pe.y, r, {color: ep_color});
             //绘制当前坐标
-            canvas.colorStyle = p_color;
-            canvas.circle(p.x, p.y, r);
-            canvas.ctx.fill();
+            context.circle(p.x, p.y, r, {color: p_color});
         }
 
         /* --------------- 环形运动 --------------- */
@@ -76,15 +72,13 @@
 
         //绘制环形运动粒子
         const disp_cmp = function(cmp, r, p_color) {
-            canvas.colorStyle = p_color;
-            canvas.circle(cmp.p.x, cmp.p.y, r);
-            canvas.ctx.fill();
+            context.circle(cmp.p.x, cmp.p.y, r, {color: p_color});
         }
 
         /* --------------- 随机游走 --------------- */
         //随机游走器
         let vd = 3;
-        rw1 = new vision.particle.RandomWalkerParticle(new Vector(canvas.cx, canvas.cy), [
+        rw1 = new vision.particle.RandomWalkerParticle(new Vector(context.cx, context.cy), [
             [new Vector(-1, -1).mult(vd), 1/8],
             [new Vector(0, -1).mult(vd), 1/8],
             [new Vector(1, -1).mult(vd), 1/8],
@@ -96,26 +90,31 @@
         ])
 
         const disp_rw = function(rw, r, p_color) {
-            canvas.colorStyle = p_color;
-            canvas.rect(rw.p.x, rw.p.y, r, r);
-            canvas.ctx.fill();
+            context.circle(rw.p.x, rw.p.y, r, {color: p_color});
         }
 
 
         //迭代
         setInterval(function(){
-            canvas.refresh();
+            context.refresh();
             //运动
             lmp1.action(); lmp2.action(); lmp3.action();
             cmp1.action(); cmp2.action();
             rw1.action();
             //绘制
-            disp_lmp(lmp1, 3, 'rgb(255, 0, 0)', 'rgb(100, 0, 0)');
-            disp_lmp(lmp2, 3, 'rgb(0, 255, 0)', 'rgb(0, 100, 0)');
-            disp_lmp(lmp3, 3, 'rgb(0, 0, 255)', 'rgb(0, 0, 100)');
-            disp_cmp(cmp1, 3, 'rgb(100, 250, 170)');
-            disp_cmp(cmp2, 3, 'rgb(100, 170, 250)');
-            disp_rw(rw1, 5, 'rgb(100, 175, 175)');
+            disp_lmp(lmp1, 3, [255, 0, 0], [100, 0, 0]);
+            disp_lmp(lmp2, 3, [0, 255, 0], [0, 100, 0]);
+            disp_lmp(lmp3, 3, [0, 0, 255], [0, 0, 100]);
+            disp_cmp(cmp1, 3, [100, 250, 170]);
+            disp_cmp(cmp2, 3, [100, 170, 250]);
+            disp_rw(rw1, 5, [100, 175, 175]);
+        
+            // disp_lmp(lmp1, 3, 'rgb(255, 0, 0)', 'rgb(100, 0, 0)');
+            // disp_lmp(lmp2, 3, 'rgb(0, 255, 0)', 'rgb(0, 100, 0)');
+            // disp_lmp(lmp3, 3, 'rgb(0, 0, 255)', 'rgb(0, 0, 100)');
+            // disp_cmp(cmp1, 3, 'rgb(100, 250, 170)');
+            // disp_cmp(cmp2, 3, 'rgb(100, 170, 250)');
+            // disp_rw(rw1, 5, 'rgb(100, 175, 175)');
         }, 17);
 
     </script>

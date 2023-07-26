@@ -31,18 +31,17 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.Canvas("vision_canvas");
+        const context = new vision.CanvasContext().init("vision_canvas");
+        const Views = vision.Views; Views.context = context;
         const Vector = vision.Vector;
-        const Views = vision.Views; Views.context = canvas;
         const Tools = vision.Tools;
-        canvas.BGC = Tools.RGB(0, 0, 0);
 
         //配置参数
         const confs = {
             //粒子数
             "N": 500,
             //粒子生成半径
-            "gR": canvas.cy,
+            "gR": context.cy,
             //速度缩放率
             "vRate": 0.03,
             //粒子绘制半径
@@ -77,20 +76,18 @@
         //构建向量环
         let pcs = new VectorRings(() => {
             return new vision.particle.Particle(
-                Vector.rcv(confs.gR, confs.gR).add(new Vector(canvas.cx, canvas.cy))
+                Vector.rcv(confs.gR, confs.gR).add(new Vector(context.cx, context.cy))
             );
         }, confs.vRate).build(confs.N);
 
         //渲染器
-        const randerer = new vision.randerer.IntervalRanderer().rander(() => {
+        const renderer = new vision.renderer.IntervalRenderer().render(() => {
             pcs.action();
             //绘制
-            canvas.refresh();
+            context.refresh();
             let pcolor = new vision.views.ColorGradient(confs.cs, confs.ce, pcs.ps.length);
             for (let i = 0, n = pcs.ps.length; i < n; i++) {
-                canvas.colorStyle = pcolor.color();
-                canvas.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, confs.R);
-                canvas.ctx.fill();
+                context.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, confs.R, {color: pcolor.color()});
             }
         });
 

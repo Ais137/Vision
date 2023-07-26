@@ -245,7 +245,7 @@
             }
         }
         //构建渲染任务
-        const MBS_randerer = function(workers, confs) {
+        const MBS_renderer = function(workers, confs) {
             let dy = parseInt(confs.height / workers.length);
             for(let i=0; i<workers.length; i++) {
                 workers[i].postMessage({
@@ -283,7 +283,7 @@
             confs.C0[1] += (-1)*(event.offsetY - confs.pco[1]) * scale;
             if(event.button == 0) { confs.zr *= confs.dzr; } 
             if(event.button == 2) { confs.zr /= confs.dzr; }
-            MBS_randerer(workers, confs);
+            MBS_renderer(workers, confs);
         }
 
         /*----------------------------------------
@@ -297,7 +297,7 @@
                 case 38: { confs.pco[1] += confs.tpn; break; };
                 case 40: { confs.pco[1] -= confs.tpn; break; };
             }
-            MBS_randerer(workers, confs)
+            MBS_renderer(workers, confs)
         }
         
         //导出器
@@ -370,7 +370,7 @@
         }
         let captuer = new Capturer(canvas).capturing();
 
-        MBS_randerer(workers, confs);
+        MBS_renderer(workers, confs);
     </script>
 </body>
 

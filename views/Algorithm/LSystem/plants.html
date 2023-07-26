@@ -31,9 +31,9 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.Canvas("vision_canvas");
+        const context = new vision.CanvasContext().init("vision_canvas");
+        const Views = vision.Views; Views.context = context;
         const Vector = vision.Vector;
-        const Views = vision.Views; Views.context = canvas;
         const Tools = vision.Tools;
 
         //系统参数
@@ -41,7 +41,7 @@
             //迭代次数
             "n": 6,
             //起始位置
-            "p": [canvas.cx-200, canvas.height-200],
+            "p": [context.cx-200, context.height-200],
             //绘制向量
             "v": [2, -5],
             //偏转弧度
@@ -60,10 +60,12 @@
             },
             "ops": {
                 "F": (st) => {
-                    canvas.line(st.p.clone(), st.p.add(st.v));
+                    let ps = st.p.clone();
+                    let pe = st.p.add(st.v);
+                    context.line(ps.x, ps.y, pe.x, pe.y, {color: confs.lc});
                 },
                 "X": (st) => {
-                    // canvas.line(p.clone(), p.add(v));
+                    // context.line(p.clone(), p.add(v));
                 },
                 "[": (st) => {
                     st.stack.unshift([st.p.clone(), st.v.clone()]);
@@ -71,7 +73,6 @@
                 "]": (st) => {
                     let status = st.stack.shift();
                     st.p = status[0], st.v = status[1];
-                    
                 },
                 "+": (st) => {
                     // st.v.rotate(-st.rad);
@@ -84,7 +85,6 @@
             }
         });
 
-        canvas.ctx.strokeStyle = Tools.RGB(confs.lc);
         ls.act(ls.gen(confs.n), {
             "p": new Vector(...confs.p),
             "v": new Vector(...confs.v),
@@ -94,9 +94,9 @@
 
         let s_it = ls.iter(confs.n);
         let s = ls.S;
-        const randerer = new vision.randerer.SingleFrameRanderer().rander(
+        const renderer = new vision.renderer.SingleFrameRenderer().render(
            (ft) => {
-                canvas.refresh();
+                context.refresh();
                 s = s_it.next().value || s;
                 ls.act(s, {
                     "p": new Vector(...confs.p),
@@ -107,7 +107,7 @@
            }
         );
 
-        const capturer = new vision.views.Capturer(canvas).capturing();
+        const capturer = new vision.views.Capturer(context).capturing();
 
     </script>
 </body>

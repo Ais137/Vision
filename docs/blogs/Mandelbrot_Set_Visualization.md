@@ -109,7 +109,7 @@ class RCS extends CoordinateSystem {
 核心绘制代码如下:
 
 ```
-const MBS_randerer = function() {
+const MBS_renderer = function() {
     //构建图像容器
     let img = new ImageData(confs.width, confs.height);
     //构建曼德勃罗特集
@@ -168,7 +168,7 @@ for(let i=0; i<confs.N; i++) {
     }
 }
 //构建渲染任务
-const MBS_randerer = function(workers, confs) {
+const MBS_renderer = function(workers, confs) {
     let dy = parseInt(confs.height / workers.length);
     for(let i=0; i<workers.length; i++) {
         workers[i].postMessage({

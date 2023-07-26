@@ -31,9 +31,9 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.Canvas("vision_canvas");
+        const context = new vision.CanvasContext().init("vision_canvas");
+        const Views = vision.Views; Views.context = context;
         const Vector = vision.Vector;
-        const Views = vision.Views; Views.context = canvas;
         const Tools = vision.Tools;
 
         /* NNS算法可视化验证测试 */
@@ -66,7 +66,7 @@
         //构建粒子群
         const pcs = new vision.particle.ParticleSystem(() => {
             return new vision.particle.ForceParticle(
-                Vector.random([[0, canvas.width], [0, canvas.height]]), 
+                Vector.random([[0, context.width], [0, context.height]]), 
                 confs.isFixed ? null : Vector.random([confs.vR, confs.vR])
             );
         }).build(confs.N);
@@ -75,44 +75,37 @@
         let nns = new confs.NNS(pcs.ps, (obj) => { return obj.p; }).build();
 
         //边界限制器
-        const border = new vision.particle.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
+        const border = new vision.particle.border.RectReflectBorder([[0, context.width], [0, context.height]]);
 
         //渲染器
-        const randerer = new vision.randerer.IntervalRanderer().rander(() => {
+        const renderer = new vision.renderer.IntervalRenderer().render(() => {
             pcs.action();
             for (let i = 0, n = pcs.ps.length; i < n; i++) {
                 border.limit(pcs.ps[i]);
             }
             //绘制粒子
-            canvas.refresh();
-            canvas.colorStyle = "rgb(255, 255, 255)";
+            context.refresh();
             for (let i = 0, n = pcs.ps.length; i < n; i++) {
-                canvas.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, 3);
-                canvas.ctx.fill();
+                context.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, 3, {color: [255, 255, 255]});
             }
             //NNS算法模块测试
             (!confs.isFixed) && nns.build(pcs.ps);
             if(confs.test_method == "near") {
-                canvas.circle(mp.p.x, mp.p.y, 5, 'rgb(0, 255, 0)');
-                canvas.circle(mp.p.x, mp.p.y, confs.test_d);
+                context.circle(mp.p.x, mp.p.y, 5, {color: [0, 255, 0]});
+                context.circle(mp.p.x, mp.p.y, confs.test_d, {fill: false});
                 //计算邻近集
                 let ns = nns.near(mp, confs.test_d);
-                canvas.colorStyle = "rgb(200, 0, 0)";
                 for(let i=0; i<ns.length; i++) {
-                    canvas.circle(ns[i].p.x, ns[i].p.y, 3);
-                    canvas.ctx.fill();
+                    context.circle(ns[i].p.x, ns[i].p.y, 3, {color: [200, 0, 0]});
                 }
             } else {
-                canvas.circle(mp.p.x, mp.p.y, 5, 'rgb(0, 255, 0)');
+                context.circle(mp.p.x, mp.p.y, 5, {color: [0, 255, 0]});
                 //计算邻近集
                 let ns = nns.k_near(mp, confs.test_d);
-                canvas.colorStyle = "rgb(200, 0, 0)";
                 for(let i=0; i<ns.length; i++) {
-                    canvas.circle(ns[i].p.x, ns[i].p.y, 3);
-                    canvas.ctx.fill();
+                    context.circle(ns[i].p.x, ns[i].p.y, 3, {color: [200, 0, 0]});
                 }
-                canvas.ctx.strokeStyle = 'rgb(0, 255, 0)';
-                canvas.circle(mp.p.x, mp.p.y, mp.p.dist(ns[ns.length-1].p));
+                context.circle(mp.p.x, mp.p.y, mp.p.dist(ns[ns.length-1].p), {color: [0, 255, 0], fill: false});
             }
         });
 

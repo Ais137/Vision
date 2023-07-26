@@ -30,7 +30,7 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.Canvas("vision_canvas");
+        const context = new vision.CanvasContext().init("vision_canvas");
         const Vector = vision.Vector;
         
 
@@ -48,20 +48,23 @@
 
         //绘制
         const disp = function() {
-            canvas.lines(vps_area.vps, color='rgb(255, 255, 255)', close=true);
-            canvas.rect((r_area.borders[0][1]-r_area.borders[0][0])/2+r_area.borders[0][0], 0, (r_area.borders[0][1]-r_area.borders[0][0])/2, canvas.height);
-            canvas.circle(c_area.po.x, c_area.po.y, c_area.r);
+            // canvas.lines(vps_area.vps, color='rgb(255, 255, 255)', close=true);
+            // canvas.rect((r_area.borders[0][1]-r_area.borders[0][0])/2+r_area.borders[0][0], 0, (r_area.borders[0][1]-r_area.borders[0][0])/2, canvas.height);
+            // canvas.circle(c_area.po.x, c_area.po.y, c_area.r);
+            
+            context.polyline(vps_area.vps, {color: [255, 255, 255], close: true});
+            context.rect((r_area.borders[0][1]-r_area.borders[0][0])/2+r_area.borders[0][0], 0, (r_area.borders[0][1]-r_area.borders[0][0])/2, context.height);
+            context.circle(c_area.po.x, c_area.po.y, c_area.r, {fill: false});
         }
 
         document.getElementById("vision_canvas").addEventListener("mousemove", function(event) {
-            canvas.refresh(); disp();
+            context.refresh(); disp();
             let p = new Vector(event.clientX, event.clientY);
-            canvas.colorStyle = 'rgb(255, 255, 255)';
-            if(vps_area.in(p)) { canvas.colorStyle = 'rgb(0, 200, 0)'; } 
-            if(r_area.in(p)) { canvas.colorStyle = 'rgb(200, 0, 0)'; } 
-            if(c_area.in(p)) { canvas.colorStyle = 'rgb(0, 0, 200)'; } 
-            canvas.circle(p.x, p.y, 10);
-            canvas.ctx.fill();
+            let color = [255, 255, 255];
+            if(vps_area.in(p)) { color = [0, 200, 0]; } 
+            if(r_area.in(p)) { color = [200, 0, 0]; } 
+            if(c_area.in(p)) { color = [0, 0, 200]; } 
+            context.circle(p.x, p.y, 10, {color: color});
         });
 
         disp();

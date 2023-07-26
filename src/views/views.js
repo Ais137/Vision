@@ -15,10 +15,10 @@ import { ColorVector, ColorGradient } from "./color.js";
 /**
  * @classdesc 高级绘制模块: 常用绘制方法封装
  * 
- * @property { Canvas } context - 绘图上下文容器
+ * @property { VisionContext } context - 绘图上下文容器
  * 
  * @example
- * const Views = vision.Views; Views.context = canvas;
+ * const Views = vision.Views; Views.context = context;
  */
 class Views {
 
@@ -44,18 +44,17 @@ class Views {
         let cv = line_color.color ? line_color : new ColorVector(...line_color);
         //绘制
         for(let i=0, n=ps.length; i<n; i++) {
-            let c = cv.color(true);
+            let c = cv.color();
             for(let k=i; k<n; k++) {
                 //计算点距
                 let pd = ps[i].p.dist(ps[k].p);
                 if(pd >= pdr[0] && pd <= pdr[1]) {
-                    Views.context.ctx.strokeStyle = `rgb(${c[0]}, ${c[1]}, ${c[2]}, ${1-pd/d})`;
-                    Views.context.line(ps[i].p, ps[k].p);
+                    Views.context.line(ps[i].p.x, ps[i].p.y, ps[k].p.x, ps[k].p.y, {color: [...c, 1-pd/d]});
                 }
             }
         }
     }
-
+    
     /**
      * 绘制网格
      * 
@@ -84,17 +83,15 @@ class Views {
         let ys = yR[0]*dy+co.y, ye = yR[1]*dy+co.y;
         //居中偏移量
         let cdx = (center ? 0 : dx/2), cdy = (center ? 0 : dy/2); 
-        //设置颜色
-        Views.context.ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]}, ${color[3]||0.25})`
         //绘制x轴平行线
         for(let x=xR[0], n=xR[1]; x<=n; x++) {
             let _x = x*dx+co.x+cdx;
-            Views.context.line(_x, ys, _x, ye);
+            Views.context.line(_x, ys, _x, ye, {color: [color[0], color[1], color[2], color[3]||0.25]});
         }
         //绘制y轴平行线
         for(let y=yR[0], n=yR[1]; y<=n; y++) {
             let _y = y*dy+co.y+cdy;
-            Views.context.line(xs, _y, xe, _y);
+            Views.context.line(xs, _y, xe, _y, {color: [color[0], color[1], color[2], color[3]||0.25]});
         }
     }
 
@@ -118,14 +115,13 @@ class Views {
         //Lfx函数在[1, n]区间的最值, 用于进行后续归一化处理
         let max = Lfx(1), min = Lfx(n);
         //绘制光线
-        Views.context.ctx.lineCap = "round";
+        // Views.context.ctx.lineCap = "round";
         for(let i=n; i>0; i--) {
             //计算亮度
             let lr = (Lfx(i) - min) / (max - min);
             let lc = [(cs[0]-ce[0])*lr+ce[0], (cs[1]-ce[1])*lr+ce[1], (cs[2]-ce[2])*lr+ce[2]];
             //绘制光线层
-            Views.context.ctx.lineWidth = i * d;
-            Views.context.lines(ps, new ColorGradient(lc, ce, ps.length));
+            Views.context.polyline(ps, {color: new ColorGradient(lc, ce, ps.length), lineWidth: i * d});
         }  
     }
 
@@ -156,9 +152,7 @@ class Views {
             let lr = (Lfx(point ? i : n-i) - min) / (max - min);
             let lc = [(cs[0]-ce[0])*lr+ce[0], (cs[1]-ce[1])*lr+ce[1], (cs[2]-ce[2])*lr+ce[2]];
             //绘制光环
-            Views.context.colorStyle = `rgb(${lc[0]}, ${lc[1]}, ${lc[2]})`;
-            Views.context.circle(x, y, dR*i);
-            Views.context.ctx.fill();
+            Views.context.circle(x, y, dR*i, {color: lc});
         }  
     }
 
@@ -169,12 +163,12 @@ class Views {
      * @param { Object } params - 绘制参数
      * @param { number } [params.split_x=100] - x轴分量分段阈值: 点间隔超过阈值的将被拆分
      * @param { number } [params.split_y=100] - y轴分量分段阈值
-     * @param { string } [params.color='rgb(255, 255, 255)'] - 轨迹颜色(支持渐变对象)
+     * @param { string } [params.color=[255, 255, 255]] - 轨迹颜色(支持渐变对象)
      * 
      * @example
      * trail(pcs.ps[i].tracker.trail, {"color": new ColorGradient([50, 50, 50], [255, 255, 255], pcs.ps[i].tracker.trail.length)});
      */
-    static trail(trail, {split_x=100, split_y=100, color='rgb(255, 255, 255)'}={}) {
+    static trail(trail, {split_x=100, split_y=100, color=[255, 255, 255]}={}) {
         let split_trail = [[]];
         //按照分量分段阈值对轨迹进行分段
         for(let i=0, n=trail.length-1; i<n; i++) {
@@ -185,7 +179,7 @@ class Views {
         }
         for(let i=0, n=split_trail.length; i<n; i++) {
             if(split_trail[i].length <= 1) { continue; }
-            Views.context.lines(split_trail[i], color)
+            Views.context.polyline(split_trail[i], {color: color});
         }
     }
 }

@@ -274,7 +274,7 @@
         @func: 曼德勃罗特集渲染器
         @desc: 计算和渲染曼德勃罗特集
         ----------------------------------------*/
-        const MBS_randerer = function() {
+        const MBS_renderer = function() {
             //构建图像容器
             let img = canvas.ctx.createImageData(confs.width, confs.height);
             //构建曼德勃罗特集
@@ -291,7 +291,7 @@
             }
             canvas.ctx.putImageData(img, confs.offset_x, confs.offset_y);
         }
-        MBS_randerer()
+        MBS_renderer()
 
         /*----------------------------------------
         @func: 缩放
@@ -302,7 +302,7 @@
             confs.C0[0] += d_C0[0], confs.C0[1] += d_C0[1];
             if(event.button == 0) { rcs.zoom(+confs.dzr); } 
             if(event.button == 2) { rcs.zoom(-confs.dzr); }
-            MBS_randerer();
+            MBS_renderer();
         }
 
         /*----------------------------------------
@@ -320,7 +320,7 @@
                 case 40: { rcs.move([0, -confs.tpn]); break; };
                 case 38: { rcs.move([0, +confs.tpn]); break; };
             }
-            MBS_randerer(confs)
+            MBS_renderer(confs)
         }
 
         

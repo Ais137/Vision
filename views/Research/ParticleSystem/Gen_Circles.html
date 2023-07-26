@@ -31,9 +31,9 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.Canvas("vision_canvas");
+        const context = new vision.CanvasContext().init("vision_canvas");
+        const Views = vision.Views; Views.context = context;
         const Vector = vision.Vector;
-        const Views = vision.Views; Views.context = canvas;
         const Tools = vision.Tools;
 
         let lmps = new vision.particle.ParticleSystem(() => {
@@ -42,10 +42,10 @@
             //构建线性运动粒子
             let p = new vision.particle.LinearMotorParticle(
                 //粒子初始位置
-                new Vector(Math.cos(p_rad)*p_r+canvas.cx, Math.sin(p_rad)*p_r+canvas.cy),
-                // Vector.random([[0, canvas.width], [0, canvas.height]]),
+                new Vector(Math.cos(p_rad)*p_r+context.cx, Math.sin(p_rad)*p_r+context.cy),
+                // Vector.random([[0, context.width], [0, context.height]]),
                 //粒子终止位置
-                Vector.random([[0, canvas.width], [0, canvas.height]]),
+                Vector.random([[0, context.width], [0, context.height]]),
             )
             //迭代次数
             let n = Vector.random([[50, 300]]).x;
@@ -61,14 +61,12 @@
         lmps.max_pn = 300; lmps.gen_pn = 20; lmps.GENR = true;
     
         //渲染器
-        const randerer = new vision.randerer.IntervalRanderer().rander(() => {
+        const renderer = new vision.renderer.IntervalRenderer().render(() => {
             lmps.action();
             //绘制
-            canvas.refresh();
+            context.refresh();
             for(let i=0, n=lmps.ps.length; i<n; i++) {
-                canvas.colorStyle = lmps.ps[i].C.val();
-                canvas.circle(lmps.ps[i].p.x, lmps.ps[i].p.y, lmps.ps[i].R.val());
-                canvas.ctx.fill();
+                context.circle(lmps.ps[i].p.x, lmps.ps[i].p.y, lmps.ps[i].R.val(), {color: lmps.ps[i].C.color()});
             }
         });
 

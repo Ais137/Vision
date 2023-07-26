@@ -113,25 +113,25 @@
 
     //-------------------- 渲染器代码片段 --------------------//
     //构建间隔渲染器
-    "Vision_IntervalRanderer": {
-        "description": "构建间隔渲染器(IntervalRanderer)",
+    "Vision_IntervalRenderer": {
+        "description": "构建间隔渲染器(IntervalRenderer)",
         "scope": "javascript,typescript",
-        "prefix": "vis-randerer",
+        "prefix": "vis-renderer",
         "body": [
             "//渲染器",
-            "const randerer = new vision.randerer.IntervalRanderer().rander(() => {",
+            "const renderer = new vision.renderer.IntervalRenderer().render(() => {",
             "    canvas.refresh();",
             "    $1",
             "});",
         ]
     },
     //构建单帧渲染器
-    "Vision_SingleFrameRanderer": {
-        "description": "构建单帧渲染器(SingleFrameRanderer)",
-        "prefix": "vis-randerer-sf",
+    "Vision_SingleFrameRenderer": {
+        "description": "构建单帧渲染器(SingleFrameRenderer)",
+        "prefix": "vis-renderer-sf",
         "body": [
             "//渲染器",
-            "const randerer = new vision.randerer.SingleFrameRanderer().rander(",
+            "const renderer = new vision.renderer.SingleFrameRenderer().render(",
             "    (ft) => {",
             "        pcs.action();",
             "        $1",
@@ -150,7 +150,7 @@
         "prefix": "vis-capturer",
         "body": [
             "//截图器",
-            "const capturer = new vision.capturer.Capturer(canvas).capturing();"
+            "const capturer = new vision.views.Capturer(context).capturing();"
         ]
     }
 }

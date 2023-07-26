@@ -4,9 +4,7 @@ export * from "./vector/matrix.js";
 
 export * as algo from "./algo/__index__.js";
 
-export * as context from "./context/__index__.js";
-export { Canvas } from "./context/canvas.js";
-// export { CanvasContext, IRContext } from "./context/context.js";
+export * from "./context/__index__.js";
 
 export * as particle from "./particle/__index__.js";
 export { Particle } from "./particle/particle.js";
@@ -16,6 +14,7 @@ export * as utils from "./utils/__index__.js";
 export { Tools } from "./utils/tools.js";
 
 export * as views from "./views/__index__.js";
-export * from "./views/capturer.js";
-export * as randerer from "./views/randerer.js"
-export * from "./views/views.js"
+export * as renderer from "./views/renderer.js"
+export * as color from "./views/color.js";
+export { Capturer } from "./views/capturer.js";
+export { Views } from "./views/views.js";

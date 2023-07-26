@@ -36,15 +36,13 @@ class ColorVector extends Vector {
      * color.color();  //'rgb(100, 200, 300)'
      */
     constructor(r=0, g=0, b=0, a=1) {
-        super();
-        //颜色分量
-        this.v = a==1 ? [r, g, b] : [r, g, b, a];
+        (a==1) ? super(r, g, b) : super(r, g, b, a);
     }
 
     get r(){ return this.v[0]; }
     get g(){ return this.v[1]; }
     get b(){ return this.v[2]; }
-    get a(){ return this.v[3]; }
+    get a(){ return this.v[3] || 1; }
     set r(val){ this.v[0] = val; }
     set g(val){ this.v[1] = val; }
     set b(val){ this.v[2] = val; }
@@ -53,18 +51,11 @@ class ColorVector extends Vector {
     /**
      * 返回颜色值
      * 
-     * @param { boolean } [tolist=false] - {"false": "rgb(r, g, b)", "true": [r, g, b]} 
-     * @returns { string | Array } 颜色值
+     * @returns { Array } 颜色值
      */
-    color(tolist=false) {
-        if(this.v.length<=3) {
-            return tolist ? [this.v[0], this.v[1], this.v[2]] : `rgb(${this.v[0]}, ${this.v[1]}, ${this.v[2]})`;
-        } else {
-            return tolist ? [this.v[0], this.v[1], this.v[2], this.v[3]] : `rgb(${this.v[0]}, ${this.v[1]}, ${this.v[2]})`;
-        }
+    color() {
+        return [...this.v];
     }
-    /** 返回颜色值 */
-    val(tolist=false) { return this.color(tolist); }
 
     /** 复制颜色 */
     clone() {
@@ -105,16 +96,14 @@ class ColorGradient {
     /**
      * 迭代并返回颜色值
      * 
-     * @param { boolean } [tolist=false] - {"false": "rgb(r, g, b)", "true": [r, g, b]} 
-     * @returns { string | Array } 颜色值
+     * @returns { Array } 颜色值
      */
-    color(tolist=false) {
-        let color_val = this.cv.color(tolist);
+    color() {
+        let color_val = this.cv.color();
         if(this._count > 0) { this.cv.add(this._dcv); }
         this._count--;
         return color_val;
     } 
-    val(tolist=false) { return this.color(tolist); }
 
     /** 迭代终止条件 */
     isEnd() {

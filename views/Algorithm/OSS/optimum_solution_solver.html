@@ -36,8 +36,7 @@
             2. 点击鼠标右键触发计算 
         ****************************************************/
 
-        const canvas = new vision.Canvas("vision_canvas");
-        // const canvas = new vision.canvas.Canvas("vision_canvas", 3840, 2160);
+        const context = new vision.CanvasContext().init("vision_canvas");
         const Vector = vision.Vector;
 
         //目标函数构建器
@@ -86,7 +85,7 @@
             //目标函数
             oss.tfunc = tfunc_builder(vps);
             //求解域
-            oss.dod = [[10, canvas.width-10], [10, canvas.height-10]];
+            oss.dod = [[10, context.width-10], [10, context.height-10]];
             //求解器速度集步长
             oss.vsd = 1;
             //最优值类型
@@ -94,27 +93,23 @@
 
             //绘制函数
             let disp = function() {
-                canvas.refresh();
+                context.refresh();
                 //绘制顶点
-                canvas.lines(vps, color='rgb(255, 255, 255)', close=true);
+                context.polyline(vps, {color: [255, 255, 255], close: true});
                 //绘制求解器坐标
                 for(let i=0, end=oss.solvers.length; i<end; i++) {
-                    canvas.colorStyle = 'rgb(0, 255, 0)';
-                    canvas.circle(oss.solvers[i].p.x, oss.solvers[i].p.y, 1);
-                    canvas.ctx.fill();
+                    context.circle(oss.solvers[i].p.x, oss.solvers[i].p.y, 1, {color: [0, 255, 0]});
                 }
             }
             //初始化
             oss.init();
             //迭代
             let clock = setInterval(function() {
-                if(!oss.end()) {
+                if(!oss.isEnd()) {
                     oss.next(); disp();
                 } else {
                     clearInterval(clock);
-                    canvas.colorStyle = 'rgb(0, 255, 0)';
-                    canvas.circle(oss.os_p.x, oss.os_p.y, 3);
-                    canvas.ctx.fill();
+                    context.circle(oss.os_p.x, oss.os_p.y, 3, {color: [0, 255, 0]});
                     alert(`os_val: (${oss.os_val})\nos_p: (${oss.os_p.v})`);
                 }
             }, 17);
@@ -125,8 +120,7 @@
             if(event.button == 0) {
                 let x = event.clientX, y = event.clientY;
                 vpoints.push(new Vector(x, y));
-                canvas.POINT.C = 'rgb(0, 255, 0)';
-                canvas.point(x, y);
+                context.circle(x, y, 3, {color: [0, 255, 0]});
             } else if(event.button == 2) {
                 solve(vpoints);
             }

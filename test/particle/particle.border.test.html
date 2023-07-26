@@ -29,18 +29,18 @@
 
     <!-- 绘制代码 -->
     <script>
-        const canvas = new vision.Canvas("vision_canvas");
+        const context = new vision.CanvasContext().init("vision_canvas");
         const Vector = vision.Vector;
 
         //构建边界器
-        // const border = new vision.particle.border.RectLoopBorder([[0, canvas.width], [0, canvas.height]]);
-        // const border = new vision.particle.border.RectReflectBorder([[0, canvas.width], [0, canvas.height]]);
-        const border = new vision.particle.border.RingReflectBorder(new Vector(canvas.cx, canvas.cy), 500);
-        // const border = new vision.particle.border.RingLoopBorder(new Vector(canvas.cx, canvas.cy), 500);
+        // const border = new vision.particle.border.RectLoopBorder([[0, context.width], [0, context.height]]);
+        // const border = new vision.particle.border.RectReflectBorder([[0, context.width], [0, context.height]]);
+        const border = new vision.particle.border.RingReflectBorder(new Vector(context.cx, context.cy), 500);
+        // const border = new vision.particle.border.RingLoopBorder(new Vector(context.cx, context.cy), 500);
         
         border.size = {
-            "x": canvas.cx,
-            "y": canvas.cy,
+            "x": context.cx,
+            "y": context.cy,
             "d": 300
         }
 
@@ -75,26 +75,24 @@
         let n = 50, v = 5, ps = [];
         for(let i=0; i<n; i++) {
             ps.push(new vision.particle.Particle(
-                Vector.random([[0, canvas.width], [0, canvas.height]]),
+                Vector.random([[0, context.width], [0, context.height]]),
                 Vector.random([[-v, v], [-v, v]]),
             ));
         }
 
         //绘制
-        const disp = function(p, r=3, color='rgb(255, 255, 255)') {
-            canvas.colorStyle = color;
-            canvas.circle(p.x, p.y, r);
-            canvas.ctx.fill();
+        const disp = function(p, r=3, color=[255, 255, 255]) {
+            context.circle(p.x, p.y, r, {color: color});
         }
 
         //时钟
         setInterval(function(){
-            canvas.refresh();
+            context.refresh();
             if(border.borders) {
-                canvas.rect(border.size.x, border.size.y, border.size.d, border.size.d);
+                context.rect(border.size.x, border.size.y, border.size.d, border.size.d);
             }
             if(border.po) {
-                canvas.circle(border.size.x, border.size.y, border.size.d);
+                context.circle(border.size.x, border.size.y, border.size.d, {fill: false});
             }
             let r = 10;
             for(let i=0, end=ps.length; i<end; i++) {

@@ -40,7 +40,7 @@
     * ### */views* : 视觉效果模块(高层次绘制API)
         * [capturer](../src/views/capturer.js) : 截图器
         * [color](../src/views/color.js) : 颜色容器
-        * [randerer](../src/views/randerer.js) : 渲染器
+        * [renderer](../src/views/renderer.js) : 渲染器
         * [views](../src/views/views.js) : 绘制模式封装
 * ### ***/test*** : 测试代码目录
 * ### ***/tools*** : 辅助开发/设计工具目录

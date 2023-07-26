@@ -13,19 +13,19 @@ class Capturer {
     /**
      * @classdesc 截图器: 截取Canvas图像后导出
      * 
-     * @property { Canvas } canvasObj - canvas对象
+     * @property { CanvasContext } context - Canvas渲染上下文容器
      * @property { string } fileTitle - 导出文件标题，默认值为 *title* 标签内容
      * @property { number } fn - 导出文件计数器(int & fn>0)
      * @property { get/set } [captureKey='Q'] - 截图按键值
      * 
-     * @param { Canvas } canvasObj - canvas对象
+     * @param { CanvasContext } context - Canvas渲染上下文容器
      * @param { string } fileTitle - 导出文件标题
      * 
      * @example
      * let captuer = new Capturer(canvas).capturing();
      */
-    constructor(canvasObj, fileTitle) {
-        this.canvasObj = canvasObj;
+    constructor(context, fileTitle) {
+        this.context = context;
         this.fileTitle = fileTitle || document.getElementsByTagName("title")[0].innerText.replace(/\s+/g, "");
         /** @readonly */
         this.fn = 0;
@@ -60,7 +60,7 @@ class Capturer {
         //构建文件名
         fileName = fileName || `${this.fileTitle}_${this.fn++}`;
         //导出canvas二进制数据
-        this.canvasObj.canvas.toBlob((blob) => {
+        this.context._canvas_.toBlob((blob) => {
             let temp_node = document.createElement('a');
             temp_node.style.display = 'none';
             temp_node.id = fileName;
