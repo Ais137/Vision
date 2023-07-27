@@ -497,7 +497,7 @@ var vector = /*#__PURE__*/Object.freeze({
 });
 
 /**
- * @module
+ * @module   
  * @desc     粒子类: 基于向量模拟抽象粒子的运动
  * @project  Vision
  * @author   Ais
@@ -542,282 +542,6 @@ class Particle {
      */
     isEnd() {
         return false;
-    }
-}
-
-
-//作用力粒子
-class ForceParticle extends Particle {
-
-    /**
-     * @classdesc 作用力粒子: 可进行受力和进行相互作用
-     * 
-     * @property { Vector } p - 位置向量
-     * @property { Vector } v - 速度向量
-     * @property { Vector } acc - 加速度
-     * @property { number } mass - 质量
-     * 
-     * @param { Vector } [position=vector(0, 0)] - 初始位置向量
-     * @param { Vector } [velocity=vector(0, 0)] - 初始速度向量
-     * @param { Vector } [acceleration=vector(0, 0)] - 初始加速度 
-     * @param { number } [mass=1] - 质量
-     *  
-     */
-    constructor(position, velocity, acceleration, mass) {
-        super();
-        this.p = position || new Vector$1(0, 0);
-        this.v = velocity || new Vector$1(0, 0);
-        this.acc = acceleration || new Vector$1(0, 0);
-        this.mass = mass || 1;
-    }
-
-    /**
-     * 受力作用: 通过受力来改变粒子的加速度(积累效应)
-     * 
-     * @param { Vector } f - 作用力 
-     */
-    force(f) {
-        this.acc.add(f.clone().mult(1/this.mass));
-    }
-
-    /** @override */
-    action() {
-        this.p.add(this.v.add(this.acc));
-        this.acc = new Vector$1(0, 0);
-        return this.p;
-    }
-}
-
-
-//线性运动粒子
-class LinearMotorParticle extends Particle {
-
-    /**
-     * @classdesc 线性运动: 描述直线运动模式的粒子
-     * 
-     * @property { Vector } p - 位置向量
-     * @property { Vector } v - 速度向量
-     * @property { Vector } ps - 初始位置向量
-     * @property { Vector } pe - 终止位置向量
-     * @property { Enum } [mode="line"] - 运动模式   
-     * {"line": 移动到pe后停机, "loop": 移动到pe后回到ps, "back":移动到pe后，ps与pe互换}
-     * @property { number } [end_dist_rate=1.2] - 终止距离误差倍率  
-     * 用于终点距离的判断: end_dist <= this.v.norm() * this.end_dist_rate  
-     * 
-     * @param { Vector } ps - 初始位置向量
-     * @param { Vector } pe - 终止位置向量
-     * @param { number } [v_rate=1] - 设置粒子运动速率
-     * 
-     * @example 
-     * let lmp = new vision.particle.LinearMotorParticle(
-     *     new Vector(200, 200), 
-     *     new Vector(1000, 200),
-     *     v_rate = 5
-     * );
-     */
-    constructor(ps, pe, v_rate=1) {
-        super();
-        this._ps = ps;
-        this._pe = pe;
-        this.p = this._ps.clone();
-        this.v = Vector$1.sub(this._pe, this._ps).norm(Math.abs(v_rate));
-        this.mode = "line";
-        this.end_dist_rate = 1.2;
-    }
-    
-    get ps() { return this._ps.clone(); }
-    get pe() { return this._pe.clone(); }
-    
-    //设置终止位置(并重新计算速度方向)
-    set pe(vector) {
-        this._pe = vector.clone();
-        this.v = Vector$1.sub(this._pe, this.p).norm(this.v.norm());
-    }
-
-    /** 
-     * 设置速率: 速度矢量的模长, 每次迭代移动的像素大小
-     * 
-     * @param { number } val - 速率(val>0)
-     * @example p.v_rate = 5;
-     */
-    set v_rate(val) { this.v.norm(val); }
-    /**
-     * 设置速率: 经过多少次迭代后移动到 **pe**
-     * 
-     * @param { number } val - 速率(val>0)
-     * @example p.v_count = 300;
-     */
-    set v_count(val) { this.v.norm(Vector$1.dist(this._pe, this._ps) / val); }
-
-    /** @override */
-    isEnd() {
-        return this.p.dist(this._pe) <= this.v.norm() * this.end_dist_rate;
-    }
-
-    /** @override */
-    action() {
-        if(!this.isEnd()) {
-            this.p.add(this.v);
-        } else {
-            switch(this.mode){
-                case "loop": {
-                    this.p = this._ps.clone();
-                    break;
-                }
-                case "back": {
-                    this.p = this._pe.clone();
-                    this._pe = this._ps.clone();
-                    this._ps = this.p.clone();
-                    this.v.mult(-1);
-                    break;
-                }
-                default: {
-                    this.p = this._pe.clone();
-                }
-            }
-        }
-        return this.p;
-    }
-}
-
-
-//环形运动系统
-class CircularMotorParticle extends Particle {
-
-    /**
-     * 环形运动: 描述环形运动模式的粒子
-     * 
-     * @property { Vector } o - 圆心位置
-     * @property { number } r - 旋转半径
-     * @property { number } w - 角速度 
-     * @property { number } rad - 当前弧度
-     * @property { Vector } po - 当前坐标(以this.o为原点)
-     * @property { Vector } p - 当前坐标(以(0, 0)为原点)
-     * 
-     * @param { Vector } [o=vector(0, 0)] - 圆心位置
-     * @param { number } [r=1] - 旋转半径
-     * @param { number } [w=(Math.PI/180)] - 角速度 
-     * @param { number } [rad=0] - 初始弧度位置
-     * 
-     * @example 
-     * let cmp = new CircularMotorParticle(new Vector(1400, 300), 100, Math.PI/180);
-     */
-    constructor(o, r=1, w=(Math.PI/180), rad=0) {
-        super();
-        this.o = o || new Vector$1(0, 0);
-        this.r = r;
-        this.w = w;
-        this.rad = rad;
-        this.po = new Vector$1(this.r*Math.sin(this.rad), this.r*Math.cos(this.rad));
-        this.p = Vector$1.add(this.po, this.o);
-    }
-
-    /** @override */
-    action() {
-        this._p = this.p.clone();
-        this.rad += this.w;
-        if(this.rad >= 2 * Math.PI) { this.rad -= 2 * Math.PI; } 
-        if(this.rad <= -2 * Math.PI) { this.rad += 2 * Math.PI; } 
-        this.po.x = this.r * Math.sin(this.rad);
-        this.po.y = this.r * Math.cos(this.rad);
-        this.p = Vector$1.add(this.po, this.o);
-        this.v = this.p.clone().sub(this._p);
-        return this.p;
-    }
-
-}
-
-
-//随机游走器
-class RandomWalkerParticle extends Particle {
-    
-    /*----------------------------------------
-    @func: 随机游走
-    @desc: 给定一组速度向量集，每次随机选择一个速度进行移动
-    @property: 
-        * ps(Vector): 初始位置
-        * rvs(list): 随机速度向量集 -> [Vector(速度向量), wt(权重)]
-    ----------------------------------------*/
-    /**
-     * 随机游走模式: 给定一组速度向量集，每次随机选择一个速度进行移动
-     * 
-     * @property { Vector } p - 位置向量
-     * @property { Object[] } _rvs - 随机速度向量集
-     * @property { Vector } _rvs.v - 速度向量
-     * @property { number } _rvs.p - 选择概率
-     * @property { number } _rvs.ps - 起始概率值
-     * @property { number } _rvs.pe - 终止概率值
-     * 
-     * @param { Vector } ps -  初始位置向量
-     * @param { Array[] } rvs - 随机速度向量集: [[Vector(速度向量), wt(权重)], ...]
-     * 
-     * @example
-     * let vd = 3;
-     * let rw = new RandomWalkerParticle(new Vector(canvas.cx, canvas.cy), [
-     *     [new Vector(-1, -1).mult(vd), 1/8],
-     *     [new Vector(0, -1).mult(vd), 1/8],
-     *     [new Vector(1, -1).mult(vd), 1/8],
-     *     [new Vector(-1, 0).mult(vd), 1/8],
-     *     [new Vector(1, 0).mult(vd), 1/8],
-     *     [new Vector(-1, 1).mult(vd), 1/8],
-     *     [new Vector(0, 1).mult(vd), 1/8],
-     *     [new Vector(1, 1).mult(vd), 1/8],
-     * ]);
-     */
-    constructor(ps, rvs) {
-        super();
-        this.p = ps;
-        this._rvs = this._probability(rvs);
-    }
-
-    /**
-     * 计算概率(基于权重): p[i] = wt[i] / sum(wt)
-     * 
-     * @param { Array[] } rvs - 随机速度向量集: [[Vector(速度向量), wt(权重)], ...]
-     * @returns { Object } 随机速度向量集: [{"v": "速度", "p": "概率", "ps/pe": "概率范围"}, ...]
-     */
-    _probability(rvs) {
-        //计算总权重
-        let swt = 0;
-        for(let i=0, end=rvs.length; i<end; i++) {
-            swt += rvs[i][1];
-        }
-        //计算每个速度矢量的概率
-        let _rvs = [], _ps = 0;
-        for(let i=0, end=rvs.length; i<end; i++) {
-            let p = (rvs[i][1] || 0) / swt;
-            _rvs.push({
-                //速度
-                "v": rvs[i][0] || new Vector$1(0, 0),
-                //概率
-                "p": p,
-                //概率范围
-                "ps": _ps, "pe": _ps + p
-            });
-            _ps += p;
-        }
-        return _rvs;
-    }
-
-    /**
-     * 从 *随机速度向量集* 中随机选择一个速度向量
-     * 
-     * @returns { Object } {"v": "速度", "p": "概率", "ps/pe": "概率范围"}
-     */
-    rv_select() {
-        let r = Math.random();
-        for(let i=0, end=this._rvs.length; i<end; i++) {
-            if(r > this._rvs[i].ps && r <= this._rvs[i].pe) {
-                return this._rvs[i].v;
-            }
-        }
-    }
-
-    /** @override */
-    action() {
-        //选择随机速度
-        this.v = this.rv_select();
-        return this.p.add(this.v);
     }
 }
 
@@ -2357,7 +2081,232 @@ class CanvasContext extends VisionContext {
 }
 
 /**
- * @module
+ * @module   
+ * @desc     粒子系统: 粒子集群容器，模拟粒子的集群行为
+ * @project  Vision
+ * @author   Ais
+ * @date     2022-07-10
+ * @version  0.1.0
+ * @since    (2023-03-06, Ais): ParticleSystem(粒子系统)结构优化 
+*/
+
+
+//粒子系统(基类)
+class ParticleSystem {
+
+    /**
+     * @classdesc 粒子系统: 粒子集群容器，模拟粒子的集群行为
+     * 
+     * @property { Particle[] } ps - 粒子容器
+     * @property { callable } particle_builder - 粒子生成器
+     * @property { Object } action_middlewares - action中间件(钩子系统)
+     * @property { callable[] } action_middlewares.before - action中间件挂载点(before)
+     * @property { callable[] } action_middlewares.after - action中间件挂载点(after)
+     * @property { number } max_pn - 最大粒子数(int & max_pn>0)
+     * @property { number } gen_pn - 迭代过程粒子生成数(int & gen_pn>0)
+     * @property { boolean } GENR - 粒子生成开关, 用于在迭代过程中生成新的粒子
+     * @property { boolean } DSTR - 粒子销毁开关, 当容器中的粒子进入停机状态时，从容器中移除该粒子
+     * 
+     * @param { callable } particle_builder - 粒子生成器
+     * @param { Object } options - 粒子生命周期控制参数
+     * @param { number } [options.max_pn=500] - 最大粒子数(int & max_pn>0)
+     * @param { number } [options.gen_pn=1] - 迭代过程粒子生成数(int & gen_pn>0)
+     * @param { boolean } [options.GENR=false] - 粒子生成开关
+     * @param { boolean } [options.DSTR=false] - 粒子销毁开关
+     * 
+     * @example
+     * let pcs = new vision.particle.ParticleSystem(() => {
+     *     return new vision.particle.ForceParticle(
+     *         Vector.random([[0, canvas.width], [0, canvas.height]]),
+     *         Vector.random([confs.vR, confs.vR])
+     *     );
+     * }, {max_pn: confs.N, gen_pn: confs.gn, GENR: confs.GENR}).build(confs.N);
+     */
+    constructor(particle_builder, {max_pn=500, gen_pn=1, GENR=false, DSTR=true}={}) {
+        this.ps = [];
+        this.particle_builder = particle_builder;
+        this.action_middlewares = {
+            "before": [],
+            "after": [],
+        };
+        this.max_pn = max_pn;
+        this.gen_pn = gen_pn;
+        this.GENR = GENR;
+        this.DSTR = DSTR;
+    }
+
+    /**
+     * 构建粒子系统并进行初始化
+     * 
+     * @param { number } pn - 初始化生成的粒子数 
+     * @returns { Object } this
+     * 
+     * @example particle_system.build(100);
+     */
+    build(pn=0) {
+        this.ps = [];
+        for(let i=(pn < this.max_pn ? pn : this.max_pn); i--; ) {
+            this.ps.push(this.particle_builder());
+        }
+        return this;
+    }
+
+    /**
+     * 粒子运动与生命周期管理
+     * 
+     * 更新粒子容器中的粒子运动状态，并进行生命周期的管理， 
+     * 该方法在 action() 内部进行调用，可通过重写该方法来控制粒子运动和生命周期逻辑
+     */
+    particle_action() {
+        let _ps = [];
+        for(let i=0, n=this.ps.length; i<n; i++) {
+            //判断粒子的停机状态
+            if(!this.ps[i].isEnd()) {
+                //调用粒子的行为模式方法
+                this.ps[i].action(); _ps.push(this.ps[i]);
+            } else {
+                //根据"粒子销毁开关"判断是否销毁停机粒子
+                (!this.DSTR) && _ps.push(this.ps[i]);
+            }
+        }
+        //生成新的粒子
+        if(this.GENR) {
+            let diff_pn = this.max_pn - _ps.length;
+            for(let i=(diff_pn>=this.gen_pn ? this.gen_pn : diff_pn); i>0; i--) {
+                _ps.push(this.particle_builder());
+            }
+        }
+        //更新粒子容器
+        this.ps = _ps;
+    }
+
+    /**
+     * 粒子集群运动(迭代过程): 描述粒子集群的行为模式
+     * 
+     * @example particle_system.action();
+     */
+    action() {
+        //action中间件挂载点(before)
+        for(let i=0, n=this.action_middlewares.before.length; i<n; i++) {
+            this.action_middlewares.before[i](this.ps);
+        }
+        //粒子运动与生命周期管理
+        this.particle_action();
+        //action中间件挂载点(after)
+        for(let i=0, n=this.action_middlewares.after.length; i<n; i++) {
+            this.action_middlewares.after[i](this.ps);
+        }
+    }
+
+}
+
+/**
+ * @module   
+ * @desc     轨迹追踪器: 追踪记录目标粒子的移动轨迹
+ * @project  Vision
+ * @author   Ais
+ * @date     2022-07-15
+ * @version  0.1.0
+*/
+
+
+class TrailTracker {
+
+    /**
+     * @classdesc 轨迹追踪器: 基于Hook式的方法隐式地追踪记录目标粒子的移动轨迹  
+     * 通过hook目标对象的action()方法来实现隐式的轨迹追踪效果
+     * 
+     * @property { Particle } tp - 追踪的目标粒子
+     * @property { number } tn - 轨迹长度(int & tn>0)
+     * @property { Vector[] } trail - 轨迹向量容器，记录的轨迹坐标
+     * 
+     * @param { Particle } tp - 追踪的目标粒子 
+     * @param { number } [tn=10] - 轨迹长度(int & tn>0)
+     * 
+     * @example
+     * let p = new Particle();
+     * let tracker = new TrailTracker(p, 50);
+     */
+    constructor(tp, tn=10) {
+        this.tp = tp;
+        this.tn = tn;
+        this.trail = [];
+        //绑定目标对象
+        this._bind();
+    }
+
+    /**
+     * 绑定追踪的粒子对象: 通过hook目标对象的action()方法来实现隐式的轨迹追踪效果
+     * @private
+     */
+    _bind() {
+        this.trail = [this.tp.p.clone()];
+        //hook目标对象的action方法
+        let _this = this;
+        this.tp._tracker_hook_action = this.tp.action;
+        this.tp.action = function() {
+            let p = this._tracker_hook_action(...arguments);
+            (_this.trail.length >= _this.tn) && _this.trail.shift();
+            _this.trail.push(p.clone());
+            return p;
+        };
+    }
+}
+
+/**
+ * @module   
+ * @desc     粒子(运动)组合器
+ * @project  Vision
+ * @author   Ais
+ * @date     2023-07-27
+ * @version  0.1.0
+*/
+
+
+//粒子(运动)组合器
+class ParticleAssembler extends Particle {
+
+    /**
+     * @classdesc 粒子(运动)组合器: 将粒子容器的位置矢量叠加进行组合
+     * 
+     * @property { Vector } po - 坐标原点
+     * @property { Particle[] } ps - 粒子容器
+     * 
+     * @param { Vector } po - 坐标原点
+     * @param { Particle[] } ps - 粒子容器
+     * 
+     * @example
+     * let PA = new vision.particle.ParticleAssembler(
+     *      po = new Vector(context.cx, context.cy),
+     *      ps = [
+     *          new SHM(new Vector(), new Vector(3, 5).norm(200), Tools.ATR(4)),
+     *          new SHM(new Vector(), new Vector(5, -1).norm(300), Tools.ATR(6)),
+     *          new SHM(new Vector(), new Vector(-5, 2).norm(250), Tools.ATR(3)),
+     *      ]
+     * );
+     */
+    constructor(po, ps) {
+        super(po);
+        this.po = po.clone();
+        this.ps = ps;
+    }
+
+    /**
+     * 行为逻辑
+     * 
+     * @returns { Vector } 粒子的位置向量(this.p) 
+     */
+    action() {
+        this.p = this.po.clone();
+        for(let i=0, n=this.ps.length; i<n; i++) {
+            this.p.add(this.ps[i].action());
+        }
+        return this.p;
+    }
+}
+
+/**
+ * @module   
  * @desc     区域类: 描述一个封闭区域，并给定一个点是否在区域内的判定算法(in)
  * @project  Vision
  * @author   Ais
@@ -2505,7 +2454,7 @@ var area = /*#__PURE__*/Object.freeze({
 });
 
 /**
- * @module
+ * @module   
  * @desc     边界类: 对到达边界的粒子进行处理
  * @project  Vision
  * @author   Ais
@@ -2682,7 +2631,7 @@ var border = /*#__PURE__*/Object.freeze({
 });
 
 /**
- * @module
+ * @module   
  * @desc     坐标系: 构建坐标系, 对向量进行坐标变换
  * @project  Vision
  * @author   Ais
@@ -2927,7 +2876,7 @@ var coor = /*#__PURE__*/Object.freeze({
 });
 
 /**
- * @module
+ * @module   
  * @desc     矢量场: 在给定区域内影响粒子行为
  * @project  Vision
  * @author   Ais
@@ -3111,184 +3060,395 @@ var field = /*#__PURE__*/Object.freeze({
 });
 
 /**
- * @module
- * @desc     粒子系统: 粒子集群容器，模拟粒子的集群行为
+ * @module   particle/motion
  * @project  Vision
  * @author   Ais
  * @date     2022-07-10
  * @version  0.1.0
- * @since    (2023-03-06, Ais): ParticleSystem(粒子系统)结构优化 
 */
 
 
-//粒子系统(基类)
-class ParticleSystem {
+//作用力粒子
+class ForceParticle extends Particle {
 
     /**
-     * @classdesc 粒子系统: 粒子集群容器，模拟粒子的集群行为
+     * @classdesc 作用力粒子: 可进行受力和进行相互作用
      * 
-     * @property { Particle[] } ps - 粒子容器
-     * @property { callable } particle_builder - 粒子生成器
-     * @property { Object } action_middlewares - action中间件(钩子系统)
-     * @property { callable[] } action_middlewares.before - action中间件挂载点(before)
-     * @property { callable[] } action_middlewares.after - action中间件挂载点(after)
-     * @property { number } max_pn - 最大粒子数(int & max_pn>0)
-     * @property { number } gen_pn - 迭代过程粒子生成数(int & gen_pn>0)
-     * @property { boolean } GENR - 粒子生成开关, 用于在迭代过程中生成新的粒子
-     * @property { boolean } DSTR - 粒子销毁开关, 当容器中的粒子进入停机状态时，从容器中移除该粒子
+     * @property { Vector } p - 位置向量
+     * @property { Vector } v - 速度向量
+     * @property { Vector } acc - 加速度
+     * @property { number } mass - 质量
      * 
-     * @param { callable } particle_builder - 粒子生成器
-     * @param { Object } options - 粒子生命周期控制参数
-     * @param { number } [options.max_pn=500] - 最大粒子数(int & max_pn>0)
-     * @param { number } [options.gen_pn=1] - 迭代过程粒子生成数(int & gen_pn>0)
-     * @param { boolean } [options.GENR=false] - 粒子生成开关
-     * @param { boolean } [options.DSTR=false] - 粒子销毁开关
-     * 
-     * @example
-     * let pcs = new vision.particle.ParticleSystem(() => {
-     *     return new vision.particle.ForceParticle(
-     *         Vector.random([[0, canvas.width], [0, canvas.height]]),
-     *         Vector.random([confs.vR, confs.vR])
-     *     );
-     * }, {max_pn: confs.N, gen_pn: confs.gn, GENR: confs.GENR}).build(confs.N);
+     * @param { Vector } [position=vector(0, 0)] - 初始位置向量
+     * @param { Vector } [velocity=vector(0, 0)] - 初始速度向量
+     * @param { Vector } [acceleration=vector(0, 0)] - 初始加速度 
+     * @param { number } [mass=1] - 质量
+     *  
      */
-    constructor(particle_builder, {max_pn=500, gen_pn=1, GENR=false, DSTR=true}={}) {
-        this.ps = [];
-        this.particle_builder = particle_builder;
-        this.action_middlewares = {
-            "before": [],
-            "after": [],
-        };
-        this.max_pn = max_pn;
-        this.gen_pn = gen_pn;
-        this.GENR = GENR;
-        this.DSTR = DSTR;
+    constructor(position, velocity, acceleration, mass) {
+        super();
+        this.p = position || new Vector(0, 0);
+        this.v = velocity || new Vector(0, 0);
+        this.acc = acceleration || new Vector(0, 0);
+        this.mass = mass || 1;
     }
 
     /**
-     * 构建粒子系统并进行初始化
+     * 受力作用: 通过受力来改变粒子的加速度(积累效应)
      * 
-     * @param { number } pn - 初始化生成的粒子数 
-     * @returns { Object } this
-     * 
-     * @example particle_system.build(100);
+     * @param { Vector } f - 作用力 
      */
-    build(pn=0) {
-        this.ps = [];
-        for(let i=(pn < this.max_pn ? pn : this.max_pn); i--; ) {
-            this.ps.push(this.particle_builder());
-        }
-        return this;
+    force(f) {
+        this.acc.add(f.clone().mult(1/this.mass));
     }
 
-    /**
-     * 粒子运动与生命周期管理: 更新粒子容器中的粒子运动状态，并进行生命周期的管理  
-     * 该方法在 action() 内部进行调用，可通过重写该方法来控制粒子运动和生命周期逻辑
-     */
-    particle_action() {
-        let _ps = [];
-        for(let i=0, n=this.ps.length; i<n; i++) {
-            //判断粒子的停机状态
-            if(!this.ps[i].isEnd()) {
-                //调用粒子的行为模式方法
-                this.ps[i].action(); _ps.push(this.ps[i]);
-            } else {
-                //根据"粒子销毁开关"判断是否销毁停机粒子
-                (!this.DSTR) && _ps.push(this.ps[i]);
-            }
-        }
-        //生成新的粒子
-        if(this.GENR) {
-            let diff_pn = this.max_pn - _ps.length;
-            for(let i=(diff_pn>=this.gen_pn ? this.gen_pn : diff_pn); i>0; i--) {
-                _ps.push(this.particle_builder());
-            }
-        }
-        //更新粒子容器
-        this.ps = _ps;
-    }
-
-    /**
-     * 粒子集群运动(迭代过程): 描述粒子集群的行为模式
-     * 
-     * @example particle_system.action();
-     */
+    /** @override */
     action() {
-        //action中间件挂载点(before)
-        for(let i=0, n=this.action_middlewares.before.length; i<n; i++) {
-            this.action_middlewares.before[i](this.ps);
+        this.p.add(this.v.add(this.acc));
+        this.acc = new Vector(0, 0);
+        return this.p;
+    }
+}
+
+/**
+ * @module   particle/motion
+ * @project  Vision
+ * @author   Ais
+ * @date     2022-07-10
+ * @version  0.1.0
+*/
+
+
+//线性运动
+class LinearMotion extends Particle {
+
+    /**
+     * @classdesc 线性运动: 描述直线运动模式的粒子
+     * 
+     * @property { Vector } p - 位置向量
+     * @property { Vector } v - 速度向量
+     * @property { Vector } ps - 初始位置向量
+     * @property { Vector } pe - 终止位置向量
+     * @property { Enum } [mode="line"] - 运动模式   
+     * {"line": 移动到pe后停机, "loop": 移动到pe后回到ps, "back":移动到pe后，ps与pe互换}
+     * @property { number } [end_dist_rate=1.2] - 终止距离误差倍率  
+     * 用于终点距离的判断: end_dist <= this.v.norm() * this.end_dist_rate  
+     * 
+     * @param { Vector } ps - 初始位置向量
+     * @param { Vector } pe - 终止位置向量
+     * @param { number } [v_rate=1] - 设置粒子运动速率
+     * 
+     * @example 
+     * let lmp = new vision.particle.LinearMotion(
+     *     new Vector(200, 200), 
+     *     new Vector(1000, 200),
+     *     v_rate = 5
+     * );
+     */
+    constructor(ps, pe, v_rate=1) {
+        super();
+        this._ps = ps;
+        this._pe = pe;
+        this.p = this._ps.clone();
+        this.v = Vector.sub(this._pe, this._ps).norm(Math.abs(v_rate));
+        this.mode = "line";
+        this.end_dist_rate = 1.2;
+    }
+    
+    get ps() { return this._ps.clone(); }
+    get pe() { return this._pe.clone(); }
+    
+    //设置终止位置(并重新计算速度方向)
+    set pe(vector) {
+        this._pe = vector.clone();
+        this.v = Vector.sub(this._pe, this.p).norm(this.v.norm());
+    }
+
+    /** 
+     * 设置速率: 速度矢量的模长, 每次迭代移动的像素大小
+     * 
+     * @param { number } val - 速率(val>0)
+     * @example p.v_rate = 5;
+     */
+    set v_rate(val) { this.v.norm(val); }
+    /**
+     * 设置速率: 经过多少次迭代后移动到 **pe**
+     * 
+     * @param { number } val - 速率(val>0)
+     * @example p.v_count = 300;
+     */
+    set v_count(val) { this.v.norm(Vector.dist(this._pe, this._ps) / val); }
+
+    /** @override */
+    isEnd() {
+        return this.p.dist(this._pe) <= this.v.norm() * this.end_dist_rate;
+    }
+
+    /** @override */
+    action() {
+        if(!this.isEnd()) {
+            this.p.add(this.v);
+        } else {
+            switch(this.mode){
+                case "loop": {
+                    this.p = this._ps.clone();
+                    break;
+                }
+                case "back": {
+                    this.p = this._pe.clone();
+                    this._pe = this._ps.clone();
+                    this._ps = this.p.clone();
+                    this.v.mult(-1);
+                    break;
+                }
+                default: {
+                    this.p = this._pe.clone();
+                }
+            }
         }
-        //粒子运动与生命周期管理
-        this.particle_action();
-        //action中间件挂载点(after)
-        for(let i=0, n=this.action_middlewares.after.length; i<n; i++) {
-            this.action_middlewares.after[i](this.ps);
-        }
+        return this.p;
+    }
+}
+
+/**
+ * @module   particle/motion
+ * @project  Vision
+ * @author   Ais
+ * @date     2022-07-10
+ * @version  0.1.0
+*/
+
+
+//圆周运动
+class CircularMotion extends Particle {
+
+    /**
+     * 圆周运动: 描述圆周运动模式的粒子
+     * 
+     * @property { Vector } o - 圆心位置
+     * @property { number } r - 旋转半径
+     * @property { number } w - 角速度 
+     * @property { number } rad - 当前弧度
+     * @property { Vector } po - 当前坐标(以this.o为原点)
+     * @property { Vector } p - 当前坐标(以(0, 0)为原点)
+     * 
+     * @param { Vector } [o=vector(0, 0)] - 圆心位置
+     * @param { number } [r=1] - 旋转半径
+     * @param { number } [w=(Math.PI/180)] - 角速度 
+     * @param { number } [rad=0] - 初始弧度位置
+     * 
+     * @example 
+     * let cmp = new CircularMotion(new Vector(1400, 300), 100, Math.PI/180);
+     */
+    constructor(o, r=1, w=(Math.PI/180), rad=0) {
+        super();
+        this.o = o || new Vector(0, 0);
+        this.r = r;
+        this.w = w;
+        this.rad = rad;
+        this.po = new Vector(this.r*Math.sin(this.rad), this.r*Math.cos(this.rad));
+        this.p = Vector.add(this.po, this.o);
+    }
+
+    /** @override */
+    action() {
+        this._p = this.p.clone();
+        this.rad += this.w;
+        if(this.rad >= 2 * Math.PI) { this.rad -= 2 * Math.PI; } 
+        if(this.rad <= -2 * Math.PI) { this.rad += 2 * Math.PI; } 
+        this.po.x = this.r * Math.sin(this.rad);
+        this.po.y = this.r * Math.cos(this.rad);
+        this.p = Vector.add(this.po, this.o);
+        this.v = this.p.clone().sub(this._p);
+        return this.p;
     }
 
 }
 
 /**
- * @module
- * @desc     轨迹追踪器: 追踪记录目标粒子的移动轨迹
+ * @module   particle/motion
  * @project  Vision
  * @author   Ais
- * @date     2022-07-15
+ * @date     2022-07-10
  * @version  0.1.0
 */
 
 
-class TrailTracker {
-
+//随机游走
+class RandomWalker extends Particle {
+    
     /**
-     * @classdesc 轨迹追踪器: 基于Hook式的方法隐式地追踪记录目标粒子的移动轨迹  
-     * 通过hook目标对象的action()方法来实现隐式的轨迹追踪效果
+     * @classdesc 随机游走: 给定一组速度向量集，每次随机选择一个速度进行移动
      * 
-     * @property { Particle } tp - 追踪的目标粒子
-     * @property { number } tn - 轨迹长度(int & tn>0)
-     * @property { Vector[] } trail - 轨迹向量容器，记录的轨迹坐标
+     * @property { Vector } p - 位置向量
+     * @property { Object[] } _rvs - 随机速度向量集
+     * @property { Vector } _rvs.v - 速度向量
+     * @property { number } _rvs.p - 选择概率
+     * @property { number } _rvs.ps - 起始概率值
+     * @property { number } _rvs.pe - 终止概率值
      * 
-     * @param { Particle } tp - 追踪的目标粒子 
-     * @param { number } [tn=10] - 轨迹长度(int & tn>0)
+     * @param { Vector } ps -  初始位置向量
+     * @param { Array[] } rvs - 随机速度向量集: [[Vector(速度向量), wt(权重)], ...]
      * 
      * @example
-     * let p = new Particle();
-     * let tracker = new TrailTracker(p, 50);
+     * let vd = 3;
+     * let rw = new RandomWalker(new Vector(canvas.cx, canvas.cy), [
+     *     [new Vector(-1, -1).mult(vd), 1/8],
+     *     [new Vector(0, -1).mult(vd), 1/8],
+     *     [new Vector(1, -1).mult(vd), 1/8],
+     *     [new Vector(-1, 0).mult(vd), 1/8],
+     *     [new Vector(1, 0).mult(vd), 1/8],
+     *     [new Vector(-1, 1).mult(vd), 1/8],
+     *     [new Vector(0, 1).mult(vd), 1/8],
+     *     [new Vector(1, 1).mult(vd), 1/8],
+     * ]);
      */
-    constructor(tp, tn=10) {
-        this.tp = tp;
-        this.tn = tn;
-        this.trail = [];
-        //绑定目标对象
-        this._bind();
+    constructor(ps, rvs) {
+        super();
+        this.p = ps;
+        this._rvs = this._probability(rvs);
     }
 
     /**
-     * 绑定追踪的粒子对象: 通过hook目标对象的action()方法来实现隐式的轨迹追踪效果
-     * @private
+     * 计算概率(基于权重): p[i] = wt[i] / sum(wt)
+     * 
+     * @param { Array[] } rvs - 随机速度向量集: [[Vector(速度向量), wt(权重)], ...]
+     * @returns { Object } 随机速度向量集: [{"v": "速度", "p": "概率", "ps/pe": "概率范围"}, ...]
      */
-    _bind() {
-        this.trail = [this.tp.p.clone()];
-        //hook目标对象的action方法
-        let _this = this;
-        this.tp._tracker_hook_action = this.tp.action;
-        this.tp.action = function() {
-            let p = this._tracker_hook_action(...arguments);
-            (_this.trail.length >= _this.tn) && _this.trail.shift();
-            _this.trail.push(p.clone());
-            return p;
-        };
+    _probability(rvs) {
+        //计算总权重
+        let swt = 0;
+        for(let i=0, end=rvs.length; i<end; i++) {
+            swt += rvs[i][1];
+        }
+        //计算每个速度矢量的概率
+        let _rvs = [], _ps = 0;
+        for(let i=0, end=rvs.length; i<end; i++) {
+            let p = (rvs[i][1] || 0) / swt;
+            _rvs.push({
+                //速度
+                "v": rvs[i][0] || new Vector(0, 0),
+                //概率
+                "p": p,
+                //概率范围
+                "ps": _ps, "pe": _ps + p
+            });
+            _ps += p;
+        }
+        return _rvs;
+    }
+
+    /**
+     * 从 *随机速度向量集* 中随机选择一个速度向量
+     * 
+     * @returns { Object } {"v": "速度", "p": "概率", "ps/pe": "概率范围"}
+     */
+    rv_select() {
+        let r = Math.random();
+        for(let i=0, end=this._rvs.length; i<end; i++) {
+            if(r > this._rvs[i].ps && r <= this._rvs[i].pe) {
+                return this._rvs[i].v;
+            }
+        }
+    }
+
+    /** @override */
+    action() {
+        //选择随机速度
+        this.v = this.rv_select();
+        return this.p.add(this.v);
+    }
+}
+
+/**
+ * @module   particle/motion
+ * @project  Vision
+ * @author   Ais
+ * @date     2022-07-25
+ * @version  0.1.0
+*/
+
+
+//简谐运动
+class SimpleHarmonicMotion extends Particle {
+
+    /**
+     * @classdesc 简谐运动
+     * 
+     * @property { Vector } p0 - 中心位置(平衡位置)
+     * @property { Vector } v0 - 单位速度(振动方向): 由 this.v 的单位化生成
+     * @property { number } A  - 振幅: 由 this.v 的模长生成
+     * @property { number } w  - 角速度
+     * @property { number } rad0 - 初始弧度
+     * @property { number } _rad - 当前弧度
+     * 
+     * @param { Vector } p - 中心位置(平衡位置)
+     * @param { Vector } v - 速度矢量: 其模长确定振幅(A), 单位向量确定振动方向
+     * @param { number } w - 角速度
+     * @param { number } rad - 初始弧度
+     * 
+     * @example
+     * let p = new SimpleHarmonicMotion(new Vector(), new Vector(3, 5).norm(200), 0.05);
+     */
+    constructor(p, v, w, rad=0) {
+        super(p, v);
+        //中心位置(平衡位置)
+        this.p0 = this.p.clone();
+        //单位速度(振动方向)
+        this.v0 = this.v.clone().norm(1);
+        //振幅
+        this.A = this.v.norm();
+        //角速度
+        this.w = w;
+        //初始弧度
+        this.rad0 = rad;
+        //当前弧度
+        this._rad = rad;
+        //2*PI
+        this._2PI = 2*Math.PI;
+    }
+
+    /**
+     * 简谐运动的行为逻辑
+     * 
+     * @returns { Vector } 粒子的位置向量(this.p)
+     */
+    action() {
+        //计算当前弧度
+        this._rad += this.w;
+        if(this._rad > this._2PI) { this._rad -= this._2PI; }        //计算位置
+        this.p = this.v0.clone().mult(this.A*Math.sin(this._rad));
+        return this.p;
+    }
+
+    /**
+     * 获取振动周期
+     */
+    get T() {
+        return (2*Math.PI)/this.w;
+    }
+
+    /**
+     * 获取简谐运动的表达式
+     */
+    expression() {
+        let A = this.A.toFixed(2);
+        let w = this.w.toFixed(2);
+        let rad0 = this.rad0.toFixed(2);
+        return `(${A})*sin((${w})*t+(${rad0}))`;
     }
 }
 
 var __index__$2 = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    CircularMotorParticle: CircularMotorParticle,
+    CircularMotion: CircularMotion,
     ForceParticle: ForceParticle,
-    LinearMotorParticle: LinearMotorParticle,
+    LinearMotion: LinearMotion,
     Particle: Particle,
+    ParticleAssembler: ParticleAssembler,
     ParticleSystem: ParticleSystem,
-    RandomWalkerParticle: RandomWalkerParticle,
+    RandomWalker: RandomWalker,
+    SimpleHarmonicMotion: SimpleHarmonicMotion,
     TrailTracker: TrailTracker,
     area: area,
     border: border,
