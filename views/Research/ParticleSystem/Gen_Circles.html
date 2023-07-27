@@ -40,7 +40,7 @@
             //粒子生成位置参数(半径, 角度)
             let p_r = 100, p_rad = Vector.random([[0, Math.PI*2]]).x;
             //构建线性运动粒子
-            let p = new vision.particle.LinearMotorParticle(
+            let p = new vision.particle.LinearMotion(
                 //粒子初始位置
                 new Vector(Math.cos(p_rad)*p_r+context.cx, Math.sin(p_rad)*p_r+context.cy),
                 // Vector.random([[0, context.width], [0, context.height]]),

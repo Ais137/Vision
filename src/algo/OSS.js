@@ -9,7 +9,7 @@
 
 
 import { Vector } from "../vector/vector.js";
-import { Particle } from "../particle/particle.js";
+import { Particle } from "../particle/Particle.js";
 
 
 /** 局部最优解求解器 */

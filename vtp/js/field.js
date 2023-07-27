@@ -65,7 +65,6 @@ const renderer = new vision.renderer.IntervalRenderer().render(() => {
     context.refresh();
     for (let i = 0, n = pcs.ps.length; i < n; i++) {
         //绘制粒子轨迹
-        //绘制粒子轨迹
         context.polyline(pcs.ps[i].tracker.trail, {color: new vision.views.ColorGradient([50, 50, 50], [255, 255, 255], confs.tn)});
         //绘制粒子坐标
         // context.circle(pcs.ps[i].p.x, pcs.ps[i].p.y, 3);

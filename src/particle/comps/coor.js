@@ -1,5 +1,5 @@
 /**
- * @module
+ * @module   
  * @desc     坐标系: 构建坐标系, 对向量进行坐标变换
  * @project  Vision
  * @author   Ais
@@ -8,7 +8,7 @@
 */
 
 
-import { Vector } from "../vector/vector.js";
+import { Vector } from "../../vector/vector.js";
 
 
 /****************************************  

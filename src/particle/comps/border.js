@@ -1,5 +1,5 @@
 /**
- * @module
+ * @module   
  * @desc     边界类: 对到达边界的粒子进行处理
  * @project  Vision
  * @author   Ais

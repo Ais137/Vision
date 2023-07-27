@@ -1,5 +1,5 @@
 /**
- * @module
+ * @module   
  * @desc     轨迹追踪器: 追踪记录目标粒子的移动轨迹
  * @project  Vision
  * @author   Ais

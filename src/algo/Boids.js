@@ -9,7 +9,7 @@
 
 
 import { Vector  } from "../vector/vector.js";
-import { Particle } from "../particle/particle.js";
+import { Particle } from "../particle/Particle.js";
 
 
 /** 鸟群个体(基准模型:M0) */

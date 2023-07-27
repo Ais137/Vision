@@ -1,5 +1,5 @@
 /**
- * @module
+ * @module   
  * @desc     区域类: 描述一个封闭区域，并给定一个点是否在区域内的判定算法(in)
  * @project  Vision
  * @author   Ais
@@ -9,7 +9,7 @@
 */
 
 
-import { Vector } from "../vector/vector.js";
+import { Vector } from "../../vector/vector.js";
 
 
 /** @classdesc 区域类(基类) */

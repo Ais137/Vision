@@ -1,5 +1,5 @@
 /**
- * @module
+ * @module   
  * @desc     矢量场: 在给定区域内影响粒子行为
  * @project  Vision
  * @author   Ais
@@ -8,7 +8,7 @@
 */
 
 
-import { Vector } from "../vector/vector.js";
+import { Vector } from "../../vector/vector.js";
 import { BaseArea } from "./area.js";
 
 

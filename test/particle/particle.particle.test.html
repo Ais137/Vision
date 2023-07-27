@@ -35,20 +35,20 @@
 
         /* --------------- 线性运动 --------------- */
         //构建线性运动粒子
-        lmp1 = new vision.particle.LinearMotorParticle(
+        lmp1 = new vision.particle.LinearMotion(
             new Vector(200, 200), 
             new Vector(1000, 200),
             v_rate = 5
         );
         //循环模式
-        lmp2 = new vision.particle.LinearMotorParticle(
+        lmp2 = new vision.particle.LinearMotion(
             new Vector(200, 300), 
             new Vector(1000, 300),
         );
         lmp2.v_rate = 10;
         lmp2.mode = "loop";
         //往复模式
-        lmp3 = new vision.particle.LinearMotorParticle(
+        lmp3 = new vision.particle.LinearMotion(
             new Vector(200, 400), 
             new Vector(1000, 400),
         );
@@ -67,8 +67,8 @@
 
         /* --------------- 环形运动 --------------- */
         //构建环形运动粒子
-        cmp1 = new vision.particle.CircularMotorParticle(new Vector(1400, 300), 100, Math.PI/180*1);
-        cmp2 = new vision.particle.CircularMotorParticle(new Vector(1400, 300), 200, -Math.PI/180*3);
+        cmp1 = new vision.particle.CircularMotion(new Vector(1400, 300), 100, Math.PI/180*1);
+        cmp2 = new vision.particle.CircularMotion(new Vector(1400, 300), 200, -Math.PI/180*3);
 
         //绘制环形运动粒子
         const disp_cmp = function(cmp, r, p_color) {
@@ -78,7 +78,7 @@
         /* --------------- 随机游走 --------------- */
         //随机游走器
         let vd = 3;
-        rw1 = new vision.particle.RandomWalkerParticle(new Vector(context.cx, context.cy), [
+        rw1 = new vision.particle.RandomWalker(new Vector(context.cx, context.cy), [
             [new Vector(-1, -1).mult(vd), 1/8],
             [new Vector(0, -1).mult(vd), 1/8],
             [new Vector(1, -1).mult(vd), 1/8],

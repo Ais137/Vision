@@ -74,7 +74,7 @@
 
             constructor({ap_o, ap_r, ap_v, N, inv_R, inv_rad, ring_rad}={}) {
                 //锚点
-                this.anchor_point = new vision.particle.CircularMotorParticle(
+                this.anchor_point = new vision.particle.CircularMotion(
                     ap_o || new Vector(context.cx, context.cy), ap_r || 30, ap_v || Tools.ATR(3)
                 );
                 //环层数

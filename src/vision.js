@@ -7,8 +7,8 @@ export * as algo from "./algo/__index__.js";
 export * from "./context/__index__.js";
 
 export * as particle from "./particle/__index__.js";
-export { Particle } from "./particle/particle.js";
-export { ParticleSystem } from "./particle/particle_system.js";
+export { Particle } from "./particle/Particle.js";
+export { ParticleSystem } from "./particle/ParticleSystem.js";
 
 export * as utils from "./utils/__index__.js";
 export { Tools } from "./utils/tools.js";
