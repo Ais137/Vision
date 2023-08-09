@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> BezierCurve </title>
+    <!-- 导入模块 -->
+    <script src="../../../dist/vision.js"></script>
+    <style>
+        /* 去掉边缘滚动条 */
+        body {
+            overflow: hidden;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            /* 隐藏鼠标 */
+            /* cursor: none; */
+        }
+    </style>
+</head>
+<!-- 禁用右键菜单 -->
+
+<body oncontextmenu="return false;">
+    <!-- canvas标签 -->
+    <div class="canvas_div">
+        <canvas id="vision_canvas"></canvas>
+    </div>
+
+    <!-- 绘制代码 -->
+    <script>
+        const context = new vision.CanvasContext().init("vision_canvas");
+        const Views = vision.Views; Views.context = context;
+        const Vector = vision.Vector;
+        const Tools = vision.Tools;
+        /*
+        intro:
+            * 左键选中节点
+            * 右键开始绘制
+            * 中键刷新页面
+        */
+        
+        //控制点
+        let nodes = [];
+        
+        //绘制贝塞尔曲线
+        const disp_BezierCurve = function(bc, dt=0.01) {
+            //绘制控制点
+            for(let i=nodes.length; i--; ) {
+                context.circle(bc.nodes[i].x, bc.nodes[i].y, 3);
+            }
+            //计算并绘制贝塞尔曲线节点
+            let p1 = bc.B(0), p2 = null;
+            for(let t=0; t<=1.1; t+=dt) {
+                p2 = bc.B(t);
+                context.line(p1.x, p1.y, p2.x, p2.y, {color: [0, 255, 0]})
+                p1 = p2;
+            }
+        }
+
+        window.addEventListener("mousedown", function(event){
+            switch(event.button) {
+                case 0: {
+                    nodes.push(new Vector(event.clientX, event.clientY));
+                    context.circle(event.clientX, event.clientY, 3);
+                    break;
+                }
+                case 1: {
+                    context.refresh();
+                    nodes = [];
+                    break;
+                } 
+                case 2: {
+                    //构建贝塞尔曲线
+                    let bc = new vision.math.BezierCurve(nodes);
+                    // let bc = new vision.math.BezierCurve(nodes, mode="equation");
+                    disp_BezierCurve(bc);
+                }
+            }
+        });
+
+    </script>
+</body>
+
+</html>

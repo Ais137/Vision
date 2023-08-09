@@ -6,6 +6,8 @@ export * as algo from "./algo/__index__.js";
 
 export * from "./context/__index__.js";
 
+export * as math from "./math/__index__.js";
+
 export * as particle from "./particle/__index__.js";
 export { Particle } from "./particle/Particle.js";
 export { ParticleSystem } from "./particle/ParticleSystem.js";
