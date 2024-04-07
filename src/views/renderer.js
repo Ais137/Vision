@@ -136,7 +136,7 @@ class SingleFrameRenderer extends Renderer {
      * 
      * @param { Function } act_func - 行为函数
      * @param { Function } draw_func - 绘制函数 
-     * @returns 
+     * @returns { SingleFrameRenderer } this
      */
     render(act_func, draw_func) {
         this.act_func = act_func, this.draw_func = draw_func;

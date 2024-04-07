@@ -8,7 +8,7 @@
 ****************************************/
 
 //导入目标模块
-import * as coors from "../../src/particle/coor.js";
+import * as coors from "../../src/particle/comps/coor.js";
 import { Vector } from "../../src/vector/vector.js";
 
 //RCS坐标系

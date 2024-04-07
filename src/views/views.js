@@ -107,7 +107,7 @@ class Views {
      * @param { number[] } [params.ce=[0, 0, 0]] - 终止颜色
      * 
      * @example
-     * 
+     * Views.lightLine(ps);
      */
     static lightLine(ps, {Lfx, n=10, d=3, cs=[255, 255, 255], ce=[0, 0, 0]} = {}) {
         //亮度衰减函数
