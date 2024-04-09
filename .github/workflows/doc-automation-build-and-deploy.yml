@@ -1,0 +1,37 @@
+name: doc-automation-build-and-deploy
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: check out the repository to the runner
+        uses: actions/checkout@v4
+      - name: setup node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: install dependency package
+        run: npm install
+      - name: use jest run test
+        run: npm run test
+      - name: use jsdoc build docs
+        run: npm run doc
+      - name: upload pages artifact 
+        uses: actions/upload-pages-artifact@v3
+        with: 
+          path: "api/"
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+
