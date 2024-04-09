@@ -9,7 +9,7 @@
 
 
 import { Vector } from "../../src/vector/vector.js";
-import { Particle } from "../../src/particle/particle.js";
+import { Particle } from "../../src/particle/Particle.js";
 import { ParticleSystem } from "../../src/particle/ParticleSystem.js";
 //导入目标测试模块
 import * as NNS from "../../src/algo/NNS.js";
